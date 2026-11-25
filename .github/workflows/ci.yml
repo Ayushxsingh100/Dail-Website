@@ -10,17 +10,44 @@ permissions:
   contents: read
 
 jobs:
-  # No secrets and no extra environment variables: the suite needs neither.
+  # No secrets. CI never calls Gemini: the adapter is tested against a local fake server.
+  # DAIL and TerraPreserve are checked out read-only at their pinned tags. There is no provider
+  # mirror on CI, so the tests of the real terraform validate gate skip with that reason.
   tests:
     name: tests
     runs-on: ubuntu-24.04
+    env:
+      TF_VERSION: "1.15.8"
+      DAIL_ROOT: ${{ github.workspace }}/_dail
+      TERRAPRESERVE_ROOT: ${{ github.workspace }}/_tp
     steps:
       - uses: actions/checkout@v6
+      - name: DAIL at dail-v1.0 (read-only input)
+        uses: actions/checkout@v6
+        with:
+          repository: Ayushxsingh100/DAIL
+          ref: dail-v1.0
+          path: _dail
+      - name: TerraPreserve at terrapreserve-v1.0-public-r3 (read-only input)
+        uses: actions/checkout@v6
+        with:
+          repository: Ayushxsingh100/terrapreserve
+          ref: terrapreserve-v1.0-public-r3
+          path: _tp
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install pinned Terraform (checksum-verified, as in DAIL's ci.yml)
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSLO "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+          curl -fsSLO "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_SHA256SUMS"
+          grep " terraform_${TF_VERSION}_linux_amd64.zip$" "terraform_${TF_VERSION}_SHA256SUMS" | sha256sum -c -
+          unzip -q "terraform_${TF_VERSION}_linux_amd64.zip" -d "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - run: terraform version
       - name: Tests (standard library only)
-        run: python -m unittest discover -s tests -p "test_*.py"
+        run: python -m unittest discover -s tests -p "test_*.py" -v
 
   # The same secret scan as DAIL's workflow.
   secrets:
