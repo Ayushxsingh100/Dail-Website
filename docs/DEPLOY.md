@@ -7,13 +7,14 @@ The site is the static folder `site/` and **one** Python function, `api/propose.
 1. **Vercel → Add New → Project → Import** `Ayushxsingh100/Dail-Website`.
 2. **Configure Project:**
    - **Root Directory:** the repository root (leave it as `./`), **not** `site`. If the project was set up for the earlier version, change Root Directory from `site` back to `./` in Settings.
-   - **Framework Preset:** `Other`. `vercel.json` sets the rest: no install, no build, static files from `site/`.
+   - **Framework Preset:** `Other`.
+   - **Build and install commands:** none. `vercel.json` sets them to nothing, serves `site/` as the static root (with one rewrite, so `/` serves `site/index.html`) and declares the one function `api/propose.py`.
 3. **Environment variables** (Settings → Environment Variables):
 
    | Name | Needed | Value |
    |---|---|---|
-   | `GEMINI_API_KEY` | yes | the Gemini key. Type **Secret** (Vercel's new name for a Sensitive variable), environment **Production** only |
-   | `DEMO_PASSCODE` | no | if set, visitors must type it before they can ask the AI. Type **Secret** |
+   | `GEMINI_API_KEY` | yes | the Gemini key, marked **Sensitive** (in Vercel's newer screens the type is called Secret), environment **Production** only |
+   | `DEMO_PASSCODE` | no | if set, visitors must type it before they can ask the AI; the page then shows a small passcode field. Mark it Sensitive |
    | `ALLOWED_ORIGINS` | no | comma-separated, for example `https://dail.example,https://www.dail.example`. Unset: only pages of the same host may ask |
 
    Type the key into Vercel yourself. Never put it in a file, a commit, a chat or a screenshot.
@@ -21,9 +22,9 @@ The site is the static folder `site/` and **one** Python function, `api/propose.
 
 ## Check after deploying
 
-1. The page opens, loads DAIL (about 17 MB), and the health rows show No, Yes, Yes, Yes.
-2. **check** `https://<your site>/api/propose` in the browser shows `{"available": true, "passcode_required": false}` (or `true` with a passcode). A 404 means Vercel did not pick up `api/`; a 500 means files are missing from the function.
-3. **Ask Gemini** gives an answer. **check** If it always fails with "The AI request failed", look at the function's bundle: it needs `dail_demo/`, `config/`, `site/vendor/dail/` and `site/vendor/scenarios/` (`includeFiles` and `excludeFiles` in `vercel.json`).
+1. `https://<your site>/` opens the Ask screen (the rewrite), loads DAIL (about 17 MB), and the four pills read "SSH open to the internet" (red), "Database port closed", "Database not public", "App reaches database".
+2. **check** `https://<your site>/api/propose` in the browser shows `{"available": true, "passcode_required": false, "model": "gemini-3.5-flash-lite"}` (`passcode_required` is `true` with a passcode). A 404 means Vercel did not pick up `api/`; a 500 means files are missing from the function.
+3. **Ask →** gives a Gemini card and a DAIL card. **check** If it always fails, look at the function's bundle: it needs `dail_demo/`, `config/`, `site/vendor/dail/` and `site/vendor/scenarios/` (`includeFiles` and `excludeFiles` in `vercel.json`); brace globs in `includeFiles` and a writable temporary folder are not confirmed by Vercel's pages (D-34).
 4. **check** `https://<your site>/dail_demo/proxy.py` and `/vercel.json` are 404: only `site/` is served.
 5. In the browser's network panel, the answer of `/api/propose` holds `reply`, `model` and `tokens`, and nothing else.
 

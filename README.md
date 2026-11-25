@@ -2,14 +2,16 @@
 
 DAIL Live is a demo in which an AI (Google Gemini, free tier) or a person proposes a fix to a Terraform configuration, and the real, released DAIL decides, stage by stage, whether to promote it. Beside DAIL's decision it shows what target-only checking would have decided on the same patch.
 
-**Status:** packages L0, B, C and D are built: the local engine, and the static website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
+**Status:** packages L0, B, C and D are built: the local engine, and the AI-first website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
 
-**The website** (PLAN §3.9) is one page with three tabs:
-- **Ask the AI:** Gemini proposes a fix; the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB). When DAIL rejects it, the page sends DAIL's reason back and the AI tries again, up to 3 attempts.
-- **Write your own fix:** your edit goes to the same DAIL.
+**The website** (PLAN §3.9) works like a chat:
+- **Ask the AI:** you ask for a fix in plain words. Gemini proposes a patch (an untrusted card); the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB) and shows its decision as a stamp, one plain sentence, DAIL's raw reason and what a normal, target-only checker would have decided. When DAIL rejects it, the page sends DAIL's reason back to Gemini and it tries again, up to 3 attempts. A promotion adds a trusted state to the tab's ledger.
+- **Write your own fix:** your edit goes to the same DAIL, with no retry.
 - **Replays:** runs recorded on the authors' laptop with `terraform validate`.
 
-Terraform validation is not run in the browser; the page says so under every live decision. The Gemini key lives only on the server (`api/propose.py`, or `serve` locally) and never reaches the browser.
+Every technical detail stays one click away under **DAIL's evidence**. Terraform validation is not run in the browser; the page says so under every live decision. The Gemini key lives only in the server function (`api/propose.py` on Vercel, or `serve` locally) and never reaches the browser.
+
+**The design** is "Mint and tomato" (PLAN §3.7): Poppins and IBM Plex Mono, a mint background, white cards with ink borders and hard shadows, tomato for actions, and no background animation. The approved mock-ups are in [`docs/design/`](docs/design/); screenshots of the built site, at 1440×900, 1366×768 (presenter) and 390×844, are in [`docs/screenshots/`](docs/screenshots/).
 
 Preview everything locally on http://127.0.0.1:8000/:
 
@@ -83,4 +85,4 @@ The browser tests use Node and Playwright, in tests and CI only (D-21): `npm ci`
 
 ## Licence and credits
 
-Apache-2.0. See [`LICENSE`](LICENSE). The website also serves DAIL (Apache-2.0), TerraPreserve scenarios (CC-BY-4.0, TerraGoat-derived files Apache-2.0), Pyodide (MPL-2.0) and three OFL fonts; see [`site/credits.html`](site/credits.html).
+Apache-2.0. See [`LICENSE`](LICENSE). The website also serves DAIL (Apache-2.0), TerraPreserve scenarios (CC-BY-4.0, TerraGoat-derived files Apache-2.0), Pyodide (MPL-2.0) and two OFL fonts (Poppins, IBM Plex Mono); see [`site/credits.html`](site/credits.html).
