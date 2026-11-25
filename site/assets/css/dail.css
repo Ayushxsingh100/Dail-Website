@@ -144,7 +144,6 @@ code, .mono, pre, textarea { font-family: var(--font-mono); }
   font-family: var(--font-body); font-weight: 600; font-size: var(--fs-1);
   letter-spacing: var(--track); text-transform: uppercase;
 }
-html.presenter .masthead { display: none; }
 
 /* ---- buttons that press physically ---- */
 .btn {
@@ -170,6 +169,7 @@ html.presenter .masthead { display: none; }
 
 /* ---- the three zones on the 12-column grid ---- */
 .zones {
+  scroll-margin-top: calc(8 * var(--u) * var(--scale));
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--gutter);
@@ -330,14 +330,12 @@ html.presenter .stage__more { display: none; }
 .clipping__kicker { font-family: var(--font-editorial); font-style: italic; font-size: var(--fs-1); }
 .clipping__statuses { display: grid; gap: 4px; margin: var(--u) 0; }
 .clipping__status { display: flex; justify-content: space-between; gap: var(--u); align-items: center; flex-wrap: wrap; }
-.clipping__hash-short { display: none; }
 .clipping__hash { font-family: var(--font-mono); font-size: var(--fs-0); overflow-wrap: anywhere; word-break: break-all; border-top: var(--rule-thin); padding-top: var(--u); }
 .link { position: relative; height: calc(8 * var(--u)); margin-left: calc(4 * var(--u)); }
 .link svg { position: absolute; left: 0; top: 0; width: 24px; height: 100%; overflow: visible; }
 .link line { stroke: var(--ink); stroke-width: 3; }
 .link__text { position: absolute; left: calc(4 * var(--u)); top: 50%; transform: translateY(-50%); font-family: var(--font-mono); font-size: var(--fs-0); }
 html.presenter .clipping { padding: var(--u) calc(2 * var(--u)); }
-html.presenter .clippings > :nth-child(n + 4) { display: none; } /* the two newest states and their link */
 html.presenter .clipping__hash { font-size: var(--fs-0); }
 .verify-result { margin-top: calc(2 * var(--u)); border: var(--border); padding: var(--u); font-weight: 700; }
 .verify-result--ok { border-color: var(--signal-green); }
@@ -413,16 +411,14 @@ html.presenter .footer { display: none; }
   html.presenter .stamp { font-size: var(--fs-2); padding: 4px calc(2 * var(--u)); }
   html.presenter .blocking, html.presenter .decision > .label { display: none; }
   html.presenter .browser-note { margin-top: var(--u); padding: 4px var(--u); }
-  html.presenter .clipping + .link + .clipping .clipping__statuses,
-  html.presenter .clipping + .link + .clipping .clipping__kicker { display: none; }
+  /* every state in full, newest on top; a longer ledger scrolls in place */
+  html.presenter .clippings { max-height: calc(100vh - 220px * var(--scale)); overflow-y: auto; padding: 0 8px 8px 0; }
   html.presenter .clipping__version { font-size: var(--fs-3); }
   html.presenter .clipping__status { gap: 2px 4px; }
   html.presenter .clipping__status > .row { display: contents; }
   html.presenter .clipping__status .pill { line-height: calc(3 * var(--u)); font-size: var(--fs-0); padding: 0 6px; letter-spacing: 0; }
   html.presenter .clipping__status .pill--pass, html.presenter .clipping__status .pill--fail { font-weight: 800; order: 2; }
   html.presenter .link { height: calc(7 * var(--u)); }
-  html.presenter .clipping__kicker, html.presenter .clipping__hash-full { display: none; }
-  html.presenter .clipping__hash-short { display: inline; }
   html.presenter .clipping__statuses { margin: 4px 0; }
   html.presenter .ovf__cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   html.presenter .ovf__col .kicker { font-size: var(--fs-0); }

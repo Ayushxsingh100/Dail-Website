@@ -150,6 +150,15 @@ export function waitingStages(list, reason = "Waiting for a candidate.") {
     )));
 }
 
+// A stage DAIL has just committed; its output is filled in when the trace arrives.
+export function markStage(list, index) {
+  const el = list.children[index];
+  if (!el || !el.classList.contains("is-waiting")) return;
+  el.classList.remove("is-waiting");
+  el.classList.add("is-done", "anim-fill");
+  el.querySelector(".stage__body").textContent = "Done by DAIL.";
+}
+
 const STAGES = [["01", "Admission"], ["02", "Identity and change"], ["03", "Impact"], ["04", "Verify"], ["05", "Decide"]];
 
 function admissionStage(trace) {
@@ -316,8 +325,7 @@ export function renderLedger(container, clippings, { fresh = null, trace = null 
       h("p", { class: "clipping__version", text: `v${clip.version}` }),
       statuses,
       h("p", { class: "clipping__hash" }, h("span", { class: "label", text: "State hash " }),
-        h("span", { class: "clipping__hash-full", text: clip.state_hash }),
-        h("span", { class: "clipping__hash-short", text: short(clip.state_hash, 16), title: clip.state_hash })),
+        clip.state_hash),
     );
     if (fresh && clip.state_id === fresh) card.classList.add("anim-drop");
     container.append(card);

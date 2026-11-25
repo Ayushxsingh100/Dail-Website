@@ -1,23 +1,25 @@
 {
  "schema": "dail-live-trace/1",
  "label": "Demo, not part of the DAIL evaluation",
- "created_at": "2026-11-25T20:19:26.859009+00:00",
- "run_id": "20261125T201909Z-generate-cad7f8df",
+ "created_at": "2026-11-25T21:18:17.923897+00:00",
+ "run_id": "20261125T211806Z-generate-ba5c51ed",
  "versions": {
   "dail_tag": "dail-v1.0",
   "dail_commit": "4f38b1c49640e5a4ab8ebbbc04d8fb07023f829c",
   "demo_version": "0.1.0",
+  "terrapreserve_tag": "terrapreserve-v1.0-public-r3",
+  "terrapreserve_commit": "53b094c64429e8c928b19a35bb677c5ee7e821c8",
   "registry": {
    "stored_invariant_registry_version": 2,
    "means": "registry-v1.1"
   }
  },
  "scenario": {
-  "scenario_id": "canonical",
-  "family": "canonical",
-  "split": "fixture",
-  "template_id": "canonical_baseline_eligible_v1",
-  "source_lineage_id": null,
+  "scenario_id": "tp-v1-F4-0092",
+  "family": "F4",
+  "split": "dev",
+  "template_id": "tpl-02",
+  "source_lineage_id": "tpl-02",
   "target_kind": "repair",
   "target_invariant_id": "INV-SEC-001",
   "protected_invariants": [
@@ -39,21 +41,23 @@
    ]
   ],
   "endpoints": {
-   "S": "aws_instance.app",
-   "D": "aws_db_instance.database"
+   "S": "aws_instance.ec2_app",
+   "D": "aws_db_instance.rds_postgres"
   },
-  "variable_values": {},
+  "variable_values": {
+   "db_password": "tp-secret-primary"
+  },
   "step_hashes": [
-   "cfbb9d054022803d12cf0eaa47dcb6742a3a3cb85151e6a02285e5adde42cecf"
+   "7610340588d47f92235067d04fc8288b917945a69c29919fefc0b6ab96d50681"
   ]
  },
  "candidate_source": "LLM",
  "candidate": {
-  "label": "canonical gemini repair, attempt 1",
-  "request_id": "315172a3-eba2-48d1-a75c-66ce4030f723",
-  "built_tree_hash": "3253289ebde2fe5bec9d9c06d197525dfd8180e99281b1b14330a01ec30e2dd9"
+  "label": "tp-v1-F4-0092 gemini repair, attempt 1",
+  "request_id": "9aab3103-f065-4061-b47c-ec8e0afd8d93",
+  "built_tree_hash": "af45c1efec73182819ef73b42b6ce19c53f2ac8fa02a1b609c4a635351a19a6b"
  },
- "diff": "--- a/main.tf\n+++ b/main.tf\n@@ -59,10 +59,10 @@\n \n resource \"aws_security_group_rule\" \"app_ssh_public\" {\n   type              = \"ingress\"\n-  protocol          = \"tcp\"\n   from_port         = 22\n   to_port           = 22\n-  cidr_blocks       = [\"0.0.0.0/0\"]\n+  protocol          = \"tcp\"\n+  cidr_blocks       = [\"192.0.2.0/32\"]\n   security_group_id = aws_security_group.app.id\n }\n \n",
+ "diff": "--- a/main.tf\n+++ b/main.tf\n@@ -55,22 +55,17 @@\n }\n \n resource \"aws_security_group\" \"sg_app\" {\n+  name        = \"sg_app-tpl-02\"\n   description = \"Application security group for tpl-02\"\n-  name        = \"sg_app-tpl-02\"\n   vpc_id      = aws_vpc.vpc_main.id\n \n-  ingress {\n-    cidr_blocks = [\"0.0.0.0/0\"]\n-    from_port   = 22\n-    protocol    = \"tcp\"\n-    to_port     = 22\n-  }\n+  ingress = []\n \n   egress {\n+    from_port   = 0\n+    to_port     = 0\n+    protocol    = \"-1\"\n     cidr_blocks = [\"0.0.0.0/0\"]\n-    from_port   = 0\n-    protocol    = \"-1\"\n-    to_port     = 0\n   }\n }\n \n",
  "admission": {
   "stage": "dail_generator",
   "admitted": true,
@@ -79,9 +83,9 @@
    },
    "baseline": {
     "outcome": "ESTABLISHED",
-    "state_id": "3c59956a-e788-56e6-8681-a9fe609b5376",
-    "state_hash": "403e2f35364723cebd92d2ee734a9ac0d02ba66044eedbb4f4a37ab6687c4941",
-    "resource_set_hash": "8ad7e768767c4affaf7e3aec4832bcd13535744702f02f149eced3a936a5f979",
+    "state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5",
+    "state_hash": "7c33fb58013dfe2d84b07705adcc8dfce691ae40a756604d90e3f88c93fad1c8",
+    "resource_set_hash": "654021656e1ca32e2f305b653e2e6c81276152c5722b74b25f5d5625bef81b4c",
     "version": 0,
     "invariant_registry_version": 2,
     "invariants": {
@@ -106,7 +110,7 @@
    "decision": {
     "type": "PROMOTE",
     "reason": "ALL_REQUIRED_PROVEN",
-    "decision_id": "7285a1ee-833b-5ffa-8efa-3c87f65efe73",
+    "decision_id": "0b3b45ae-05e5-551d-abac-3a893351219c",
     "blocking": [],
     "note": null
    },
@@ -115,95 +119,95 @@
    "result_kind": "PROMOTED",
    "identity": {
     "algorithm_version": "dail-identity-1",
-    "content_hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd",
+    "content_hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19",
     "pairs": [
      {
-      "trusted_ref": "aws_db_instance.database",
-      "candidate_ref": "aws_db_instance.database",
+      "trusted_ref": "aws_db_instance.rds_postgres",
+      "candidate_ref": "aws_db_instance.rds_postgres",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_db_subnet_group.db",
-      "candidate_ref": "aws_db_subnet_group.db",
+      "trusted_ref": "aws_db_subnet_group.dbsng_main",
+      "candidate_ref": "aws_db_subnet_group.dbsng_main",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_instance.app",
-      "candidate_ref": "aws_instance.app",
+      "trusted_ref": "aws_instance.ec2_app",
+      "candidate_ref": "aws_instance.ec2_app",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_internet_gateway.igw",
-      "candidate_ref": "aws_internet_gateway.igw",
+      "trusted_ref": "aws_internet_gateway.igw_main",
+      "candidate_ref": "aws_internet_gateway.igw_main",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_route_table.public",
-      "candidate_ref": "aws_route_table.public",
+      "trusted_ref": "aws_route_table.rt_db",
+      "candidate_ref": "aws_route_table.rt_db",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_route_table_association.app",
-      "candidate_ref": "aws_route_table_association.app",
+      "trusted_ref": "aws_route_table.rt_public",
+      "candidate_ref": "aws_route_table.rt_public",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group.app",
-      "candidate_ref": "aws_security_group.app",
+      "trusted_ref": "aws_route_table_association.rta_app",
+      "candidate_ref": "aws_route_table_association.rta_app",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group.db",
-      "candidate_ref": "aws_security_group.db",
+      "trusted_ref": "aws_route_table_association.rta_db_1",
+      "candidate_ref": "aws_route_table_association.rta_db_1",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group_rule.app_egress_all",
-      "candidate_ref": "aws_security_group_rule.app_egress_all",
+      "trusted_ref": "aws_route_table_association.rta_db_2",
+      "candidate_ref": "aws_route_table_association.rta_db_2",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group_rule.app_ssh_public",
-      "candidate_ref": "aws_security_group_rule.app_ssh_public",
+      "trusted_ref": "aws_security_group.sg_app",
+      "candidate_ref": "aws_security_group.sg_app",
       "change_type": "MODIFIED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group_rule.app_to_db_5432",
-      "candidate_ref": "aws_security_group_rule.app_to_db_5432",
+      "trusted_ref": "aws_security_group.sg_db",
+      "candidate_ref": "aws_security_group.sg_db",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_subnet.app",
-      "candidate_ref": "aws_subnet.app",
+      "trusted_ref": "aws_subnet.sub_app",
+      "candidate_ref": "aws_subnet.sub_app",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_subnet.db_a",
-      "candidate_ref": "aws_subnet.db_a",
+      "trusted_ref": "aws_subnet.sub_db_1",
+      "candidate_ref": "aws_subnet.sub_db_1",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_subnet.db_b",
-      "candidate_ref": "aws_subnet.db_b",
+      "trusted_ref": "aws_subnet.sub_db_2",
+      "candidate_ref": "aws_subnet.sub_db_2",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_vpc.main",
-      "candidate_ref": "aws_vpc.main",
+      "trusted_ref": "aws_vpc.vpc_main",
+      "candidate_ref": "aws_vpc.vpc_main",
       "change_type": "UNCHANGED",
       "moved": false
      }
@@ -211,10 +215,10 @@
    },
    "changed_resources": [
     {
-     "address": "aws_security_group_rule.app_ssh_public",
-     "trusted_ref": "aws_security_group_rule.app_ssh_public",
-     "candidate_ref": "aws_security_group_rule.app_ssh_public",
-     "resource_type": "aws_security_group_rule",
+     "address": "aws_security_group.sg_app",
+     "trusted_ref": "aws_security_group.sg_app",
+     "candidate_ref": "aws_security_group.sg_app",
+     "resource_type": "aws_security_group",
      "change_type": "MODIFIED",
      "flags": []
     }
@@ -229,24 +233,16 @@
        "DEPENDENCY"
       ],
       "changed_resource_refs": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "dependency_paths": [
        {
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
+        "changed_ref": "aws_security_group.sg_app",
         "steps": [
          {
-          "edge_key": "f263204f242b06910af86d918014ccf984915c7544d602b780ba9b039ddb053b",
-          "from_node": "RESOURCE:aws_security_group_rule.app_ssh_public",
-          "to_node": "RESOURCE:aws_security_group.app",
-          "relationship": "RULE_BELONGS_TO_SECURITY_GROUP",
-          "direction": "FORWARD",
-          "status": "KNOWN"
-         },
-         {
-          "edge_key": "d65ff950006904601ef0982e0606594c325cf611cf368c8b051b13dc12075b06",
-          "from_node": "RESOURCE:aws_security_group.app",
-          "to_node": "RESOURCE:aws_instance.app",
+          "edge_key": "7c3ad7e6c56c2887eb0baccf16eef3bdfe65baaedb7a7697850e5877e0ecbef0",
+          "from_node": "RESOURCE:aws_security_group.sg_app",
+          "to_node": "RESOURCE:aws_instance.ec2_app",
           "relationship": "INSTANCE_USES_SECURITY_GROUP",
           "direction": "REVERSE",
           "status": "KNOWN"
@@ -257,13 +253,13 @@
       "reasons": [
        {
         "code": "FOOTPRINT_MEMBER_CHANGED",
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
-        "scope_element": "walk:RULE_BELONGS_TO_SECURITY_GROUP:REVERSE",
-        "detail": "MODIFIED aws_security_group_rule.app_ssh_public is in the walk of INV-FUNC-001"
+        "changed_ref": "aws_security_group.sg_app",
+        "scope_element": "walk:INSTANCE_USES_SECURITY_GROUP:FORWARD",
+        "detail": "MODIFIED aws_security_group.sg_app is in the walk of INV-FUNC-001"
        }
       ],
       "prior_evidence_ids": [
-       "54034928-da2b-5782-ba8f-c6daf3bb10dc"
+       "841d44e9-cd71-5b4c-818b-d34757de4c17"
       ],
       "evidence_validity": "INVALID"
      },
@@ -275,24 +271,24 @@
        "DIRECT"
       ],
       "changed_resource_refs": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "dependency_paths": [
        {
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
+        "changed_ref": "aws_security_group.sg_app",
         "steps": []
        }
       ],
       "reasons": [
        {
         "code": "SCOPE_TYPE_CHANGED",
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
-        "scope_element": "resource_types:aws_security_group_rule",
-        "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-001"
+        "changed_ref": "aws_security_group.sg_app",
+        "scope_element": "resource_types:aws_security_group",
+        "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-001"
        }
       ],
       "prior_evidence_ids": [
-       "2b7a16c0-6fe8-5ae8-a5b4-b6e95155084a"
+       "1f037c5c-a91e-5e64-9a9b-cc8f230a46b2"
       ],
       "evidence_validity": "INVALID"
      },
@@ -304,24 +300,24 @@
        "DIRECT"
       ],
       "changed_resource_refs": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "dependency_paths": [
        {
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
+        "changed_ref": "aws_security_group.sg_app",
         "steps": []
        }
       ],
       "reasons": [
        {
         "code": "SCOPE_TYPE_CHANGED",
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
-        "scope_element": "resource_types:aws_security_group_rule",
-        "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-002"
+        "changed_ref": "aws_security_group.sg_app",
+        "scope_element": "resource_types:aws_security_group",
+        "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-002"
        }
       ],
       "prior_evidence_ids": [
-       "66fd97e8-5987-5a5f-ba91-b3a71c117841"
+       "9e584afa-f9e4-5c4c-bd78-202bbd6bbb64"
       ],
       "evidence_validity": "INVALID"
      }
@@ -331,7 +327,7 @@
       "invariant_id": "INV-SEC-003",
       "invariant_version": 1,
       "prior_evidence_ids": [
-       "dee85a5d-0cb4-5271-9c0d-f888ee67cfa5"
+       "788eea2c-9250-59b8-962f-d135d5656a66"
       ],
       "carry_forward_eligible": true,
       "reason": "NO_CHANGE_IN_FOOTPRINT"
@@ -342,7 +338,7 @@
       "invariant_id": "INV-SEC-003",
       "invariant_version": 1,
       "evidence_ids": [
-       "dee85a5d-0cb4-5271-9c0d-f888ee67cfa5"
+       "788eea2c-9250-59b8-962f-d135d5656a66"
       ]
      }
     ],
@@ -353,9 +349,9 @@
       "target_type": "INVARIANT",
       "reason": "FOOTPRINT_MEMBER_CHANGED",
       "scope": [
-       "aws_db_instance.database",
-       "aws_instance.app",
-       "aws_security_group_rule.app_ssh_public"
+       "aws_db_instance.rds_postgres",
+       "aws_instance.ec2_app",
+       "aws_security_group.sg_app"
       ],
       "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
       "priority": "BLOCKING"
@@ -365,7 +361,7 @@
       "target_type": "INVARIANT",
       "reason": "SCOPE_TYPE_CHANGED",
       "scope": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
       "priority": "BLOCKING"
@@ -375,7 +371,7 @@
       "target_type": "INVARIANT",
       "reason": "SCOPE_TYPE_CHANGED",
       "scope": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
       "priority": "BLOCKING"
@@ -439,28 +435,28 @@
      "target_id": "CONSISTENCY",
      "kind": "GATE",
      "source": "VERIFIED",
-     "verification_id": "c52ce21d-adea-562a-a99a-1e7ef44755c5",
+     "verification_id": "5f8f78d0-42cd-5f44-b50f-74f472cd4d93",
      "blocking": []
     },
     {
      "target_id": "INVARIANT:INV-FUNC-001:1",
      "kind": "INVARIANT",
      "source": "VERIFIED",
-     "verification_id": "dd0c8802-74a4-54b5-9ba1-69658421263c",
+     "verification_id": "1bb2f01e-4d5e-5050-b627-2a31346dc4ab",
      "blocking": []
     },
     {
      "target_id": "INVARIANT:INV-SEC-001:2",
      "kind": "INVARIANT",
      "source": "VERIFIED",
-     "verification_id": "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309",
+     "verification_id": "604f31c6-6160-5340-b83b-e40fe0ef2476",
      "blocking": []
     },
     {
      "target_id": "INVARIANT:INV-SEC-002:2",
      "kind": "INVARIANT",
      "source": "VERIFIED",
-     "verification_id": "fa2ee4e8-069b-5087-96e0-eccee4c24ead",
+     "verification_id": "7f9bcd40-32e0-553f-8938-a91d42316f59",
      "blocking": []
     },
     {
@@ -474,7 +470,7 @@
      "target_id": "STRUCTURAL",
      "kind": "GATE",
      "source": "VERIFIED",
-     "verification_id": "d921862f-5367-50af-b5d0-97c15cb83061",
+     "verification_id": "175795fe-938f-5d23-a3ea-3b34d453441d",
      "blocking": []
     }
    ],
@@ -483,7 +479,7 @@
      "invariant_id": "INV-FUNC-001",
      "invariant_version": 1,
      "source": "VERIFIED",
-     "verification_id": "dd0c8802-74a4-54b5-9ba1-69658421263c",
+     "verification_id": "1bb2f01e-4d5e-5050-b627-2a31346dc4ab",
      "source_state_id": null,
      "evidence_ids": []
     },
@@ -491,7 +487,7 @@
      "invariant_id": "INV-SEC-001",
      "invariant_version": 2,
      "source": "VERIFIED",
-     "verification_id": "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309",
+     "verification_id": "604f31c6-6160-5340-b83b-e40fe0ef2476",
      "source_state_id": null,
      "evidence_ids": []
     },
@@ -499,7 +495,7 @@
      "invariant_id": "INV-SEC-002",
      "invariant_version": 2,
      "source": "VERIFIED",
-     "verification_id": "fa2ee4e8-069b-5087-96e0-eccee4c24ead",
+     "verification_id": "7f9bcd40-32e0-553f-8938-a91d42316f59",
      "source_state_id": null,
      "evidence_ids": []
     },
@@ -508,9 +504,9 @@
      "invariant_version": 1,
      "source": "CARRIED_FORWARD",
      "verification_id": null,
-     "source_state_id": "3c59956a-e788-56e6-8681-a9fe609b5376",
+     "source_state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5",
      "evidence_ids": [
-      "dee85a5d-0cb4-5271-9c0d-f888ee67cfa5"
+      "788eea2c-9250-59b8-962f-d135d5656a66"
      ]
     }
    ],
@@ -522,9 +518,9 @@
     "not_protected_in_parent": 0
    },
    "new_state": {
-    "state_id": "bd5b15d8-e992-5836-a5d8-837d36148544",
-    "state_hash": "29fec45b37ecc91ab85812bd277efe20687258d60da46ce6760d9e489e599b08",
-    "resource_set_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+    "state_id": "ebb78224-5ccf-5dd7-b5bb-31c35a9bad4d",
+    "state_hash": "725ff497875ec63ec6b59c2cb2667eb3bf2859fa29a572a3a55420c05ab545ec",
+    "resource_set_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
     "version": 1,
     "invariant_registry_version": 2,
     "invariants": {
@@ -549,7 +545,7 @@
    "dail": {
     "transition": {
      "condition": "C",
-     "scenario_id": "canonical",
+     "scenario_id": "tp-v1-F4-0092",
      "record": "transition",
      "step_index": 1,
      "status": "EVALUATED",
@@ -562,17 +558,17 @@
        "registry.terraform.io/hashicorp/aws": "6.53.0"
       }
      },
-     "parent_state_id": "3c59956a-e788-56e6-8681-a9fe609b5376",
-     "parent_state_hash": "403e2f35364723cebd92d2ee734a9ac0d02ba66044eedbb4f4a37ab6687c4941",
-     "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-     "candidate_state_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+     "parent_state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5",
+     "parent_state_hash": "7c33fb58013dfe2d84b07705adcc8dfce691ae40a756604d90e3f88c93fad1c8",
+     "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+     "candidate_state_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
      "open_targets": [],
      "outcome_class": "DAIL_OUTCOME",
      "result_kind": "PROMOTED",
      "decision": {
       "type": "PROMOTE",
       "reason": "ALL_REQUIRED_PROVEN",
-      "decision_id": "7285a1ee-833b-5ffa-8efa-3c87f65efe73",
+      "decision_id": "0b3b45ae-05e5-551d-abac-3a893351219c",
       "blocking": [],
       "note": null
      },
@@ -581,28 +577,28 @@
        "target_id": "CONSISTENCY",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "c52ce21d-adea-562a-a99a-1e7ef44755c5",
+       "verification_id": "5f8f78d0-42cd-5f44-b50f-74f472cd4d93",
        "blocking": []
       },
       {
        "target_id": "INVARIANT:INV-FUNC-001:1",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "dd0c8802-74a4-54b5-9ba1-69658421263c",
+       "verification_id": "1bb2f01e-4d5e-5050-b627-2a31346dc4ab",
        "blocking": []
       },
       {
        "target_id": "INVARIANT:INV-SEC-001:2",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309",
+       "verification_id": "604f31c6-6160-5340-b83b-e40fe0ef2476",
        "blocking": []
       },
       {
        "target_id": "INVARIANT:INV-SEC-002:2",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "fa2ee4e8-069b-5087-96e0-eccee4c24ead",
+       "verification_id": "7f9bcd40-32e0-553f-8938-a91d42316f59",
        "blocking": []
       },
       {
@@ -616,7 +612,7 @@
        "target_id": "STRUCTURAL",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "d921862f-5367-50af-b5d0-97c15cb83061",
+       "verification_id": "175795fe-938f-5d23-a3ea-3b34d453441d",
        "blocking": []
       }
      ],
@@ -696,95 +692,95 @@
      },
      "identity": {
       "algorithm_version": "dail-identity-1",
-      "content_hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd",
+      "content_hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19",
       "pairs": [
        {
-        "trusted_ref": "aws_db_instance.database",
-        "candidate_ref": "aws_db_instance.database",
+        "trusted_ref": "aws_db_instance.rds_postgres",
+        "candidate_ref": "aws_db_instance.rds_postgres",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_db_subnet_group.db",
-        "candidate_ref": "aws_db_subnet_group.db",
+        "trusted_ref": "aws_db_subnet_group.dbsng_main",
+        "candidate_ref": "aws_db_subnet_group.dbsng_main",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_instance.app",
-        "candidate_ref": "aws_instance.app",
+        "trusted_ref": "aws_instance.ec2_app",
+        "candidate_ref": "aws_instance.ec2_app",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_internet_gateway.igw",
-        "candidate_ref": "aws_internet_gateway.igw",
+        "trusted_ref": "aws_internet_gateway.igw_main",
+        "candidate_ref": "aws_internet_gateway.igw_main",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_route_table.public",
-        "candidate_ref": "aws_route_table.public",
+        "trusted_ref": "aws_route_table.rt_db",
+        "candidate_ref": "aws_route_table.rt_db",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_route_table_association.app",
-        "candidate_ref": "aws_route_table_association.app",
+        "trusted_ref": "aws_route_table.rt_public",
+        "candidate_ref": "aws_route_table.rt_public",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group.app",
-        "candidate_ref": "aws_security_group.app",
+        "trusted_ref": "aws_route_table_association.rta_app",
+        "candidate_ref": "aws_route_table_association.rta_app",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group.db",
-        "candidate_ref": "aws_security_group.db",
+        "trusted_ref": "aws_route_table_association.rta_db_1",
+        "candidate_ref": "aws_route_table_association.rta_db_1",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group_rule.app_egress_all",
-        "candidate_ref": "aws_security_group_rule.app_egress_all",
+        "trusted_ref": "aws_route_table_association.rta_db_2",
+        "candidate_ref": "aws_route_table_association.rta_db_2",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group_rule.app_ssh_public",
-        "candidate_ref": "aws_security_group_rule.app_ssh_public",
+        "trusted_ref": "aws_security_group.sg_app",
+        "candidate_ref": "aws_security_group.sg_app",
         "change_type": "MODIFIED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group_rule.app_to_db_5432",
-        "candidate_ref": "aws_security_group_rule.app_to_db_5432",
+        "trusted_ref": "aws_security_group.sg_db",
+        "candidate_ref": "aws_security_group.sg_db",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_subnet.app",
-        "candidate_ref": "aws_subnet.app",
+        "trusted_ref": "aws_subnet.sub_app",
+        "candidate_ref": "aws_subnet.sub_app",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_subnet.db_a",
-        "candidate_ref": "aws_subnet.db_a",
+        "trusted_ref": "aws_subnet.sub_db_1",
+        "candidate_ref": "aws_subnet.sub_db_1",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_subnet.db_b",
-        "candidate_ref": "aws_subnet.db_b",
+        "trusted_ref": "aws_subnet.sub_db_2",
+        "candidate_ref": "aws_subnet.sub_db_2",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_vpc.main",
-        "candidate_ref": "aws_vpc.main",
+        "trusted_ref": "aws_vpc.vpc_main",
+        "candidate_ref": "aws_vpc.vpc_main",
         "change_type": "UNCHANGED",
         "moved": false
        }
@@ -792,7 +788,7 @@
      },
      "impact": {
       "algorithm_version": "dail-impact-1",
-      "content_hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4",
+      "content_hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce",
       "affected": [
        {
         "invariant_id": "INV-FUNC-001",
@@ -821,9 +817,9 @@
       ]
      },
      "new_state": {
-      "state_id": "bd5b15d8-e992-5836-a5d8-837d36148544",
-      "state_hash": "29fec45b37ecc91ab85812bd277efe20687258d60da46ce6760d9e489e599b08",
-      "resource_set_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+      "state_id": "ebb78224-5ccf-5dd7-b5bb-31c35a9bad4d",
+      "state_hash": "725ff497875ec63ec6b59c2cb2667eb3bf2859fa29a572a3a55420c05ab545ec",
+      "resource_set_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
       "version": 1,
       "invariant_registry_version": 2,
       "invariants": {
@@ -851,14 +847,14 @@
      }
     },
     "impact": {
-     "parent_state_id": "3c59956a-e788-56e6-8681-a9fe609b5376",
-     "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
+     "parent_state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5",
+     "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
      "changed_resources": [
       {
-       "address": "aws_security_group_rule.app_ssh_public",
-       "trusted_ref": "aws_security_group_rule.app_ssh_public",
-       "candidate_ref": "aws_security_group_rule.app_ssh_public",
-       "resource_type": "aws_security_group_rule",
+       "address": "aws_security_group.sg_app",
+       "trusted_ref": "aws_security_group.sg_app",
+       "candidate_ref": "aws_security_group.sg_app",
+       "resource_type": "aws_security_group",
        "change_type": "MODIFIED",
        "flags": []
       }
@@ -872,24 +868,16 @@
         "DEPENDENCY"
        ],
        "changed_resource_refs": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "dependency_paths": [
         {
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
+         "changed_ref": "aws_security_group.sg_app",
          "steps": [
           {
-           "edge_key": "f263204f242b06910af86d918014ccf984915c7544d602b780ba9b039ddb053b",
-           "from_node": "RESOURCE:aws_security_group_rule.app_ssh_public",
-           "to_node": "RESOURCE:aws_security_group.app",
-           "relationship": "RULE_BELONGS_TO_SECURITY_GROUP",
-           "direction": "FORWARD",
-           "status": "KNOWN"
-          },
-          {
-           "edge_key": "d65ff950006904601ef0982e0606594c325cf611cf368c8b051b13dc12075b06",
-           "from_node": "RESOURCE:aws_security_group.app",
-           "to_node": "RESOURCE:aws_instance.app",
+           "edge_key": "7c3ad7e6c56c2887eb0baccf16eef3bdfe65baaedb7a7697850e5877e0ecbef0",
+           "from_node": "RESOURCE:aws_security_group.sg_app",
+           "to_node": "RESOURCE:aws_instance.ec2_app",
            "relationship": "INSTANCE_USES_SECURITY_GROUP",
            "direction": "REVERSE",
            "status": "KNOWN"
@@ -900,13 +888,13 @@
        "reasons": [
         {
          "code": "FOOTPRINT_MEMBER_CHANGED",
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
-         "scope_element": "walk:RULE_BELONGS_TO_SECURITY_GROUP:REVERSE",
-         "detail": "MODIFIED aws_security_group_rule.app_ssh_public is in the walk of INV-FUNC-001"
+         "changed_ref": "aws_security_group.sg_app",
+         "scope_element": "walk:INSTANCE_USES_SECURITY_GROUP:FORWARD",
+         "detail": "MODIFIED aws_security_group.sg_app is in the walk of INV-FUNC-001"
         }
        ],
        "prior_evidence_ids": [
-        "54034928-da2b-5782-ba8f-c6daf3bb10dc"
+        "841d44e9-cd71-5b4c-818b-d34757de4c17"
        ],
        "evidence_validity": "INVALID"
       },
@@ -918,24 +906,24 @@
         "DIRECT"
        ],
        "changed_resource_refs": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "dependency_paths": [
         {
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
+         "changed_ref": "aws_security_group.sg_app",
          "steps": []
         }
        ],
        "reasons": [
         {
          "code": "SCOPE_TYPE_CHANGED",
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
-         "scope_element": "resource_types:aws_security_group_rule",
-         "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-001"
+         "changed_ref": "aws_security_group.sg_app",
+         "scope_element": "resource_types:aws_security_group",
+         "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-001"
         }
        ],
        "prior_evidence_ids": [
-        "2b7a16c0-6fe8-5ae8-a5b4-b6e95155084a"
+        "1f037c5c-a91e-5e64-9a9b-cc8f230a46b2"
        ],
        "evidence_validity": "INVALID"
       },
@@ -947,24 +935,24 @@
         "DIRECT"
        ],
        "changed_resource_refs": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "dependency_paths": [
         {
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
+         "changed_ref": "aws_security_group.sg_app",
          "steps": []
         }
        ],
        "reasons": [
         {
          "code": "SCOPE_TYPE_CHANGED",
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
-         "scope_element": "resource_types:aws_security_group_rule",
-         "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-002"
+         "changed_ref": "aws_security_group.sg_app",
+         "scope_element": "resource_types:aws_security_group",
+         "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-002"
         }
        ],
        "prior_evidence_ids": [
-        "66fd97e8-5987-5a5f-ba91-b3a71c117841"
+        "9e584afa-f9e4-5c4c-bd78-202bbd6bbb64"
        ],
        "evidence_validity": "INVALID"
       }
@@ -975,9 +963,9 @@
        "target_type": "INVARIANT",
        "reason": "FOOTPRINT_MEMBER_CHANGED",
        "scope": [
-        "aws_db_instance.database",
-        "aws_instance.app",
-        "aws_security_group_rule.app_ssh_public"
+        "aws_db_instance.rds_postgres",
+        "aws_instance.ec2_app",
+        "aws_security_group.sg_app"
        ],
        "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
        "priority": "BLOCKING"
@@ -987,7 +975,7 @@
        "target_type": "INVARIANT",
        "reason": "SCOPE_TYPE_CHANGED",
        "scope": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
        "priority": "BLOCKING"
@@ -997,7 +985,7 @@
        "target_type": "INVARIANT",
        "reason": "SCOPE_TYPE_CHANGED",
        "scope": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
        "priority": "BLOCKING"
@@ -1009,7 +997,7 @@
        "invariant_id": "INV-SEC-003",
        "invariant_version": 1,
        "prior_evidence_ids": [
-        "dee85a5d-0cb4-5271-9c0d-f888ee67cfa5"
+        "788eea2c-9250-59b8-962f-d135d5656a66"
        ],
        "carry_forward_eligible": true,
        "reason": "NO_CHANGE_IN_FOOTPRINT"
@@ -1020,7 +1008,7 @@
        "invariant_id": "INV-SEC-003",
        "invariant_version": 1,
        "evidence_ids": [
-        "dee85a5d-0cb4-5271-9c0d-f888ee67cfa5"
+        "788eea2c-9250-59b8-962f-d135d5656a66"
        ]
       }
      ],
@@ -1031,23 +1019,23 @@
      ],
      "algorithm_version": "dail-impact-1",
      "graph_version": "dail-graph-2",
-     "trusted_graph_hash": "b5b60eb00bebfe80408d2487a61bcaaf66df8f0cf9e648c40217c99cb1395302",
-     "candidate_graph_hash": "fc801c6a83b6d4a7c499c8b25380c15d1a8f588234e465e394b62b450da2969d",
-     "identity_report_hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd",
+     "trusted_graph_hash": "976a3c305c8d29618f441a0d32d0b5560684a3094456902b533ecffbb27c5402",
+     "candidate_graph_hash": "fb84c7f670d4835fcd7dbdfca340553e81a95eb04e8252f4aefc4d33dc1a38ff",
+     "identity_report_hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19",
      "created_at": "2026-01-01T00:00:03+00:00",
-     "content_hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4"
+     "content_hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce"
     },
     "verification": {
-     "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-     "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+     "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+     "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
      "results": [
       {
-       "verification_id": "dd0c8802-74a4-54b5-9ba1-69658421263c",
-       "request_id": "fbc381cc-6337-593e-a428-0c0c9b26f0b1",
+       "verification_id": "1bb2f01e-4d5e-5050-b627-2a31346dc4ab",
+       "request_id": "622604d4-63cf-5619-ae2c-59b34cf77abf",
        "target_type": "INVARIANT",
        "target_id": "INVARIANT:INV-FUNC-001:1",
-       "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": "INV-FUNC-001",
        "invariant_version": 1,
        "verifier_id": "dail.verify.reachability_cfg",
@@ -1065,30 +1053,30 @@
         "unresolved": [],
         "endpoints": {
          "S": {
-          "trusted": "aws_instance.app",
-          "candidate": "aws_instance.app",
+          "trusted": "aws_instance.ec2_app",
+          "candidate": "aws_instance.ec2_app",
           "match": "UNCHANGED"
          },
          "D": {
-          "trusted": "aws_db_instance.database",
-          "candidate": "aws_db_instance.database",
+          "trusted": "aws_db_instance.rds_postgres",
+          "candidate": "aws_db_instance.rds_postgres",
           "match": "UNCHANGED"
          }
         },
         "port": 5432,
         "path": {
-         "S": "aws_instance.app",
-         "subnet": "aws_subnet.app",
-         "vpc_s": "aws_vpc.main",
+         "S": "aws_instance.ec2_app",
+         "subnet": "aws_subnet.sub_app",
+         "vpc_s": "aws_vpc.vpc_main",
          "sg_s": [
-          "aws_security_group.app"
+          "aws_security_group.sg_app"
          ],
-         "egress_rule": "aws_security_group_rule.app_egress_all",
+         "egress_rule": "aws_security_group.sg_app",
          "sg_d": [
-          "aws_security_group.db"
+          "aws_security_group.sg_db"
          ],
-         "ingress_rule": "aws_security_group_rule.app_to_db_5432",
-         "vpc_d": "aws_vpc.main"
+         "ingress_rule": "aws_security_group.sg_db",
+         "vpc_d": "aws_vpc.vpc_main"
         },
         "row2_causes": [],
         "failing_conditions": [],
@@ -1103,39 +1091,39 @@
         "tolerated type: aws_db_subnet_group (C-15)"
        ],
        "evidence": {
-        "verification_id": "dd0c8802-74a4-54b5-9ba1-69658421263c",
+        "verification_id": "1bb2f01e-4d5e-5050-b627-2a31346dc4ab",
         "invariant_id": "INV-FUNC-001",
         "invariant_version": 1,
-        "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "INVARIANT:INV-FUNC-001:1",
         "verifier_id": "dail.verify.reachability_cfg",
         "verifier_version": "1",
         "evidence_level": "L1",
-        "predicate": "registry-v1.0 §6 {\"D\":\"aws_db_instance.database\",\"S\":\"aws_instance.app\",\"port\":5432}",
+        "predicate": "registry-v1.0 §6 {\"D\":\"aws_db_instance.rds_postgres\",\"S\":\"aws_instance.ec2_app\",\"port\":5432}",
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "3c59956a-e788-56e6-8681-a9fe609b5376"
+          "state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5"
          },
          {
           "kind": "identity_report",
-          "hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd"
+          "hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19"
          },
          {
           "kind": "impact_report",
-          "hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4"
+          "hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce"
          },
          {
           "kind": "invariant_definition",
           "id": "INV-FUNC-001",
           "version": 1,
-          "hash": "1cdf82a9e6a39bb8488b3d8251f70c611a0e08522337e4074181cdd4f1420a03"
+          "hash": "3fd4262ea4db87d3789dc7d7d8976b8709fcd362acf33d03184c1ee4ebd9fbea"
          }
         ],
         "observations": {
@@ -1145,30 +1133,30 @@
          "unresolved": [],
          "endpoints": {
           "S": {
-           "trusted": "aws_instance.app",
-           "candidate": "aws_instance.app",
+           "trusted": "aws_instance.ec2_app",
+           "candidate": "aws_instance.ec2_app",
            "match": "UNCHANGED"
           },
           "D": {
-           "trusted": "aws_db_instance.database",
-           "candidate": "aws_db_instance.database",
+           "trusted": "aws_db_instance.rds_postgres",
+           "candidate": "aws_db_instance.rds_postgres",
            "match": "UNCHANGED"
           }
          },
          "port": 5432,
          "path": {
-          "S": "aws_instance.app",
-          "subnet": "aws_subnet.app",
-          "vpc_s": "aws_vpc.main",
+          "S": "aws_instance.ec2_app",
+          "subnet": "aws_subnet.sub_app",
+          "vpc_s": "aws_vpc.vpc_main",
           "sg_s": [
-           "aws_security_group.app"
+           "aws_security_group.sg_app"
           ],
-          "egress_rule": "aws_security_group_rule.app_egress_all",
+          "egress_rule": "aws_security_group.sg_app",
           "sg_d": [
-           "aws_security_group.db"
+           "aws_security_group.sg_db"
           ],
-          "ingress_rule": "aws_security_group_rule.app_to_db_5432",
-          "vpc_d": "aws_vpc.main"
+          "ingress_rule": "aws_security_group.sg_db",
+          "vpc_d": "aws_vpc.vpc_main"
          },
          "row2_causes": [],
          "failing_conditions": [],
@@ -1196,12 +1184,12 @@
        "completed_at": "2026-01-01T00:00:03+00:00"
       },
       {
-       "verification_id": "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309",
-       "request_id": "a04949ad-9f66-502e-85c9-0bcb77a0423c",
+       "verification_id": "604f31c6-6160-5340-b83b-e40fe0ef2476",
+       "request_id": "888dc235-5aed-576c-aa3b-ddf564036cec",
        "target_type": "INVARIANT",
        "target_id": "INVARIANT:INV-SEC-001:2",
-       "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": "INV-SEC-001",
        "invariant_version": 2,
        "verifier_id": "dail.verify.public_ingress",
@@ -1236,11 +1224,11 @@
         "v1: coverage split across groups is not detected (S6)"
        ],
        "evidence": {
-        "verification_id": "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309",
+        "verification_id": "604f31c6-6160-5340-b83b-e40fe0ef2476",
         "invariant_id": "INV-SEC-001",
         "invariant_version": 2,
-        "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "INVARIANT:INV-SEC-001:2",
         "verifier_id": "dail.verify.public_ingress",
         "verifier_version": "1",
@@ -1249,20 +1237,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "3c59956a-e788-56e6-8681-a9fe609b5376"
+          "state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5"
          },
          {
           "kind": "identity_report",
-          "hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd"
+          "hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19"
          },
          {
           "kind": "impact_report",
-          "hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4"
+          "hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce"
          },
          {
           "kind": "invariant_definition",
@@ -1308,12 +1296,12 @@
        "completed_at": "2026-01-01T00:00:03+00:00"
       },
       {
-       "verification_id": "fa2ee4e8-069b-5087-96e0-eccee4c24ead",
-       "request_id": "d8d37622-5fd9-5a85-9066-f2285dd5a4e9",
+       "verification_id": "7f9bcd40-32e0-553f-8938-a91d42316f59",
+       "request_id": "9bab430f-08ee-5327-a758-68e63a1b31c0",
        "target_type": "INVARIANT",
        "target_id": "INVARIANT:INV-SEC-002:2",
-       "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": "INV-SEC-002",
        "invariant_version": 2,
        "verifier_id": "dail.verify.public_ingress",
@@ -1348,11 +1336,11 @@
         "v1: coverage split across groups is not detected (S6)"
        ],
        "evidence": {
-        "verification_id": "fa2ee4e8-069b-5087-96e0-eccee4c24ead",
+        "verification_id": "7f9bcd40-32e0-553f-8938-a91d42316f59",
         "invariant_id": "INV-SEC-002",
         "invariant_version": 2,
-        "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "INVARIANT:INV-SEC-002:2",
         "verifier_id": "dail.verify.public_ingress",
         "verifier_version": "1",
@@ -1361,20 +1349,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "3c59956a-e788-56e6-8681-a9fe609b5376"
+          "state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5"
          },
          {
           "kind": "identity_report",
-          "hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd"
+          "hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19"
          },
          {
           "kind": "impact_report",
-          "hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4"
+          "hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce"
          },
          {
           "kind": "invariant_definition",
@@ -1420,12 +1408,12 @@
        "completed_at": "2026-01-01T00:00:03+00:00"
       },
       {
-       "verification_id": "c52ce21d-adea-562a-a99a-1e7ef44755c5",
-       "request_id": "95051ce1-bbd3-5b45-995f-05a3f2ee8bb6",
+       "verification_id": "5f8f78d0-42cd-5f44-b50f-74f472cd4d93",
+       "request_id": "9831f57d-7bf3-5118-8c2c-e7c225c7a12c",
        "target_type": "STRUCTURAL",
        "target_id": "CONSISTENCY",
-       "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": null,
        "invariant_version": null,
        "verifier_id": "dail.verify.consistency",
@@ -1444,11 +1432,11 @@
        },
        "assumptions": [],
        "evidence": {
-        "verification_id": "c52ce21d-adea-562a-a99a-1e7ef44755c5",
+        "verification_id": "5f8f78d0-42cd-5f44-b50f-74f472cd4d93",
         "invariant_id": null,
         "invariant_version": null,
-        "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "CONSISTENCY",
         "verifier_id": "dail.verify.consistency",
         "verifier_version": "1",
@@ -1457,20 +1445,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "3c59956a-e788-56e6-8681-a9fe609b5376"
+          "state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5"
          },
          {
           "kind": "identity_report",
-          "hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd"
+          "hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19"
          },
          {
           "kind": "impact_report",
-          "hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4"
+          "hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce"
          }
         ],
         "observations": {
@@ -1494,12 +1482,12 @@
        "completed_at": "2026-01-01T00:00:03+00:00"
       },
       {
-       "verification_id": "d921862f-5367-50af-b5d0-97c15cb83061",
-       "request_id": "01922c89-5076-5d58-80d0-8f14cceeb66f",
+       "verification_id": "175795fe-938f-5d23-a3ea-3b34d453441d",
+       "request_id": "b70c0934-1624-5e0f-a372-7d2d4d80e687",
        "target_type": "STRUCTURAL",
        "target_id": "STRUCTURAL",
-       "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": null,
        "invariant_version": null,
        "verifier_id": "dail.verify.structural",
@@ -1518,11 +1506,11 @@
        },
        "assumptions": [],
        "evidence": {
-        "verification_id": "d921862f-5367-50af-b5d0-97c15cb83061",
+        "verification_id": "175795fe-938f-5d23-a3ea-3b34d453441d",
         "invariant_id": null,
         "invariant_version": null,
-        "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "STRUCTURAL",
         "verifier_id": "dail.verify.structural",
         "verifier_version": "1",
@@ -1531,20 +1519,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "3c59956a-e788-56e6-8681-a9fe609b5376"
+          "state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5"
          },
          {
           "kind": "identity_report",
-          "hash": "050b27f74e8d2a59d3cf768aaeb4df89cfa074d8a604feaded2a8b85169b04bd"
+          "hash": "0c1b01b79c3c6d529e78315fdec6f74150854237309c546e719288f702786c19"
          },
          {
           "kind": "impact_report",
-          "hash": "6025ad3868b710abe72c5f012d04bd03c7cb8f286ae85816c4ffa985957073a4"
+          "hash": "e158adc98ad25ba8c872d141bdc9ad6b3e1f890fa889ba70492d799f0ec2d3ce"
          }
         ],
         "observations": {
@@ -1588,12 +1576,12 @@
        }
       }
      },
-     "content_hash": "b3fc89900bca0a6ec460ac55592ff58c3a3b3497652c9b7eff9248771a9501be"
+     "content_hash": "598042297fd92a011809390dea94091ac85335b762f977693731d9beb8d8bb5b"
     },
     "decision": {
-     "decision_id": "7285a1ee-833b-5ffa-8efa-3c87f65efe73",
-     "candidate_id": "69867d0a-081c-569c-af13-439dab4706c3",
-     "parent_state_id": "3c59956a-e788-56e6-8681-a9fe609b5376",
+     "decision_id": "0b3b45ae-05e5-551d-abac-3a893351219c",
+     "candidate_id": "d2d5455b-a488-5665-8416-06deb56f2488",
+     "parent_state_id": "ffdf77e9-0432-5e46-ad42-694911806fa5",
      "decision": "PROMOTE",
      "reason": "ALL_REQUIRED_PROVEN",
      "policy_version": "p8a-C-dail",
@@ -1603,25 +1591,25 @@
        "target_id": "CONSISTENCY",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "c52ce21d-adea-562a-a99a-1e7ef44755c5"
+       "verification_id": "5f8f78d0-42cd-5f44-b50f-74f472cd4d93"
       },
       {
        "target_id": "INVARIANT:INV-FUNC-001:1",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "dd0c8802-74a4-54b5-9ba1-69658421263c"
+       "verification_id": "1bb2f01e-4d5e-5050-b627-2a31346dc4ab"
       },
       {
        "target_id": "INVARIANT:INV-SEC-001:2",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309"
+       "verification_id": "604f31c6-6160-5340-b83b-e40fe0ef2476"
       },
       {
        "target_id": "INVARIANT:INV-SEC-002:2",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "fa2ee4e8-069b-5087-96e0-eccee4c24ead"
+       "verification_id": "7f9bcd40-32e0-553f-8938-a91d42316f59"
       },
       {
        "target_id": "INVARIANT:INV-SEC-003:1",
@@ -1633,24 +1621,24 @@
        "target_id": "STRUCTURAL",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "d921862f-5367-50af-b5d0-97c15cb83061"
+       "verification_id": "175795fe-938f-5d23-a3ea-3b34d453441d"
       }
      ],
      "blocking_conditions": [],
      "supporting_results": [
-      "c52ce21d-adea-562a-a99a-1e7ef44755c5",
-      "d921862f-5367-50af-b5d0-97c15cb83061",
-      "dc37ac6e-d1b2-5c7b-85d1-9b8ab8d52309",
-      "dd0c8802-74a4-54b5-9ba1-69658421263c",
-      "fa2ee4e8-069b-5087-96e0-eccee4c24ead"
+      "175795fe-938f-5d23-a3ea-3b34d453441d",
+      "1bb2f01e-4d5e-5050-b627-2a31346dc4ab",
+      "5f8f78d0-42cd-5f44-b50f-74f472cd4d93",
+      "604f31c6-6160-5340-b83b-e40fe0ef2476",
+      "7f9bcd40-32e0-553f-8938-a91d42316f59"
      ],
      "created_at": "2026-01-01T00:00:03+00:00",
-     "committed_state_id": "bd5b15d8-e992-5836-a5d8-837d36148544",
-     "content_hash": "1a06cf48c3e26e7f9126411a57e2f66fc9cc81990ca5a6db7a6f7c81c4990b56"
+     "committed_state_id": "ebb78224-5ccf-5dd7-b5bb-31c35a9bad4d",
+     "content_hash": "013448bce95cac63f15bf38ad9559b23beaad0ce7476702e96d9740bd1950d88"
     }
    },
    "store": "C/store/dail.sqlite",
-   "wall_seconds": 0.792485999991186
+   "wall_seconds": 0.9665956999524496
   },
   "A": {
    "condition": "A",
@@ -1667,9 +1655,9 @@
    },
    "baseline": {
     "outcome": "ESTABLISHED",
-    "state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490",
-    "state_hash": "0138868722228e7e4c8e798b7a1d88e0a0d7fedc0c9e523585bd7b7fccdd18a6",
-    "resource_set_hash": "8ad7e768767c4affaf7e3aec4832bcd13535744702f02f149eced3a936a5f979",
+    "state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647",
+    "state_hash": "6c610e47180a5bb3264d3adc24cbe8244ebbaa192ebb8cf918fc864586fada03",
+    "resource_set_hash": "654021656e1ca32e2f305b653e2e6c81276152c5722b74b25f5d5625bef81b4c",
     "version": 0,
     "invariant_registry_version": 2,
     "invariants": {
@@ -1682,7 +1670,7 @@
    "decision": {
     "type": "PROMOTE",
     "reason": "ALL_REQUIRED_PROVEN",
-    "decision_id": "05869a07-34eb-5329-9b8f-069c239079ea",
+    "decision_id": "d410a81d-6196-5443-b5eb-55daed75fa82",
     "blocking": [],
     "note": null
    },
@@ -1691,95 +1679,95 @@
    "result_kind": "PROMOTED",
    "identity": {
     "algorithm_version": "dail-identity-1",
-    "content_hash": "a5c18ee067121182841b8ffcb6b32093bdf76320c46814f7ff5701fbce2c476e",
+    "content_hash": "4564fe69fbb9b01afd944e75690a80865b6c398e0e16390185e8f83b5ef7dbad",
     "pairs": [
      {
-      "trusted_ref": "aws_db_instance.database",
-      "candidate_ref": "aws_db_instance.database",
+      "trusted_ref": "aws_db_instance.rds_postgres",
+      "candidate_ref": "aws_db_instance.rds_postgres",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_db_subnet_group.db",
-      "candidate_ref": "aws_db_subnet_group.db",
+      "trusted_ref": "aws_db_subnet_group.dbsng_main",
+      "candidate_ref": "aws_db_subnet_group.dbsng_main",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_instance.app",
-      "candidate_ref": "aws_instance.app",
+      "trusted_ref": "aws_instance.ec2_app",
+      "candidate_ref": "aws_instance.ec2_app",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_internet_gateway.igw",
-      "candidate_ref": "aws_internet_gateway.igw",
+      "trusted_ref": "aws_internet_gateway.igw_main",
+      "candidate_ref": "aws_internet_gateway.igw_main",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_route_table.public",
-      "candidate_ref": "aws_route_table.public",
+      "trusted_ref": "aws_route_table.rt_db",
+      "candidate_ref": "aws_route_table.rt_db",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_route_table_association.app",
-      "candidate_ref": "aws_route_table_association.app",
+      "trusted_ref": "aws_route_table.rt_public",
+      "candidate_ref": "aws_route_table.rt_public",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group.app",
-      "candidate_ref": "aws_security_group.app",
+      "trusted_ref": "aws_route_table_association.rta_app",
+      "candidate_ref": "aws_route_table_association.rta_app",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group.db",
-      "candidate_ref": "aws_security_group.db",
+      "trusted_ref": "aws_route_table_association.rta_db_1",
+      "candidate_ref": "aws_route_table_association.rta_db_1",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group_rule.app_egress_all",
-      "candidate_ref": "aws_security_group_rule.app_egress_all",
+      "trusted_ref": "aws_route_table_association.rta_db_2",
+      "candidate_ref": "aws_route_table_association.rta_db_2",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group_rule.app_ssh_public",
-      "candidate_ref": "aws_security_group_rule.app_ssh_public",
+      "trusted_ref": "aws_security_group.sg_app",
+      "candidate_ref": "aws_security_group.sg_app",
       "change_type": "MODIFIED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_security_group_rule.app_to_db_5432",
-      "candidate_ref": "aws_security_group_rule.app_to_db_5432",
+      "trusted_ref": "aws_security_group.sg_db",
+      "candidate_ref": "aws_security_group.sg_db",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_subnet.app",
-      "candidate_ref": "aws_subnet.app",
+      "trusted_ref": "aws_subnet.sub_app",
+      "candidate_ref": "aws_subnet.sub_app",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_subnet.db_a",
-      "candidate_ref": "aws_subnet.db_a",
+      "trusted_ref": "aws_subnet.sub_db_1",
+      "candidate_ref": "aws_subnet.sub_db_1",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_subnet.db_b",
-      "candidate_ref": "aws_subnet.db_b",
+      "trusted_ref": "aws_subnet.sub_db_2",
+      "candidate_ref": "aws_subnet.sub_db_2",
       "change_type": "UNCHANGED",
       "moved": false
      },
      {
-      "trusted_ref": "aws_vpc.main",
-      "candidate_ref": "aws_vpc.main",
+      "trusted_ref": "aws_vpc.vpc_main",
+      "candidate_ref": "aws_vpc.vpc_main",
       "change_type": "UNCHANGED",
       "moved": false
      }
@@ -1787,10 +1775,10 @@
    },
    "changed_resources": [
     {
-     "address": "aws_security_group_rule.app_ssh_public",
-     "trusted_ref": "aws_security_group_rule.app_ssh_public",
-     "candidate_ref": "aws_security_group_rule.app_ssh_public",
-     "resource_type": "aws_security_group_rule",
+     "address": "aws_security_group.sg_app",
+     "trusted_ref": "aws_security_group.sg_app",
+     "candidate_ref": "aws_security_group.sg_app",
+     "resource_type": "aws_security_group",
      "change_type": "MODIFIED",
      "flags": []
     }
@@ -1805,24 +1793,16 @@
        "DEPENDENCY"
       ],
       "changed_resource_refs": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "dependency_paths": [
        {
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
+        "changed_ref": "aws_security_group.sg_app",
         "steps": [
          {
-          "edge_key": "f263204f242b06910af86d918014ccf984915c7544d602b780ba9b039ddb053b",
-          "from_node": "RESOURCE:aws_security_group_rule.app_ssh_public",
-          "to_node": "RESOURCE:aws_security_group.app",
-          "relationship": "RULE_BELONGS_TO_SECURITY_GROUP",
-          "direction": "FORWARD",
-          "status": "KNOWN"
-         },
-         {
-          "edge_key": "d65ff950006904601ef0982e0606594c325cf611cf368c8b051b13dc12075b06",
-          "from_node": "RESOURCE:aws_security_group.app",
-          "to_node": "RESOURCE:aws_instance.app",
+          "edge_key": "7c3ad7e6c56c2887eb0baccf16eef3bdfe65baaedb7a7697850e5877e0ecbef0",
+          "from_node": "RESOURCE:aws_security_group.sg_app",
+          "to_node": "RESOURCE:aws_instance.ec2_app",
           "relationship": "INSTANCE_USES_SECURITY_GROUP",
           "direction": "REVERSE",
           "status": "KNOWN"
@@ -1833,9 +1813,9 @@
       "reasons": [
        {
         "code": "FOOTPRINT_MEMBER_CHANGED",
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
-        "scope_element": "walk:RULE_BELONGS_TO_SECURITY_GROUP:REVERSE",
-        "detail": "MODIFIED aws_security_group_rule.app_ssh_public is in the walk of INV-FUNC-001"
+        "changed_ref": "aws_security_group.sg_app",
+        "scope_element": "walk:INSTANCE_USES_SECURITY_GROUP:FORWARD",
+        "detail": "MODIFIED aws_security_group.sg_app is in the walk of INV-FUNC-001"
        }
       ],
       "prior_evidence_ids": [],
@@ -1849,24 +1829,24 @@
        "DIRECT"
       ],
       "changed_resource_refs": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "dependency_paths": [
        {
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
+        "changed_ref": "aws_security_group.sg_app",
         "steps": []
        }
       ],
       "reasons": [
        {
         "code": "SCOPE_TYPE_CHANGED",
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
-        "scope_element": "resource_types:aws_security_group_rule",
-        "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-001"
+        "changed_ref": "aws_security_group.sg_app",
+        "scope_element": "resource_types:aws_security_group",
+        "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-001"
        }
       ],
       "prior_evidence_ids": [
-       "800abb56-c07c-568e-aa1e-e39a4d034ee8"
+       "5dcd8b25-3acd-54da-bc57-5ea0400cd61d"
       ],
       "evidence_validity": "INVALID"
      },
@@ -1878,20 +1858,20 @@
        "DIRECT"
       ],
       "changed_resource_refs": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "dependency_paths": [
        {
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
+        "changed_ref": "aws_security_group.sg_app",
         "steps": []
        }
       ],
       "reasons": [
        {
         "code": "SCOPE_TYPE_CHANGED",
-        "changed_ref": "aws_security_group_rule.app_ssh_public",
-        "scope_element": "resource_types:aws_security_group_rule",
-        "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-002"
+        "changed_ref": "aws_security_group.sg_app",
+        "scope_element": "resource_types:aws_security_group",
+        "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-002"
        }
       ],
       "prior_evidence_ids": [],
@@ -1915,9 +1895,9 @@
       "target_type": "INVARIANT",
       "reason": "FOOTPRINT_MEMBER_CHANGED",
       "scope": [
-       "aws_db_instance.database",
-       "aws_instance.app",
-       "aws_security_group_rule.app_ssh_public"
+       "aws_db_instance.rds_postgres",
+       "aws_instance.ec2_app",
+       "aws_security_group.sg_app"
       ],
       "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
       "priority": "BLOCKING"
@@ -1927,7 +1907,7 @@
       "target_type": "INVARIANT",
       "reason": "SCOPE_TYPE_CHANGED",
       "scope": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
       "priority": "BLOCKING"
@@ -1937,7 +1917,7 @@
       "target_type": "INVARIANT",
       "reason": "SCOPE_TYPE_CHANGED",
       "scope": [
-       "aws_security_group_rule.app_ssh_public"
+       "aws_security_group.sg_app"
       ],
       "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
       "priority": "BLOCKING"
@@ -1981,21 +1961,21 @@
      "target_id": "CONSISTENCY",
      "kind": "GATE",
      "source": "VERIFIED",
-     "verification_id": "565201aa-dd3d-509a-b718-ed12b1c361d0",
+     "verification_id": "4ef2442c-01a3-539b-8e19-7fd87a2a7431",
      "blocking": []
     },
     {
      "target_id": "INVARIANT:INV-SEC-001:2",
      "kind": "INVARIANT",
      "source": "VERIFIED",
-     "verification_id": "2278083e-4384-5521-8bfa-76121510c29a",
+     "verification_id": "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9",
      "blocking": []
     },
     {
      "target_id": "STRUCTURAL",
      "kind": "GATE",
      "source": "VERIFIED",
-     "verification_id": "1e5ee205-e8cd-5671-89bd-b3e9d9684ac1",
+     "verification_id": "f307fc65-3777-519c-8daa-5afe17eaa0f9",
      "blocking": []
     }
    ],
@@ -2004,7 +1984,7 @@
      "invariant_id": "INV-SEC-001",
      "invariant_version": 2,
      "source": "VERIFIED",
-     "verification_id": "2278083e-4384-5521-8bfa-76121510c29a",
+     "verification_id": "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9",
      "source_state_id": null,
      "evidence_ids": []
     }
@@ -2017,9 +1997,9 @@
     "not_protected_in_parent": 0
    },
    "new_state": {
-    "state_id": "284b4211-a942-531a-9aff-78197362dc84",
-    "state_hash": "ab54718006367cd6691d50c053ef63c474b4bbd073e5f845f43bf5b5f278a21d",
-    "resource_set_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+    "state_id": "c9921ace-5767-53da-8668-f1ddd474c6a5",
+    "state_hash": "d52f8620ddbe03eeff9f3bdac5db49a7a667288e30ece618d8699c4bac857877",
+    "resource_set_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
     "version": 1,
     "invariant_registry_version": 2,
     "invariants": {
@@ -2032,7 +2012,7 @@
    "dail": {
     "transition": {
      "condition": "A",
-     "scenario_id": "canonical",
+     "scenario_id": "tp-v1-F4-0092",
      "record": "transition",
      "step_index": 1,
      "status": "EVALUATED",
@@ -2045,17 +2025,17 @@
        "registry.terraform.io/hashicorp/aws": "6.53.0"
       }
      },
-     "parent_state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490",
-     "parent_state_hash": "0138868722228e7e4c8e798b7a1d88e0a0d7fedc0c9e523585bd7b7fccdd18a6",
-     "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-     "candidate_state_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+     "parent_state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647",
+     "parent_state_hash": "6c610e47180a5bb3264d3adc24cbe8244ebbaa192ebb8cf918fc864586fada03",
+     "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+     "candidate_state_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
      "open_targets": [],
      "outcome_class": "DAIL_OUTCOME",
      "result_kind": "PROMOTED",
      "decision": {
       "type": "PROMOTE",
       "reason": "ALL_REQUIRED_PROVEN",
-      "decision_id": "05869a07-34eb-5329-9b8f-069c239079ea",
+      "decision_id": "d410a81d-6196-5443-b5eb-55daed75fa82",
       "blocking": [],
       "note": null
      },
@@ -2064,21 +2044,21 @@
        "target_id": "CONSISTENCY",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "565201aa-dd3d-509a-b718-ed12b1c361d0",
+       "verification_id": "4ef2442c-01a3-539b-8e19-7fd87a2a7431",
        "blocking": []
       },
       {
        "target_id": "INVARIANT:INV-SEC-001:2",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "2278083e-4384-5521-8bfa-76121510c29a",
+       "verification_id": "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9",
        "blocking": []
       },
       {
        "target_id": "STRUCTURAL",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "1e5ee205-e8cd-5671-89bd-b3e9d9684ac1",
+       "verification_id": "f307fc65-3777-519c-8daa-5afe17eaa0f9",
        "blocking": []
       }
      ],
@@ -2132,95 +2112,95 @@
      },
      "identity": {
       "algorithm_version": "dail-identity-1",
-      "content_hash": "a5c18ee067121182841b8ffcb6b32093bdf76320c46814f7ff5701fbce2c476e",
+      "content_hash": "4564fe69fbb9b01afd944e75690a80865b6c398e0e16390185e8f83b5ef7dbad",
       "pairs": [
        {
-        "trusted_ref": "aws_db_instance.database",
-        "candidate_ref": "aws_db_instance.database",
+        "trusted_ref": "aws_db_instance.rds_postgres",
+        "candidate_ref": "aws_db_instance.rds_postgres",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_db_subnet_group.db",
-        "candidate_ref": "aws_db_subnet_group.db",
+        "trusted_ref": "aws_db_subnet_group.dbsng_main",
+        "candidate_ref": "aws_db_subnet_group.dbsng_main",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_instance.app",
-        "candidate_ref": "aws_instance.app",
+        "trusted_ref": "aws_instance.ec2_app",
+        "candidate_ref": "aws_instance.ec2_app",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_internet_gateway.igw",
-        "candidate_ref": "aws_internet_gateway.igw",
+        "trusted_ref": "aws_internet_gateway.igw_main",
+        "candidate_ref": "aws_internet_gateway.igw_main",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_route_table.public",
-        "candidate_ref": "aws_route_table.public",
+        "trusted_ref": "aws_route_table.rt_db",
+        "candidate_ref": "aws_route_table.rt_db",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_route_table_association.app",
-        "candidate_ref": "aws_route_table_association.app",
+        "trusted_ref": "aws_route_table.rt_public",
+        "candidate_ref": "aws_route_table.rt_public",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group.app",
-        "candidate_ref": "aws_security_group.app",
+        "trusted_ref": "aws_route_table_association.rta_app",
+        "candidate_ref": "aws_route_table_association.rta_app",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group.db",
-        "candidate_ref": "aws_security_group.db",
+        "trusted_ref": "aws_route_table_association.rta_db_1",
+        "candidate_ref": "aws_route_table_association.rta_db_1",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group_rule.app_egress_all",
-        "candidate_ref": "aws_security_group_rule.app_egress_all",
+        "trusted_ref": "aws_route_table_association.rta_db_2",
+        "candidate_ref": "aws_route_table_association.rta_db_2",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group_rule.app_ssh_public",
-        "candidate_ref": "aws_security_group_rule.app_ssh_public",
+        "trusted_ref": "aws_security_group.sg_app",
+        "candidate_ref": "aws_security_group.sg_app",
         "change_type": "MODIFIED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_security_group_rule.app_to_db_5432",
-        "candidate_ref": "aws_security_group_rule.app_to_db_5432",
+        "trusted_ref": "aws_security_group.sg_db",
+        "candidate_ref": "aws_security_group.sg_db",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_subnet.app",
-        "candidate_ref": "aws_subnet.app",
+        "trusted_ref": "aws_subnet.sub_app",
+        "candidate_ref": "aws_subnet.sub_app",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_subnet.db_a",
-        "candidate_ref": "aws_subnet.db_a",
+        "trusted_ref": "aws_subnet.sub_db_1",
+        "candidate_ref": "aws_subnet.sub_db_1",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_subnet.db_b",
-        "candidate_ref": "aws_subnet.db_b",
+        "trusted_ref": "aws_subnet.sub_db_2",
+        "candidate_ref": "aws_subnet.sub_db_2",
         "change_type": "UNCHANGED",
         "moved": false
        },
        {
-        "trusted_ref": "aws_vpc.main",
-        "candidate_ref": "aws_vpc.main",
+        "trusted_ref": "aws_vpc.vpc_main",
+        "candidate_ref": "aws_vpc.vpc_main",
         "change_type": "UNCHANGED",
         "moved": false
        }
@@ -2228,7 +2208,7 @@
      },
      "impact": {
       "algorithm_version": "dail-impact-1",
-      "content_hash": "984f2b10bdd5e520f34fb73bc561cbfc2295cc6cb1a70382139bc655209d9185",
+      "content_hash": "6681b87abf1cd48cbdf59253acb6aff16c95a5a3ec4a3aef30646b3982b438ca",
       "affected": [
        {
         "invariant_id": "INV-FUNC-001",
@@ -2257,9 +2237,9 @@
       ]
      },
      "new_state": {
-      "state_id": "284b4211-a942-531a-9aff-78197362dc84",
-      "state_hash": "ab54718006367cd6691d50c053ef63c474b4bbd073e5f845f43bf5b5f278a21d",
-      "resource_set_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+      "state_id": "c9921ace-5767-53da-8668-f1ddd474c6a5",
+      "state_hash": "d52f8620ddbe03eeff9f3bdac5db49a7a667288e30ece618d8699c4bac857877",
+      "resource_set_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
       "version": 1,
       "invariant_registry_version": 2,
       "invariants": {
@@ -2275,14 +2255,14 @@
      }
     },
     "impact": {
-     "parent_state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490",
-     "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
+     "parent_state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647",
+     "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
      "changed_resources": [
       {
-       "address": "aws_security_group_rule.app_ssh_public",
-       "trusted_ref": "aws_security_group_rule.app_ssh_public",
-       "candidate_ref": "aws_security_group_rule.app_ssh_public",
-       "resource_type": "aws_security_group_rule",
+       "address": "aws_security_group.sg_app",
+       "trusted_ref": "aws_security_group.sg_app",
+       "candidate_ref": "aws_security_group.sg_app",
+       "resource_type": "aws_security_group",
        "change_type": "MODIFIED",
        "flags": []
       }
@@ -2296,24 +2276,16 @@
         "DEPENDENCY"
        ],
        "changed_resource_refs": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "dependency_paths": [
         {
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
+         "changed_ref": "aws_security_group.sg_app",
          "steps": [
           {
-           "edge_key": "f263204f242b06910af86d918014ccf984915c7544d602b780ba9b039ddb053b",
-           "from_node": "RESOURCE:aws_security_group_rule.app_ssh_public",
-           "to_node": "RESOURCE:aws_security_group.app",
-           "relationship": "RULE_BELONGS_TO_SECURITY_GROUP",
-           "direction": "FORWARD",
-           "status": "KNOWN"
-          },
-          {
-           "edge_key": "d65ff950006904601ef0982e0606594c325cf611cf368c8b051b13dc12075b06",
-           "from_node": "RESOURCE:aws_security_group.app",
-           "to_node": "RESOURCE:aws_instance.app",
+           "edge_key": "7c3ad7e6c56c2887eb0baccf16eef3bdfe65baaedb7a7697850e5877e0ecbef0",
+           "from_node": "RESOURCE:aws_security_group.sg_app",
+           "to_node": "RESOURCE:aws_instance.ec2_app",
            "relationship": "INSTANCE_USES_SECURITY_GROUP",
            "direction": "REVERSE",
            "status": "KNOWN"
@@ -2324,9 +2296,9 @@
        "reasons": [
         {
          "code": "FOOTPRINT_MEMBER_CHANGED",
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
-         "scope_element": "walk:RULE_BELONGS_TO_SECURITY_GROUP:REVERSE",
-         "detail": "MODIFIED aws_security_group_rule.app_ssh_public is in the walk of INV-FUNC-001"
+         "changed_ref": "aws_security_group.sg_app",
+         "scope_element": "walk:INSTANCE_USES_SECURITY_GROUP:FORWARD",
+         "detail": "MODIFIED aws_security_group.sg_app is in the walk of INV-FUNC-001"
         }
        ],
        "prior_evidence_ids": [],
@@ -2340,24 +2312,24 @@
         "DIRECT"
        ],
        "changed_resource_refs": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "dependency_paths": [
         {
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
+         "changed_ref": "aws_security_group.sg_app",
          "steps": []
         }
        ],
        "reasons": [
         {
          "code": "SCOPE_TYPE_CHANGED",
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
-         "scope_element": "resource_types:aws_security_group_rule",
-         "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-001"
+         "changed_ref": "aws_security_group.sg_app",
+         "scope_element": "resource_types:aws_security_group",
+         "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-001"
         }
        ],
        "prior_evidence_ids": [
-        "800abb56-c07c-568e-aa1e-e39a4d034ee8"
+        "5dcd8b25-3acd-54da-bc57-5ea0400cd61d"
        ],
        "evidence_validity": "INVALID"
       },
@@ -2369,20 +2341,20 @@
         "DIRECT"
        ],
        "changed_resource_refs": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "dependency_paths": [
         {
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
+         "changed_ref": "aws_security_group.sg_app",
          "steps": []
         }
        ],
        "reasons": [
         {
          "code": "SCOPE_TYPE_CHANGED",
-         "changed_ref": "aws_security_group_rule.app_ssh_public",
-         "scope_element": "resource_types:aws_security_group_rule",
-         "detail": "MODIFIED aws_security_group_rule.app_ssh_public is a scope element of INV-SEC-002"
+         "changed_ref": "aws_security_group.sg_app",
+         "scope_element": "resource_types:aws_security_group",
+         "detail": "MODIFIED aws_security_group.sg_app is a scope element of INV-SEC-002"
         }
        ],
        "prior_evidence_ids": [],
@@ -2395,9 +2367,9 @@
        "target_type": "INVARIANT",
        "reason": "FOOTPRINT_MEMBER_CHANGED",
        "scope": [
-        "aws_db_instance.database",
-        "aws_instance.app",
-        "aws_security_group_rule.app_ssh_public"
+        "aws_db_instance.rds_postgres",
+        "aws_instance.ec2_app",
+        "aws_security_group.sg_app"
        ],
        "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
        "priority": "BLOCKING"
@@ -2407,7 +2379,7 @@
        "target_type": "INVARIANT",
        "reason": "SCOPE_TYPE_CHANGED",
        "scope": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
        "priority": "BLOCKING"
@@ -2417,7 +2389,7 @@
        "target_type": "INVARIANT",
        "reason": "SCOPE_TYPE_CHANGED",
        "scope": [
-        "aws_security_group_rule.app_ssh_public"
+        "aws_security_group.sg_app"
        ],
        "required_evidence": "L1 dail.verify.public_ingress 1 (registry-v1.1)",
        "priority": "BLOCKING"
@@ -2441,23 +2413,23 @@
      ],
      "algorithm_version": "dail-impact-1",
      "graph_version": "dail-graph-2",
-     "trusted_graph_hash": "b5b60eb00bebfe80408d2487a61bcaaf66df8f0cf9e648c40217c99cb1395302",
-     "candidate_graph_hash": "fc801c6a83b6d4a7c499c8b25380c15d1a8f588234e465e394b62b450da2969d",
-     "identity_report_hash": "a5c18ee067121182841b8ffcb6b32093bdf76320c46814f7ff5701fbce2c476e",
+     "trusted_graph_hash": "976a3c305c8d29618f441a0d32d0b5560684a3094456902b533ecffbb27c5402",
+     "candidate_graph_hash": "fb84c7f670d4835fcd7dbdfca340553e81a95eb04e8252f4aefc4d33dc1a38ff",
+     "identity_report_hash": "4564fe69fbb9b01afd944e75690a80865b6c398e0e16390185e8f83b5ef7dbad",
      "created_at": "2026-01-01T00:00:03+00:00",
-     "content_hash": "984f2b10bdd5e520f34fb73bc561cbfc2295cc6cb1a70382139bc655209d9185"
+     "content_hash": "6681b87abf1cd48cbdf59253acb6aff16c95a5a3ec4a3aef30646b3982b438ca"
     },
     "verification": {
-     "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-     "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+     "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+     "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
      "results": [
       {
-       "verification_id": "2278083e-4384-5521-8bfa-76121510c29a",
-       "request_id": "efdf3917-4f42-5b0e-8028-697b8ddf7bc1",
+       "verification_id": "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9",
+       "request_id": "bacb51e0-47be-5e44-a24c-fd552fb38e35",
        "target_type": "INVARIANT",
        "target_id": "INVARIANT:INV-SEC-001:2",
-       "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": "INV-SEC-001",
        "invariant_version": 2,
        "verifier_id": "dail.verify.public_ingress",
@@ -2492,11 +2464,11 @@
         "v1: coverage split across groups is not detected (S6)"
        ],
        "evidence": {
-        "verification_id": "2278083e-4384-5521-8bfa-76121510c29a",
+        "verification_id": "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9",
         "invariant_id": "INV-SEC-001",
         "invariant_version": 2,
-        "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "INVARIANT:INV-SEC-001:2",
         "verifier_id": "dail.verify.public_ingress",
         "verifier_version": "1",
@@ -2505,20 +2477,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490"
+          "state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647"
          },
          {
           "kind": "identity_report",
-          "hash": "a5c18ee067121182841b8ffcb6b32093bdf76320c46814f7ff5701fbce2c476e"
+          "hash": "4564fe69fbb9b01afd944e75690a80865b6c398e0e16390185e8f83b5ef7dbad"
          },
          {
           "kind": "impact_report",
-          "hash": "984f2b10bdd5e520f34fb73bc561cbfc2295cc6cb1a70382139bc655209d9185"
+          "hash": "6681b87abf1cd48cbdf59253acb6aff16c95a5a3ec4a3aef30646b3982b438ca"
          },
          {
           "kind": "invariant_definition",
@@ -2564,12 +2536,12 @@
        "completed_at": "2026-01-01T00:00:03+00:00"
       },
       {
-       "verification_id": "565201aa-dd3d-509a-b718-ed12b1c361d0",
-       "request_id": "15013a30-a33f-5f65-9018-e4840f5d94b7",
+       "verification_id": "4ef2442c-01a3-539b-8e19-7fd87a2a7431",
+       "request_id": "758b0140-5aef-501b-b7b0-7f407954b48d",
        "target_type": "STRUCTURAL",
        "target_id": "CONSISTENCY",
-       "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": null,
        "invariant_version": null,
        "verifier_id": "dail.verify.consistency",
@@ -2588,11 +2560,11 @@
        },
        "assumptions": [],
        "evidence": {
-        "verification_id": "565201aa-dd3d-509a-b718-ed12b1c361d0",
+        "verification_id": "4ef2442c-01a3-539b-8e19-7fd87a2a7431",
         "invariant_id": null,
         "invariant_version": null,
-        "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "CONSISTENCY",
         "verifier_id": "dail.verify.consistency",
         "verifier_version": "1",
@@ -2601,20 +2573,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490"
+          "state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647"
          },
          {
           "kind": "identity_report",
-          "hash": "a5c18ee067121182841b8ffcb6b32093bdf76320c46814f7ff5701fbce2c476e"
+          "hash": "4564fe69fbb9b01afd944e75690a80865b6c398e0e16390185e8f83b5ef7dbad"
          },
          {
           "kind": "impact_report",
-          "hash": "984f2b10bdd5e520f34fb73bc561cbfc2295cc6cb1a70382139bc655209d9185"
+          "hash": "6681b87abf1cd48cbdf59253acb6aff16c95a5a3ec4a3aef30646b3982b438ca"
          }
         ],
         "observations": {
@@ -2638,12 +2610,12 @@
        "completed_at": "2026-01-01T00:00:03+00:00"
       },
       {
-       "verification_id": "1e5ee205-e8cd-5671-89bd-b3e9d9684ac1",
-       "request_id": "051cfc88-b4fb-537b-a3f3-25b630ca99d2",
+       "verification_id": "f307fc65-3777-519c-8daa-5afe17eaa0f9",
+       "request_id": "a3cc86ec-bf26-5692-9604-6213b6d97ae6",
        "target_type": "STRUCTURAL",
        "target_id": "STRUCTURAL",
-       "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-       "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+       "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+       "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
        "invariant_id": null,
        "invariant_version": null,
        "verifier_id": "dail.verify.structural",
@@ -2662,11 +2634,11 @@
        },
        "assumptions": [],
        "evidence": {
-        "verification_id": "1e5ee205-e8cd-5671-89bd-b3e9d9684ac1",
+        "verification_id": "f307fc65-3777-519c-8daa-5afe17eaa0f9",
         "invariant_id": null,
         "invariant_version": null,
-        "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-        "candidate_hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+        "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+        "candidate_hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
         "target_id": "STRUCTURAL",
         "verifier_id": "dail.verify.structural",
         "verifier_version": "1",
@@ -2675,20 +2647,20 @@
         "inputs": [
          {
           "kind": "candidate_state",
-          "hash": "527e4aa88ba2380b9360c264ecadd1527a77598195bd122cd79e8b8e40d2333c",
+          "hash": "e9aae1f8602ca38f49eba5d346729ccdb9727ac0a8558fcc391cd29b73e0f622",
           "resources": 15
          },
          {
           "kind": "parent_state",
-          "state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490"
+          "state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647"
          },
          {
           "kind": "identity_report",
-          "hash": "a5c18ee067121182841b8ffcb6b32093bdf76320c46814f7ff5701fbce2c476e"
+          "hash": "4564fe69fbb9b01afd944e75690a80865b6c398e0e16390185e8f83b5ef7dbad"
          },
          {
           "kind": "impact_report",
-          "hash": "984f2b10bdd5e520f34fb73bc561cbfc2295cc6cb1a70382139bc655209d9185"
+          "hash": "6681b87abf1cd48cbdf59253acb6aff16c95a5a3ec4a3aef30646b3982b438ca"
          }
         ],
         "observations": {
@@ -2729,12 +2701,12 @@
        }
       }
      },
-     "content_hash": "72979970216ed0b6d67e9a6a7d4b7213509bd3aeda35856f36badd69c1264864"
+     "content_hash": "01a81e0bb8c1c27c5277d3789f795ffe9169c6c6d30a0b7ff98c31cc445563aa"
     },
     "decision": {
-     "decision_id": "05869a07-34eb-5329-9b8f-069c239079ea",
-     "candidate_id": "ae01a808-2949-528d-a6e1-caf8dd06e8fd",
-     "parent_state_id": "7b8125bc-2ac1-58a8-96cb-4b3b58373490",
+     "decision_id": "d410a81d-6196-5443-b5eb-55daed75fa82",
+     "candidate_id": "4582a8c7-1b39-520b-913b-d93ff59687c3",
+     "parent_state_id": "3be4f1ed-0a83-5938-bbff-b1c92661a647",
      "decision": "PROMOTE",
      "reason": "ALL_REQUIRED_PROVEN",
      "policy_version": "p8a-A-dail-stateless-1",
@@ -2744,34 +2716,34 @@
        "target_id": "CONSISTENCY",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "565201aa-dd3d-509a-b718-ed12b1c361d0"
+       "verification_id": "4ef2442c-01a3-539b-8e19-7fd87a2a7431"
       },
       {
        "target_id": "INVARIANT:INV-SEC-001:2",
        "kind": "INVARIANT",
        "source": "VERIFIED",
-       "verification_id": "2278083e-4384-5521-8bfa-76121510c29a"
+       "verification_id": "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9"
       },
       {
        "target_id": "STRUCTURAL",
        "kind": "GATE",
        "source": "VERIFIED",
-       "verification_id": "1e5ee205-e8cd-5671-89bd-b3e9d9684ac1"
+       "verification_id": "f307fc65-3777-519c-8daa-5afe17eaa0f9"
       }
      ],
      "blocking_conditions": [],
      "supporting_results": [
-      "1e5ee205-e8cd-5671-89bd-b3e9d9684ac1",
-      "2278083e-4384-5521-8bfa-76121510c29a",
-      "565201aa-dd3d-509a-b718-ed12b1c361d0"
+      "4ef2442c-01a3-539b-8e19-7fd87a2a7431",
+      "e2eb10f1-a25c-5065-89e0-644a0e8f4bc9",
+      "f307fc65-3777-519c-8daa-5afe17eaa0f9"
      ],
      "created_at": "2026-01-01T00:00:03+00:00",
-     "committed_state_id": "284b4211-a942-531a-9aff-78197362dc84",
-     "content_hash": "939c123e1df42272c4006fbd5f8bf28a7593a7a704642ba7592117e798ee1f56"
+     "committed_state_id": "c9921ace-5767-53da-8668-f1ddd474c6a5",
+     "content_hash": "e49d8e4aabdcac734d363633c5f02ec8a8972c1f13b497e0a16ec3d70a2d91e9"
     }
    },
    "store": null,
-   "wall_seconds": 0.7537149999989197
+   "wall_seconds": 0.8887500999844633
   }
  },
  "comparison": {
@@ -2836,34 +2808,34 @@
    "prompt_adjustment_policy": "none"
   },
   "context_version": "dail-llm-context-1",
-  "context_hash": "314b24c52d78429018dddf5aba08a9c6ba3a9941bafb6d02a0787f827cff130c",
+  "context_hash": "19c13c914a23f34629b81f8fe2c65ec4f76e931b912255236047f15f8865eeb2",
   "prompt_version": "dail-repair-prompt-3",
-  "prompt_hash": "f1d0f0633059538e21610f3fbc10018bcc513cdbd40d20a86f5851d4437002ae",
+  "prompt_hash": "c92275f9813bf2ca7bf43400a576090a1e48b28b0c094b3feb8e7b1d9984479e",
   "parser_version": "dail-llm-parser-2",
   "validator_version": "dail-patch-validator-3",
   "observability": {
    "request_ids": [
-    "315172a3-eba2-48d1-a75c-66ce4030f723"
+    "9aab3103-f065-4061-b47c-ec8e0afd8d93"
    ],
    "attempt_ids": [
-    "0fb402f4-1ecf-4696-bb64-72c48c434399"
+    "597fb775-dff6-41ee-8738-0d4c9a981a35"
    ],
    "provider": "gemini",
    "model_name": "gemini-3.5-flash-lite",
    "model_version": "models/gemini-3.5-flash-lite",
    "prompt_version": "dail-repair-prompt-3",
-   "prompt_hash": "f1d0f0633059538e21610f3fbc10018bcc513cdbd40d20a86f5851d4437002ae",
+   "prompt_hash": "c92275f9813bf2ca7bf43400a576090a1e48b28b0c094b3feb8e7b1d9984479e",
    "context_version": "dail-llm-context-1",
-   "context_hash": "314b24c52d78429018dddf5aba08a9c6ba3a9941bafb6d02a0787f827cff130c",
+   "context_hash": "19c13c914a23f34629b81f8fe2c65ec4f76e931b912255236047f15f8865eeb2",
    "response_hashes": [
-    "7e13260e1d9f630c6027a4d13df91350050b3a2781d55b9cbeb16298ddd2f182"
+    "bba67286df1205df2ebcbae35a484a727cda11b08356df59216fde6093ff8b8c"
    ],
    "latency_ms": [
-    5497.342900023796
+    2967.216399963945
    ],
    "token_usage": {
-    "input": 2894,
-    "output": 310
+    "input": 3241,
+    "output": 336
    },
    "retry_count": 0,
    "failure_class": null,
@@ -2874,7 +2846,7 @@
     "max_context_tokens": 1048576,
     "reserved_output_tokens": 8192,
     "safety_margin": 256,
-    "estimated_input_tokens": 2273,
+    "estimated_input_tokens": 2607,
     "estimated_output_tokens": 8192,
     "estimate_rule": "ceil(characters / 4)",
     "insufficient": false,
@@ -2885,27 +2857,27 @@
   },
   "context": {
    "parent": {
-    "state_id": "04577cf8-0be1-5350-81d6-9c0159aa341c",
-    "state_hash": "21ffe89c15f97f6eded1788515980ed7a1ede7f65484e449e9cee33a54f5122a",
-    "resource_set_hash": "8ad7e768767c4affaf7e3aec4832bcd13535744702f02f149eced3a936a5f979",
+    "state_id": "0ade3334-d934-5970-8665-58514a280448",
+    "state_hash": "920c802870773af879907c05be2adae5ea828d05a5f6b857f31ffe6aefe95c34",
+    "resource_set_hash": "654021656e1ca32e2f305b653e2e6c81276152c5722b74b25f5d5625bef81b4c",
     "resource_addresses": [
-     "aws_db_instance.database",
-     "aws_db_subnet_group.db",
-     "aws_instance.app",
-     "aws_internet_gateway.igw",
-     "aws_route_table.public",
-     "aws_route_table_association.app",
-     "aws_security_group.app",
-     "aws_security_group.db",
-     "aws_security_group_rule.app_egress_all",
-     "aws_security_group_rule.app_ssh_public",
-     "aws_security_group_rule.app_to_db_5432",
-     "aws_subnet.app",
-     "aws_subnet.db_a",
-     "aws_subnet.db_b",
-     "aws_vpc.main"
+     "aws_db_instance.rds_postgres",
+     "aws_db_subnet_group.dbsng_main",
+     "aws_instance.ec2_app",
+     "aws_internet_gateway.igw_main",
+     "aws_route_table.rt_db",
+     "aws_route_table.rt_public",
+     "aws_route_table_association.rta_app",
+     "aws_route_table_association.rta_db_1",
+     "aws_route_table_association.rta_db_2",
+     "aws_security_group.sg_app",
+     "aws_security_group.sg_db",
+     "aws_subnet.sub_app",
+     "aws_subnet.sub_db_1",
+     "aws_subnet.sub_db_2",
+     "aws_vpc.vpc_main"
     ],
-    "s0_content_hash": "cfbb9d054022803d12cf0eaa47dcb6742a3a3cb85151e6a02285e5adde42cecf",
+    "s0_content_hash": "7610340588d47f92235067d04fc8288b917945a69c29919fefc0b6ab96d50681",
     "invariants": {
      "INV-FUNC-001": {
       "version": 1,
@@ -2927,21 +2899,21 @@
    },
    "scope": {
     "resource_addresses": [
-     "aws_db_instance.database",
-     "aws_db_subnet_group.db",
-     "aws_instance.app",
-     "aws_internet_gateway.igw",
-     "aws_route_table.public",
-     "aws_route_table_association.app",
-     "aws_security_group.app",
-     "aws_security_group.db",
-     "aws_security_group_rule.app_egress_all",
-     "aws_security_group_rule.app_ssh_public",
-     "aws_security_group_rule.app_to_db_5432",
-     "aws_subnet.app",
-     "aws_subnet.db_a",
-     "aws_subnet.db_b",
-     "aws_vpc.main"
+     "aws_db_instance.rds_postgres",
+     "aws_db_subnet_group.dbsng_main",
+     "aws_instance.ec2_app",
+     "aws_internet_gateway.igw_main",
+     "aws_route_table.rt_db",
+     "aws_route_table.rt_public",
+     "aws_route_table_association.rta_app",
+     "aws_route_table_association.rta_db_1",
+     "aws_route_table_association.rta_db_2",
+     "aws_security_group.sg_app",
+     "aws_security_group.sg_db",
+     "aws_subnet.sub_app",
+     "aws_subnet.sub_db_1",
+     "aws_subnet.sub_db_2",
+     "aws_vpc.vpc_main"
     ],
     "resource_types": [
      "aws_db_instance",
@@ -2964,11 +2936,8 @@
    },
    "objective": "Repair INV-SEC-001: No security group in the configuration admits TCP port 22 from the entire IPv4 internet, or from the entire IPv6 internet (registry-v1.1 §3). Keep every other protected invariant satisfied. Make the smallest change.",
    "focus": [
-    "aws_security_group.app",
-    "aws_security_group.db",
-    "aws_security_group_rule.app_egress_all",
-    "aws_security_group_rule.app_ssh_public",
-    "aws_security_group_rule.app_to_db_5432"
+    "aws_security_group.sg_app",
+    "aws_security_group.sg_db"
    ],
    "target_invariant_id": "INV-SEC-001"
   },
@@ -2980,16 +2949,16 @@
     "parse_errors": [],
     "validator_version": "dail-patch-validator-3",
     "validation_errors": [],
-    "candidate_tree_hash": "3253289ebde2fe5bec9d9c06d197525dfd8180e99281b1b14330a01ec30e2dd9",
+    "candidate_tree_hash": "af45c1efec73182819ef73b42b6ce19c53f2ac8fa02a1b609c4a635351a19a6b",
     "request": {
-     "request_id": "315172a3-eba2-48d1-a75c-66ce4030f723",
-     "attempt_id": "0fb402f4-1ecf-4696-bb64-72c48c434399",
+     "request_id": "9aab3103-f065-4061-b47c-ec8e0afd8d93",
+     "attempt_id": "597fb775-dff6-41ee-8738-0d4c9a981a35",
      "attempt_number": 1,
-     "parent_state_id": "04577cf8-0be1-5350-81d6-9c0159aa341c",
-     "trusted_state_hash": "21ffe89c15f97f6eded1788515980ed7a1ede7f65484e449e9cee33a54f5122a",
+     "parent_state_id": "0ade3334-d934-5970-8665-58514a280448",
+     "trusted_state_hash": "920c802870773af879907c05be2adae5ea828d05a5f6b857f31ffe6aefe95c34",
      "context_version": "dail-llm-context-1",
-     "context_hash": "314b24c52d78429018dddf5aba08a9c6ba3a9941bafb6d02a0787f827cff130c",
-     "prompt_hash": "f1d0f0633059538e21610f3fbc10018bcc513cdbd40d20a86f5851d4437002ae",
+     "context_hash": "19c13c914a23f34629b81f8fe2c65ec4f76e931b912255236047f15f8865eeb2",
+     "prompt_hash": "c92275f9813bf2ca7bf43400a576090a1e48b28b0c094b3feb8e7b1d9984479e",
      "prompt_version": "dail-repair-prompt-3",
      "template_hash": "80e4dfb3f3055e50fdd7ae610537bfd8e68af9e76c2000f1ecd0f4aa6d140691",
      "model_config": {
@@ -3005,30 +2974,30 @@
       "prompt_version": "dail-repair-prompt-3",
       "response_schema_version": "dail-llm-repair-response/1"
      },
-     "created_at": "2026-11-25T20:19:10.936833+00:00"
+     "created_at": "2026-11-25T21:18:07.678507+00:00"
     },
     "response": {
-     "response_id": "6a8066e8-8d88-49b2-8444-536a0b710b78",
-     "request_id": "315172a3-eba2-48d1-a75c-66ce4030f723",
-     "raw_response": "{\n \"schema_version\": \"dail-llm-repair-response/1\",\n \"status\": \"PATCH\",\n \"summary\": \"Remove public SSH ingress rule aws_security_group_rule.app_ssh_public to satisfy INV-SEC-001.\",\n \"patch\": \"resource \\\"aws_security_group_rule\\\" \\\"app_ssh_public\\\" {\\n  type              = \\\"ingress\\\"\\n  from_port         = 22\\n  to_port           = 22\\n  protocol          = \\\"tcp\\\"\\n  cidr_blocks       = [\\\"192.0.2.0/32\\\"]\\n  security_group_id = aws_security_group.app.id\\n}\",\n \"changed_addresses\": [\n  \"aws_security_group_rule.app_ssh_public\"\n ],\n \"assumptions\": [\n  \"Restricting SSH access to a specific non-public CIDR (192.0.2.0/32) satisfies INV-SEC-001 while preserving the rule resource.\"\n ],\n \"rationale\": \"The rule aws_security_group_rule.app_ssh_public previously allowed TCP/22 from 0.0.0.0/0. Changing the cidr_blocks to a non-public IP removes public SSH ingress without deleting the rule itself.\",\n \"confidence\": 1.0\n}",
+     "response_id": "b3254a5f-d04d-4562-880f-ba93904037c7",
+     "request_id": "9aab3103-f065-4061-b47c-ec8e0afd8d93",
+     "raw_response": "{\n \"schema_version\": \"dail-llm-repair-response/1\",\n \"status\": \"PATCH\",\n \"summary\": \"Remove public SSH ingress (TCP port 22 from 0.0.0.0/0) from aws_security_group.sg_app to satisfy INV-SEC-001.\",\n \"patch\": \"resource \\\"aws_security_group\\\" \\\"sg_app\\\" {\\n  name        = \\\"sg_app-tpl-02\\\"\\n  description = \\\"Application security group for tpl-02\\\"\\n  vpc_id      = aws_vpc.vpc_main.id\\n\\n  ingress = []\\n\\n  egress {\\n    from_port   = 0\\n    to_port     = 0\\n    protocol    = \\\"-1\\\"\\n    cidr_blocks = [\\\"0.0.0.0/0\\\"]\\n  }\\n}\",\n \"changed_addresses\": [\n  \"aws_security_group.sg_app\"\n ],\n \"assumptions\": [\n  \"Removing the ingress rule allowing TCP port 22 from 0.0.0.0/0 fixes the INV-SEC-001 violation without breaking other invariants.\"\n ],\n \"rationale\": \"aws_security_group.sg_app currently has an inline ingress block permitting TCP/22 from 0.0.0.0/0. Replacing the ingress blocks with an empty list removes public SSH access.\",\n \"confidence\": 1.0\n}",
      "parsed_status": "PATCH",
-     "extracted_patch": "resource \"aws_security_group_rule\" \"app_ssh_public\" {\n  type              = \"ingress\"\n  from_port         = 22\n  to_port           = 22\n  protocol          = \"tcp\"\n  cidr_blocks       = [\"192.0.2.0/32\"]\n  security_group_id = aws_security_group.app.id\n}",
-     "response_hash": "7e13260e1d9f630c6027a4d13df91350050b3a2781d55b9cbeb16298ddd2f182",
-     "patch_hash": "9eaeac02b9f770f8d99086166118def1cbb56ca70a40f6c466552889a125d2a1",
+     "extracted_patch": "resource \"aws_security_group\" \"sg_app\" {\n  name        = \"sg_app-tpl-02\"\n  description = \"Application security group for tpl-02\"\n  vpc_id      = aws_vpc.vpc_main.id\n\n  ingress = []\n\n  egress {\n    from_port   = 0\n    to_port     = 0\n    protocol    = \"-1\"\n    cidr_blocks = [\"0.0.0.0/0\"]\n  }\n}",
+     "response_hash": "bba67286df1205df2ebcbae35a484a727cda11b08356df59216fde6093ff8b8c",
+     "patch_hash": "2039e1a81387cd1d73d96576444c0a7f42f5fa385f562d9655e48bdb3e6b1ac8",
      "parse_errors": [],
      "failure_class": null,
-     "latency_ms": 5497.342900023796,
+     "latency_ms": 2967.216399963945,
      "token_usage": {
-      "input": 2894,
-      "output": 310
+      "input": 3241,
+      "output": 336
      },
      "parser_version": "dail-llm-parser-2",
-     "created_at": "2026-11-25T20:19:25.256333+00:00",
+     "created_at": "2026-11-25T21:18:15.994414+00:00",
      "confidence": 1.0,
      "validator_version": "dail-patch-validator-3",
      "validation_errors": [],
-     "patch_id": "5a3ca557-2e64-4919-8e72-70a8ba7159cf",
-     "candidate_tree_hash": "3253289ebde2fe5bec9d9c06d197525dfd8180e99281b1b14330a01ec30e2dd9"
+     "patch_id": "46f196dc-1f2f-4815-b84f-a238f694ca58",
+     "candidate_tree_hash": "af45c1efec73182819ef73b42b6ce19c53f2ac8fa02a1b609c4a635351a19a6b"
     }
    }
   ],

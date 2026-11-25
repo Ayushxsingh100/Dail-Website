@@ -6,6 +6,7 @@
 <title>DAIL Live: Demo, not part of the DAIL evaluation</title>
 <meta name="description" content="DAIL Live: a person or an AI proposes a Terraform fix, and the released DAIL decides whether to promote it. Demo, not part of the DAIL evaluation.">
 <link rel="preload" href="assets/fonts/archivo-latin-wdth-wght.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/dail.css">
 <script>
   // Before anything paints: reduced motion and presenter mode as classes on <html>.
@@ -115,7 +116,7 @@
         <h2 class="zone__title" id="ledger-title">The ledger</h2>
         <p class="zone__sub kicker">Trusted states, newest on top, each linked to its parent.</p>
       </div>
-      <div class="clippings" id="ledger"></div>
+      <div class="clippings" id="ledger" tabindex="0" role="region" aria-label="Trusted states"></div>
       <div class="row" style="margin-top: 24px" id="ledger-tools" hidden>
         <button type="button" class="btn" id="verify">Verify chain</button>
       </div>

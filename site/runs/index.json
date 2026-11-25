@@ -1,7 +1,7 @@
 {
  "schema": "dail-live-runs/1",
  "label": "Demo, not part of the DAIL evaluation",
- "recorded_at": "2026-11-25T20:20:01.373042+00:00",
+ "recorded_at": "2026-11-25T21:18:32.354148+00:00",
  "runs": [
   {
    "file": "canonical--safe.json",
@@ -9,7 +9,7 @@
    "family": "canonical",
    "source": "FIXED_PATCH",
    "label": "canonical safe",
-   "recorded_at": "2026-11-25T20:17:05.135414+00:00",
+   "recorded_at": "2026-11-25T21:16:24.382493+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -27,7 +27,7 @@
    "family": "canonical",
    "source": "FIXED_PATCH",
    "label": "canonical regression",
-   "recorded_at": "2026-11-25T20:17:15.631359+00:00",
+   "recorded_at": "2026-11-25T21:16:32.317472+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "REJECT",
@@ -45,7 +45,7 @@
    "family": "F2",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F2-0027 fixed",
-   "recorded_at": "2026-11-25T20:17:29.008050+00:00",
+   "recorded_at": "2026-11-25T21:16:43.038807+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -63,7 +63,7 @@
    "family": "F2",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F2-0040 fixed",
-   "recorded_at": "2026-11-25T20:17:39.796462+00:00",
+   "recorded_at": "2026-11-25T21:16:50.620880+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "REJECT",
@@ -81,7 +81,7 @@
    "family": "F4",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F4-0079 fixed",
-   "recorded_at": "2026-11-25T20:17:50.652275+00:00",
+   "recorded_at": "2026-11-25T21:16:58.812147+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -99,7 +99,7 @@
    "family": "F4",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F4-0092 fixed",
-   "recorded_at": "2026-11-25T20:18:03.562052+00:00",
+   "recorded_at": "2026-11-25T21:17:06.380906+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "REJECT",
@@ -117,7 +117,7 @@
    "family": "F4",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F4-0093 fixed",
-   "recorded_at": "2026-11-25T20:18:14.499389+00:00",
+   "recorded_at": "2026-11-25T21:17:14.257601+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "REJECT",
@@ -135,7 +135,7 @@
    "family": "F8",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F8-0192 fixed",
-   "recorded_at": "2026-11-25T20:18:25.475401+00:00",
+   "recorded_at": "2026-11-25T21:17:22.273112+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -153,7 +153,7 @@
    "family": "F8",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F8-0196 fixed",
-   "recorded_at": "2026-11-25T20:18:36.342853+00:00",
+   "recorded_at": "2026-11-25T21:17:30.674179+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -171,7 +171,7 @@
    "family": "F8",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F8-0196 step 1",
-   "recorded_at": "2026-11-25T20:18:58.789948+00:00",
+   "recorded_at": "2026-11-25T21:17:43.410955+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -190,7 +190,7 @@
    "family": "F8",
    "source": "FIXED_PATCH",
    "label": "tp-v1-F8-0196 step 2",
-   "recorded_at": "2026-11-25T20:19:09.221344+00:00",
+   "recorded_at": "2026-11-25T21:17:50.578071+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "REJECT",
@@ -204,12 +204,12 @@
    "session_step": 2
   },
   {
-   "file": "canonical--gemini-20261125T201926.json",
+   "file": "canonical--gemini-20261125T211806.json",
    "scenario_id": "canonical",
    "family": "canonical",
    "source": "LLM",
    "label": "canonical gemini repair, attempt 1",
-   "recorded_at": "2026-11-25T20:19:26.859009+00:00",
+   "recorded_at": "2026-11-25T21:18:06.605840+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -226,12 +226,12 @@
    ]
   },
   {
-   "file": "tp-v1-F4-0092--gemini-20261125T201946.json",
+   "file": "tp-v1-F4-0092--gemini-20261125T211817.json",
    "scenario_id": "tp-v1-F4-0092",
    "family": "F4",
    "source": "LLM",
    "label": "tp-v1-F4-0092 gemini repair, attempt 1",
-   "recorded_at": "2026-11-25T20:19:46.086354+00:00",
+   "recorded_at": "2026-11-25T21:18:17.923897+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",
@@ -248,12 +248,12 @@
    ]
   },
   {
-   "file": "tp-v1-F4-0093--gemini-20261125T202001.json",
+   "file": "tp-v1-F4-0093--gemini-20261125T211832.json",
    "scenario_id": "tp-v1-F4-0093",
    "family": "F4",
    "source": "LLM",
    "label": "tp-v1-F4-0093 gemini repair, attempt 1",
-   "recorded_at": "2026-11-25T20:20:01.151004+00:00",
+   "recorded_at": "2026-11-25T21:18:32.071144+00:00",
    "refused_before_dail": false,
    "decisions": {
     "C": "PROMOTE",

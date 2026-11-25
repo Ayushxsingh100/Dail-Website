@@ -3,7 +3,7 @@
 //   Live:    "Beat the gate": the visitor's edit goes to the real DAIL running in this tab.
 import { bundleInfo, loadDail } from "./dail-bridge.js";
 import {
-  announcement, formatDate, h, ledgerFromTrace, pad, renderCandidate, renderDecision, renderLedger,
+  announcement, formatDate, h, ledgerFromTrace, markStage, pad, renderCandidate, renderDecision, renderLedger,
   renderOvf, renderStages, waitingStages,
 } from "./render.js";
 
@@ -56,7 +56,7 @@ function play({ card, stages, stamp, fresh }) {
   }
 }
 
-function show(trace, { mode, freshState = null, issue }) {
+function show(trace, { mode, freshState = null, issue, live = false }) {
   const card = renderCandidate($("candidate"), trace, { mode });
   const stages = renderStages($("stages"), trace);
   const stamp = renderDecision($("decision"), trace, { mode });
@@ -64,7 +64,9 @@ function show(trace, { mode, freshState = null, issue }) {
   renderLedger($("ledger"), ledgerFromTrace(trace), { fresh: freshState, trace });
   $("issue").textContent = issue;
   $("announce").textContent = announcement(trace);
-  play({ card: trace.refused_before_dail ? null : card, stages, stamp, fresh: freshState });
+  // after a live run the card has crossed and the stages have filled while DAIL worked
+  const filled = live || trace.refused_before_dail;
+  play({ card: filled ? null : card, stages: filled ? [] : stages, stamp, fresh: freshState });
 }
 
 // ---- replays --------------------------------------------------------------------------------
@@ -134,6 +136,7 @@ async function ensureDail() {
       $("loading-title").textContent = `Loading DAIL into your browser (~${megabytes(bytes)} MB)`;
       const dail = await loadDail({
         vendor: "vendor",
+        onEvent: stageEvent,
         onProgress: ({ done, total, stage }) => {
           $("meter").style.width = `${Math.min(100, Math.round((100 * done) / total))}%`;
           $("loading-detail").textContent = stage === "ready" ? "DAIL is ready." :
@@ -185,8 +188,8 @@ function quickFill(scenario) {
   const buttons = (scenario.quick_fill || []).map((name) => {
     const label = name === "safe" ? "Fill: the safe repair" : name === "regression" ? "Fill: the repair that breaks INV-FUNC-001" : "Fill: the scenario's own fix";
     const button = h("button", { type: "button", class: "btn btn--small", "data-fill": name }, label);
-    button.addEventListener("click", () => {
-      const answer = state.dail.call("patch_files", name);
+    button.addEventListener("click", async () => {
+      const answer = await state.dail.call("patch_files", name);
       if (!answer.ok) return;
       state.live.files = answer.value;
       renderFiles();
@@ -200,11 +203,14 @@ function quickFill(scenario) {
 async function startLive(scenarioId) {
   const dail = await ensureDail();
   if (state.mode !== "live") return; // the visitor went back to the replays while DAIL was loading
-  const answer = dail.call("start", scenarioId);
+  setBusy(true);
+  const answer = await dail.call("start", scenarioId);
+  setBusy(false);
   if (!answer.ok) throw new Error(answer.error);
   const s = answer.value;
   Object.assign(state.live, { scenario: scenarioId, files: s.files, current: null, sequence: 0, ledger: s.ledger, version: 0, last: null });
   state.live.sessions += 1;
+  if (state.mode !== "live") return;
   liveScenarioPicker();
   quickFill(state.scenarios.find((x) => x.id === scenarioId) || {});
   renderFiles();
@@ -224,7 +230,7 @@ async function startLive(scenarioId) {
 function resumeLive() {
   liveScenarioPicker();
   if (state.live.last) {
-    show(state.live.last, { mode: "live", issue: liveIssue() });
+    show(state.live.last, { mode: "live", live: true, issue: liveIssue() });
     return;
   }
   $("candidate").replaceChildren();
@@ -235,16 +241,38 @@ function resumeLive() {
   $("issue").textContent = liveIssue();
 }
 
+// Which stage each event DAIL commits completes (01 is the admission, before the orchestrator).
+const STAGE_OF = { ADMITTED: 0, IDENTITY_COMPLETED: 1, IMPACT_COMPLETED: 2, VERIFICATION_COMPLETED: 3, PROMOTION_DECIDED: 4 };
+
+function stageEvent(name) {
+  if (state.mode !== "live" || !(name in STAGE_OF)) return;
+  if (name === "ADMITTED" && !reduced()) crossBoundary($("candidate-card"));
+  markStage($("stages"), STAGE_OF[name]);
+}
+
+function setBusy(on) {
+  state.busy = on;
+  for (const el of [$("submit"), $("reset"), $("verify"), $("scenario"), $("editor"), ...document.querySelectorAll("[data-fill]")]) {
+    el.disabled = on;
+  }
+}
+
 async function submitLive() {
   saveEditor();
   const button = $("submit");
-  button.disabled = true;
+  setBusy(true);
   button.textContent = "DAIL is checking…";
   $("announce").textContent = "DAIL is checking the patch.";
-  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 30)));  // let the page paint first
+  $("decision").replaceChildren();
+  $("ovf").replaceChildren();
+  $("candidate").replaceChildren(h("article", { class: "card", id: "candidate-card" },
+    h("span", { class: "card__source", text: "Typed patch" }),
+    h("p", { class: "card__label", text: `${state.live.scenario} typed in the browser` })));
+  waitingStages($("stages"), "DAIL is checking…");
   try {
-    const answer = state.dail.call("submit_files", JSON.stringify(state.live.files));
+    const answer = await state.dail.call("submit_files", JSON.stringify(state.live.files));
     if (!answer.ok) {
+      if (state.mode !== "live") return;
       $("candidate").replaceChildren(h("div", { class: "refused", role: "status" },
         h("p", { class: "refused__title", text: "Not evaluated" }),
         h("p", { text: "The run stopped with an error. This is not a DAIL decision; the trusted state stays where it was." }),
@@ -265,16 +293,17 @@ async function submitLive() {
       state.live.files = trace.files;
       renderFiles();
     }
-    show(trace, { mode: "live", freshState: session.promoted ? session.trusted_state.state_id : null, issue: liveIssue() });
+    if (state.mode !== "live") return; // shown when the visitor comes back (resumeLive)
+    show(trace, { mode: "live", live: true, freshState: session.promoted ? session.trusted_state.state_id : null, issue: liveIssue() });
     $("verify-result").replaceChildren();
   } finally {
-    button.disabled = false;
+    setBusy(false);
     button.textContent = "Submit to the gate";
   }
 }
 
-function verifyChain() {
-  const answer = state.dail.call("verify_chain");
+async function verifyChain() {
+  const answer = await state.dail.call("verify_chain");
   const box = $("verify-result");
   if (!answer.ok) {
     box.replaceChildren(h("p", { class: "verify-result verify-result--bad", text: `Chain check failed to run: ${answer.error}` }));
@@ -290,6 +319,7 @@ function verifyChain() {
 
 async function setMode(mode) {
   state.mode = mode;
+  $("scenario").disabled = mode === "live" && Boolean(state.busy);
   $("mode-live").setAttribute("aria-pressed", String(mode === "live"));
   $("mode-replays").setAttribute("aria-pressed", String(mode === "replays"));
   $("live-panel").hidden = mode !== "live";
@@ -332,9 +362,11 @@ async function init() {
   $("presenter").addEventListener("click", () => {
     const on = root.classList.toggle("presenter");
     $("presenter").setAttribute("aria-pressed", String(on));
+    if (on) $("zones").scrollIntoView(); // the decision, the stages and the ledger on one screen
   });
   $("presenter").setAttribute("aria-pressed", String(root.classList.contains("presenter")));
   $("scenario").addEventListener("change", async (event) => {
+    if (state.busy) return;
     if (state.mode === "replays") {
       const list = fillReplayPickers(event.target.value);
       if (list.length) await showReplay(list[0].file);
