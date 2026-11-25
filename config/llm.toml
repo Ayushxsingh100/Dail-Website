@@ -1,0 +1,9 @@
+# DAIL Live's reviewed LLM file, modelled on DAIL's experiments/config/llm.toml (P10a Section 3.3).
+# Flat keys for DAIL's llm area; it replaces config/base/llm.toml only in DAIL Live's own temporary
+# copy of DAIL's configuration (dail_demo.settings.dail_config), for `python -m dail_demo generate`.
+#
+# generation_enabled is safety-critical (DAIL Doc 14 §37-38): DAIL's Generator returns DISABLED
+# without it. It is enabled here only. DAIL's schema allows llm.provider = "fake" or "ollama" only,
+# and Generator never reads that key (it checks LLMConfig.provider against the provider object), so
+# the key is left at DAIL's default; the Gemini settings are in config/gemini.toml.
+generation_enabled = true

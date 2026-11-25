@@ -5,7 +5,7 @@
 ## Hard rules
 
 1. **Never merge, never enable auto-merge, never create a tag or a release.** Push the branch and open the PR, then stop. The user merges after an external review verdict.
-2. **Every change goes through a PR** from a `feature/l<N>` branch to `main`.
+2. **Every change goes through a PR** from a `feature/<package>` branch to `main`.
 3. **No secrets, ever.**
    - Never read, print, log or commit the value of `GEMINI_API_KEY`. In L0 you may only test whether it is set.
    - Never create a `.env` file with real values.
@@ -17,8 +17,8 @@
 
 ## Branches and commits
 
-- Branch: `feature/l<N>` (for example `feature/l1`).
-- Commit messages: `L<N> step <k>: <what> (PLAN §x)`.
+- Branch: `feature/<package>` (`feature/b`, `feature/c`; fast track, D-12).
+- Commit messages: `<Package> step <k>: <what> (PLAN §x)` (for example `B step 3: the engine (PLAN §3.3)`).
 
 ## Not allowed (PLAN §2, verbatim)
 
@@ -27,7 +27,8 @@
 - Risk scoring, findings dashboards, multi-account or user-account features, logins.
 - CloudShield AI name or branding anywhere.
 - Paid APIs, paid models or paid cloud.
-- Serving the app to the network. It binds to `127.0.0.1` only.
+- Any server-side code, serverless function, database, API key or secret in the website. The site is static files only.
+- Gemini, or any other paid or keyed service, called from the website. AI runs are recorded locally and shown as replays.
 - New safety logic. The demo may not decide anything itself; it only calls DAIL and displays what DAIL returns.
 - Committing any secret, including the Gemini API key.
 
