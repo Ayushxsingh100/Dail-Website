@@ -46,7 +46,16 @@ jobs:
           unzip -q "terraform_${TF_VERSION}_linux_amd64.zip" -d "$RUNNER_TEMP/bin"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - run: terraform version
-      - name: Tests (standard library only)
+      # Dev-only test tooling (D-21): loads site/ in headless Chromium.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Playwright (dev-only, pinned by package-lock.json)
+        working-directory: tests/browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Tests
         run: python -m unittest discover -s tests -p "test_*.py" -v
 
   # The same secret scan as DAIL's workflow.

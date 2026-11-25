@@ -1,0 +1,135 @@
+{
+  "schema": "dail-live-scenarios/1",
+  "scenarios": [
+    {
+      "id": "canonical",
+      "family": "canonical",
+      "title": "DAIL's canonical example: public SSH open, a database behind it",
+      "why": "DAIL's own fixture: the safe repair is promoted, the repair that cuts the database off is rejected",
+      "target": "INV-SEC-001",
+      "patches": [
+        "regression",
+        "safe"
+      ],
+      "quick_fill": [
+        "safe",
+        "regression"
+      ],
+      "source": "DAIL"
+    },
+    {
+      "id": "tp-v1-F2-0027",
+      "family": "F2",
+      "title": "TerraPreserve tp-v1-F2-0027",
+      "why": "a safe SSH repair (INV-SEC-001): the target is fixed and nothing breaks",
+      "target": "INV-SEC-001",
+      "patches": [
+        "fixed",
+        "step-1"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 1
+    },
+    {
+      "id": "tp-v1-F2-0040",
+      "family": "F2",
+      "title": "TerraPreserve tp-v1-F2-0040",
+      "why": "an unsafe SSH repair: INV-SEC-001 is still violated after the fix",
+      "target": "INV-SEC-001",
+      "patches": [
+        "fixed",
+        "step-1"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 1
+    },
+    {
+      "id": "tp-v1-F4-0079",
+      "family": "F4",
+      "title": "TerraPreserve tp-v1-F4-0079",
+      "why": "a safe SSH repair in the family where a fix can break another invariant",
+      "target": "INV-SEC-001",
+      "patches": [
+        "fixed",
+        "step-1"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 1
+    },
+    {
+      "id": "tp-v1-F4-0092",
+      "family": "F4",
+      "title": "TerraPreserve tp-v1-F4-0092",
+      "why": "an SSH repair that removes the database ingress: INV-FUNC-001 breaks",
+      "target": "INV-SEC-001",
+      "patches": [
+        "fixed",
+        "step-1"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 1
+    },
+    {
+      "id": "tp-v1-F4-0093",
+      "family": "F4",
+      "title": "TerraPreserve tp-v1-F4-0093",
+      "why": "an INV-SEC-002 repair that opens SSH again: INV-SEC-001 breaks",
+      "target": "INV-SEC-002",
+      "patches": [
+        "fixed",
+        "step-1"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 1
+    },
+    {
+      "id": "tp-v1-F8-0192",
+      "family": "F8",
+      "title": "TerraPreserve tp-v1-F8-0192",
+      "why": "the first step of a safe two-step repair (the target stays open)",
+      "target": "INV-SEC-001",
+      "patches": [
+        "fixed",
+        "step-1",
+        "step-2"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 2
+    },
+    {
+      "id": "tp-v1-F8-0196",
+      "family": "F8",
+      "title": "TerraPreserve tp-v1-F8-0196",
+      "why": "the first step of a two-step repair that ends by breaking INV-FUNC-001",
+      "target": "INV-SEC-001",
+      "patches": [
+        "fixed",
+        "step-1",
+        "step-2"
+      ],
+      "quick_fill": [
+        "fixed"
+      ],
+      "source": "TerraPreserve",
+      "steps": 2
+    }
+  ]
+}

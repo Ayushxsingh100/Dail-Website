@@ -1,8 +1,18 @@
 # DAIL Live
 
-DAIL Live is a local demo in which an AI (Google Gemini, free tier) or a person proposes a fix to a Terraform configuration, and the real, released DAIL decides, stage by stage, whether to promote it. Beside DAIL's decision it shows what target-only checking would have decided on the same patch.
+DAIL Live is a demo in which an AI (Google Gemini, free tier) or a person proposes a fix to a Terraform configuration, and the real, released DAIL decides, stage by stage, whether to promote it. Beside DAIL's decision it shows what target-only checking would have decided on the same patch.
 
-**Status:** Under construction (package B of the fast track L0, B, C; see `docs/PLAN.md` §5). The local engine and inputs work from the command line (below); the static website (package C, PLAN §3.8) is not built yet.
+**Status:** all packages of the fast track (L0, B, C; `docs/PLAN.md` §5) are built: the local engine, and the static website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
+
+**The website has two modes** (PLAN §3.8):
+- **Live, "Beat the gate":** you edit a configuration and the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB). Terraform validation is not run in the browser; the page says so under every live decision.
+- **Replays:** runs recorded on the authors' laptop with the local engine and `terraform validate`, including Gemini's patches. They need no Pyodide.
+
+Preview it locally, then open http://127.0.0.1:8000/:
+
+```powershell
+py -3.12 -m http.server --bind 127.0.0.1 -d site 8000
+```
 
 **Demo, not part of the DAIL evaluation.** The output of DAIL Live is a demonstration. It is not part of the DAIL evaluation; the research results are in DAIL's repository and paper.
 
@@ -38,7 +48,7 @@ It prints one `PASS`, `FAIL` or `WARN` line per check (Python 3.12, the two pinn
 
 ## Commands
 
-All commands print a short summary and write a JSON trace (`dail-live-trace/1`) to `DAIL_LIVE_DATA\traces\`, never into a repository.
+`evaluate` and `generate` print a short summary and write a JSON trace (`dail-live-trace/1`) to `DAIL_LIVE_DATA\traces\`, never into a repository. Only `record` writes into `site/runs/`, after checking that a trace holds no key and no local path.
 
 ```powershell
 py -3.12 -m dail_demo check                                              # the startup checks
@@ -47,6 +57,8 @@ py -3.12 -m dail_demo evaluate --scenario canonical --patch regression  # the re
 py -3.12 -m dail_demo evaluate --scenario tp-v1-F4-0092 --patch fixed   # a curated TerraPreserve scenario's own step 1
 py -3.12 -m dail_demo evaluate --scenario canonical --patch C:\path\to\edited-config   # a typed patch
 py -3.12 -m dail_demo generate --scenario canonical --attempts 3        # Gemini proposes, DAIL decides
+py -3.12 -m dail_demo bundle                                             # rebuild site/vendor/
+py -3.12 -m dail_demo record                                             # re-record site/runs/
 ```
 
 - `evaluate` runs one candidate under DAIL (condition C) and under target-only checking (condition A) on the same parent, and shows both decisions and check counts.
@@ -64,6 +76,8 @@ py -3.12 -m dail_demo generate --scenario canonical --attempts 3        # Gemini
 
 The code was written by an AI coding assistant (Claude Code) from work packages prepared under the authors' direction; every change is reviewed before it is merged.
 
-## Licence
+The browser tests use Node and Playwright, in tests and CI only (D-21): `npm ci` in `tests/browser`.
 
-Apache-2.0. See [`LICENSE`](LICENSE).
+## Licence and credits
+
+Apache-2.0. See [`LICENSE`](LICENSE). The website also serves DAIL (Apache-2.0), TerraPreserve scenarios (CC-BY-4.0, TerraGoat-derived files Apache-2.0), Pyodide (MPL-2.0) and three OFL fonts; see [`site/credits.html`](site/credits.html).

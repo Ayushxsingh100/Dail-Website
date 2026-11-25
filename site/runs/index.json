@@ -1,0 +1,273 @@
+{
+ "schema": "dail-live-runs/1",
+ "label": "Demo, not part of the DAIL evaluation",
+ "recorded_at": "2026-11-25T21:18:32.354148+00:00",
+ "runs": [
+  {
+   "file": "canonical--safe.json",
+   "scenario_id": "canonical",
+   "family": "canonical",
+   "source": "FIXED_PATCH",
+   "label": "canonical safe",
+   "recorded_at": "2026-11-25T21:16:24.382493+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "canonical--regression.json",
+   "scenario_id": "canonical",
+   "family": "canonical",
+   "source": "FIXED_PATCH",
+   "label": "canonical regression",
+   "recorded_at": "2026-11-25T21:16:32.317472+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "REJECT",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F2-0027--fixed.json",
+   "scenario_id": "tp-v1-F2-0027",
+   "family": "F2",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F2-0027 fixed",
+   "recorded_at": "2026-11-25T21:16:43.038807+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F2-0040--fixed.json",
+   "scenario_id": "tp-v1-F2-0040",
+   "family": "F2",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F2-0040 fixed",
+   "recorded_at": "2026-11-25T21:16:50.620880+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "REJECT",
+    "A": "REJECT"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F4-0079--fixed.json",
+   "scenario_id": "tp-v1-F4-0079",
+   "family": "F4",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F4-0079 fixed",
+   "recorded_at": "2026-11-25T21:16:58.812147+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F4-0092--fixed.json",
+   "scenario_id": "tp-v1-F4-0092",
+   "family": "F4",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F4-0092 fixed",
+   "recorded_at": "2026-11-25T21:17:06.380906+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "REJECT",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F4-0093--fixed.json",
+   "scenario_id": "tp-v1-F4-0093",
+   "family": "F4",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F4-0093 fixed",
+   "recorded_at": "2026-11-25T21:17:14.257601+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "REJECT",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F8-0192--fixed.json",
+   "scenario_id": "tp-v1-F8-0192",
+   "family": "F8",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F8-0192 fixed",
+   "recorded_at": "2026-11-25T21:17:22.273112+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 4,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F8-0196--fixed.json",
+   "scenario_id": "tp-v1-F8-0196",
+   "family": "F8",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F8-0196 fixed",
+   "recorded_at": "2026-11-25T21:17:30.674179+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 4,
+    "A": 3
+   },
+   "group": null
+  },
+  {
+   "file": "tp-v1-F8-0196--session-step-1.json",
+   "scenario_id": "tp-v1-F8-0196",
+   "family": "F8",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F8-0196 step 1",
+   "recorded_at": "2026-11-25T21:17:43.410955+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 4,
+    "A": 3
+   },
+   "group": "tp-v1-F8-0196 session",
+   "session_step": 1
+  },
+  {
+   "file": "tp-v1-F8-0196--session-step-2.json",
+   "scenario_id": "tp-v1-F8-0196",
+   "family": "F8",
+   "source": "FIXED_PATCH",
+   "label": "tp-v1-F8-0196 step 2",
+   "recorded_at": "2026-11-25T21:17:50.578071+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "REJECT",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": "tp-v1-F8-0196 session",
+   "session_step": 2
+  },
+  {
+   "file": "canonical--gemini-20261125T211806.json",
+   "scenario_id": "canonical",
+   "family": "canonical",
+   "source": "LLM",
+   "label": "canonical gemini repair, attempt 1",
+   "recorded_at": "2026-11-25T21:18:06.605840+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null,
+   "model": "gemini-3.5-flash-lite",
+   "attempts": [
+    "PATCH"
+   ]
+  },
+  {
+   "file": "tp-v1-F4-0092--gemini-20261125T211817.json",
+   "scenario_id": "tp-v1-F4-0092",
+   "family": "F4",
+   "source": "LLM",
+   "label": "tp-v1-F4-0092 gemini repair, attempt 1",
+   "recorded_at": "2026-11-25T21:18:17.923897+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null,
+   "model": "gemini-3.5-flash-lite",
+   "attempts": [
+    "PATCH"
+   ]
+  },
+  {
+   "file": "tp-v1-F4-0093--gemini-20261125T211832.json",
+   "scenario_id": "tp-v1-F4-0093",
+   "family": "F4",
+   "source": "LLM",
+   "label": "tp-v1-F4-0093 gemini repair, attempt 1",
+   "recorded_at": "2026-11-25T21:18:32.071144+00:00",
+   "refused_before_dail": false,
+   "decisions": {
+    "C": "PROMOTE",
+    "A": "PROMOTE"
+   },
+   "check_counts": {
+    "C": 5,
+    "A": 3
+   },
+   "group": null,
+   "model": "gemini-3.5-flash-lite",
+   "attempts": [
+    "PATCH"
+   ]
+  }
+ ]
+}

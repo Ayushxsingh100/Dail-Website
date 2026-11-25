@@ -1,0 +1,77 @@
+{
+  "schema": "dail-live-scenario-pack/1",
+  "kind": "terrapreserve",
+  "record": {
+    "scenario_id": "tp-v1-F8-0192",
+    "family": "F8",
+    "split": "dev",
+    "template_id": "tpl-32",
+    "source_lineage_id": "tpl-32",
+    "target_kind": "repair",
+    "target_invariant_id": "INV-SEC-001",
+    "protected_invariants": [
+      [
+        "INV-FUNC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-002",
+        "1.0"
+      ],
+      [
+        "INV-SEC-003",
+        "1.0"
+      ]
+    ],
+    "endpoints": {
+      "S": "aws_instance.ec2_app",
+      "D": "aws_db_instance.rds_postgres"
+    },
+    "variable_values": {
+      "db_password": "tp-secret-primary"
+    },
+    "step_hashes": [
+      "f087cd73c6ec39c585e9104c7d06a403fff1bca0ad0e27e3e793aab260b52ac0",
+      "15a2cd97e5f1650732964f5862b901579030bbcf9ec0c0c6fbe830e854767c2f",
+      "d271ba69c9c1cac9ddbeb9d4b26506d6ca7ae637e5ed7770651b1e3e06851b96"
+    ]
+  },
+  "s0": "s0",
+  "hashes": {
+    "0": "f087cd73c6ec39c585e9104c7d06a403fff1bca0ad0e27e3e793aab260b52ac0"
+  },
+  "patches": {
+    "step-1": {
+      "dir": "patches/step-1",
+      "content_hash": "15a2cd97e5f1650732964f5862b901579030bbcf9ec0c0c6fbe830e854767c2f",
+      "step": 1
+    },
+    "step-2": {
+      "dir": "patches/step-2",
+      "content_hash": "d271ba69c9c1cac9ddbeb9d4b26506d6ca7ae637e5ed7770651b1e3e06851b96",
+      "step": 2
+    },
+    "fixed": {
+      "dir": "patches/step-1",
+      "content_hash": "15a2cd97e5f1650732964f5862b901579030bbcf9ec0c0c6fbe830e854767c2f",
+      "step": 1
+    }
+  },
+  "steps": [
+    {
+      "index": 1,
+      "dir": "patches/step-1",
+      "content_hash": "15a2cd97e5f1650732964f5862b901579030bbcf9ec0c0c6fbe830e854767c2f"
+    },
+    {
+      "index": 2,
+      "dir": "patches/step-2",
+      "content_hash": "d271ba69c9c1cac9ddbeb9d4b26506d6ca7ae637e5ed7770651b1e3e06851b96"
+    }
+  ],
+  "source": "TerraPreserve terrapreserve-v1.0-public-r3 scenarios/dev/tp-v1-F8-0192 (CC-BY-4.0)"
+}

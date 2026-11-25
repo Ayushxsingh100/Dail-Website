@@ -1,0 +1,11 @@
+# DAIL Live's reviewed promotion file (PLAN §3.4), modelled on DAIL's experiments/config/promotion.toml
+# (C-207). Flat keys for DAIL's promotion area, as in DAIL's config/base/promotion.toml, which it
+# replaces only in DAIL Live's own temporary copy of DAIL's configuration
+# (dail_demo.settings.dail_config).
+#
+# automatic_enabled is safety-critical (DAIL Doc 14 §37-38) and may be enabled only in a reviewed
+# configuration file. It is enabled here, for DAIL Live only: every run has its own fresh store and
+# lineage under DAIL_LIVE_DATA, outside every repository, and no DAIL Live lineage is ever an
+# authoritative lineage. Without it every PROMOTE would be an ESCALATE. DAIL's own configuration is
+# never changed. tests/test_switches.py fails if the switch is on in any other file of this repository.
+automatic_enabled = true

@@ -15,6 +15,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CORE = REPO_ROOT / "dail_demo" / "evaluate_core.py"
+BRIDGE = REPO_ROOT / "dail_demo" / "browser.py"
 DAIL_PACKAGES = {"core", "llm", "evidence", "experiments"}
 FORBIDDEN = {"subprocess", "threading", "socket", "urllib", "os", "multiprocessing", "asyncio", "http"}
 
@@ -33,8 +34,9 @@ def imported_modules(path: Path) -> list[str]:
     return found
 
 
-def check_core(path: Path) -> list[str]:
-    """Every problem with the core's imports and names (empty when it follows the rule)."""
+def check_core(path: Path, also: frozenset[str] = frozenset()) -> list[str]:
+    """Every problem with the core's imports and names (empty when it follows the rule).
+    ``also`` names modules of this repository a file may import besides DAIL and the stdlib."""
     problems = []
     for name in imported_modules(path):
         top = name.split(".")[0]
@@ -42,7 +44,7 @@ def check_core(path: Path) -> list[str]:
             problems.append(f"relative import {name}")
         elif top in FORBIDDEN:
             problems.append(f"forbidden module {name}")
-        elif top == "__future__":
+        elif top == "__future__" or name in also:
             continue
         elif top not in DAIL_PACKAGES and top not in sys.stdlib_module_names:
             problems.append(f"{name} is neither DAIL nor the standard library")
@@ -60,6 +62,9 @@ def check_core(path: Path) -> list[str]:
 class CoreImportTests(unittest.TestCase):
     def test_the_core_imports_only_dail_and_the_standard_library(self) -> None:
         self.assertEqual(check_core(CORE), [])
+
+    def test_the_browser_bridge_follows_the_same_rule(self) -> None:
+        self.assertEqual(check_core(BRIDGE, frozenset({"dail_demo", "dail_demo.evaluate_core"})), [])
 
     def test_the_core_imports_dail(self) -> None:
         tops = {name.split(".")[0] for name in imported_modules(CORE)}

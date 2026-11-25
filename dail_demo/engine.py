@@ -22,6 +22,7 @@ from dail_demo import scenarios as sc
 from dail_demo.environment import REPO_ROOT
 from dail_demo.settings import (
     SetupError,
+    committed_copy,
     dail_config,
     data_dir,
     import_dail,
@@ -116,11 +117,14 @@ def run_evaluate(
     environ: Mapping[str, str],
     out: Path | None = None,
     terraform: Any = None,
+    validate_fixed: bool = False,
 ) -> Outcome:
     """Evaluate one candidate under DAIL (C) and target-only (A) and write the trace.
 
     ``patch`` is ``safe`` or ``regression`` (canonical), ``fixed`` (a TerraPreserve scenario's step
     1) or a directory (a typed patch). ``terraform`` replaces the real validate gate (tests only).
+    With ``validate_fixed`` (``record``), a fixed patch also passes the pinned ``terraform
+    validate`` gate before DAIL, and the gate's result is recorded in its admission.
     """
     run = new_run(environ, "evaluate")
     from dail_demo import evaluate_core as core
@@ -128,7 +132,10 @@ def run_evaluate(
 
     source, tp_root = resolve(scenario_id, environ, run.dail_root)
     inputs = run.root / "inputs"
-    s0 = _copy(source.s0_dir, inputs / "s0")
+    if source.scenario is None:  # DAIL's own fixture: its committed bytes (D-28)
+        s0 = committed_copy(run.dail_root, source.s0_dir, inputs / "s0")
+    else:
+        s0 = _copy(source.s0_dir, inputs / "s0")
     meta = versions(run.dail_root, tp_root)
     if patch in source.fixed:
         kind, origin = core.FIXED_PATCH, source.fixed[patch]
@@ -136,7 +143,10 @@ def run_evaluate(
         raise SetupError(f"--patch {patch} does not exist for {scenario_id}; use one of {sorted(source.fixed)}")
     else:
         kind, origin = core.TYPED, Path(patch)
-    candidate_dir = _copy(origin, inputs / "candidate")
+    if kind == core.FIXED_PATCH and source.scenario is None:
+        candidate_dir = committed_copy(run.dail_root, origin, inputs / "candidate")
+    else:
+        candidate_dir = _copy(origin, inputs / "candidate")
 
     if source.scenario is None:
         assert source.expected is not None
@@ -151,7 +161,7 @@ def run_evaluate(
         admission: dict[str, Any] = {
             "stage": "fixed_patch",
             "admitted": True,
-            "content_hash": step_content_hash(Path(origin)),
+            "content_hash": step_content_hash(candidate_dir if source.scenario is None else Path(origin)),
         }
         if source.scenario is not None and tp_root is not None:
             admission["content_hash_matches_manifest"] = (
@@ -162,6 +172,12 @@ def run_evaluate(
                 raise SetupError(f"{scenario_id} step 1: the content hash is not the manifest's")
         else:
             admission["origin"] = f"DAIL fixture {sc.CANONICAL_DIR.as_posix()}/{sc.CANONICAL_PATCHES[patch]}"
+        if validate_fixed:
+            gate = terraform if terraform is not None else terraform_runner(environ, run.root / "terraform")
+            check = gate(candidate_dir)
+            admission["terraform_validate_run"] = check.to_dict()
+            if not check.ok:
+                raise SetupError(f"{scenario_id} {patch}: terraform validate refused it: {check.error}")
     else:
         gate = terraform if terraform is not None else terraform_runner(environ, run.root / "terraform")
         check = gate(candidate_dir)
