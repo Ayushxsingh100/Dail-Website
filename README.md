@@ -2,16 +2,19 @@
 
 DAIL Live is a demo in which an AI (Google Gemini, free tier) or a person proposes a fix to a Terraform configuration, and the real, released DAIL decides, stage by stage, whether to promote it. Beside DAIL's decision it shows what target-only checking would have decided on the same patch.
 
-**Status:** all packages of the fast track (L0, B, C; `docs/PLAN.md` §5) are built: the local engine, and the static website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
+**Status:** packages L0, B, C and D are built: the local engine, and the static website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
 
-**The website has two modes** (PLAN §3.8):
-- **Live, "Beat the gate":** you edit a configuration and the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB). Terraform validation is not run in the browser; the page says so under every live decision.
-- **Replays:** runs recorded on the authors' laptop with the local engine and `terraform validate`, including Gemini's patches. They need no Pyodide.
+**The website** (PLAN §3.9) is one page with three tabs:
+- **Ask the AI:** Gemini proposes a fix; the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB). When DAIL rejects it, the page sends DAIL's reason back and the AI tries again, up to 3 attempts.
+- **Write your own fix:** your edit goes to the same DAIL.
+- **Replays:** runs recorded on the authors' laptop with `terraform validate`.
 
-Preview it locally, then open http://127.0.0.1:8000/:
+Terraform validation is not run in the browser; the page says so under every live decision. The Gemini key lives only on the server (`api/propose.py`, or `serve` locally) and never reaches the browser.
+
+Preview everything locally on http://127.0.0.1:8000/:
 
 ```powershell
-py -3.12 -m http.server --bind 127.0.0.1 -d site 8000
+py -3.12 -m dail_demo serve
 ```
 
 **Demo, not part of the DAIL evaluation.** The output of DAIL Live is a demonstration. It is not part of the DAIL evaluation; the research results are in DAIL's repository and paper.
@@ -70,7 +73,7 @@ py -3.12 -m dail_demo record                                             # re-re
 - No AWS: no account, no credentials, no API call.
 - No `terraform plan`, `apply` or `destroy`.
 - No paid API, paid model or paid cloud.
-- No server code and no key in the website: it is static files only (PLAN §3.8); a local preview binds to `127.0.0.1` only.
+- No key in the repository, the browser, a response or a log; the only server code is the Gemini proxy `api/propose.py` (PLAN §3.9). `serve` binds to `127.0.0.1` only.
 
 ## How it was built
 
