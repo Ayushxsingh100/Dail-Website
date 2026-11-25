@@ -64,9 +64,16 @@ def files_turning_on(key: str, root: Path = REPO_ROOT) -> list[Path]:
 
 class SwitchTests(unittest.TestCase):
     def test_each_switch_is_on_in_its_reviewed_file_only(self) -> None:
+        # the website bundles the same reviewed file for the browser (site/vendor/dail_live/config/);
+        # that copy must be byte-identical to it
+        bundled = REPO_ROOT / "site" / "vendor" / "dail_live" / "config"
         for key, reviewed in SWITCHES.items():
             with self.subTest(switch=key):
-                self.assertEqual(files_turning_on(key), [reviewed.resolve()])
+                found = files_turning_on(key)
+                copy = (bundled / reviewed.name).resolve()
+                self.assertEqual(sorted(set(found) - {copy}), [reviewed.resolve()])
+                if copy in found:
+                    self.assertEqual(copy.read_bytes(), reviewed.read_bytes())
 
     def test_the_scan_would_find_another_file(self) -> None:
         import tempfile

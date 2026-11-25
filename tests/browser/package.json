@@ -1,0 +1,10 @@
+{
+  "name": "dail-live-browser-tests",
+  "private": true,
+  "description": "Dev-only test tooling (D-21): loads site/ in headless Chromium. Never part of the site.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.61.1"
+  }
+}
