@@ -7,7 +7,7 @@
 1. **Never merge, never enable auto-merge, never create a tag or a release.** Push the branch and open the PR, then stop. The user merges after an external review verdict.
 2. **Every change goes through a PR** from a `feature/<package>` branch to `main`.
 3. **No secrets, ever.**
-   - The value of `GEMINI_API_KEY` may be read only by the process that calls Gemini (the proxy function, or the local `serve`, `generate` and `record`) and by the local leak scan. It is never printed, logged, written, returned or committed.
+   - The Gemini key may be read only by the process that calls Gemini (the proxy function, or the local `generate`/`record`) and by the local leak scan. It is never printed, logged, written, or returned.
    - Never create a `.env` file with real values.
 4. **Never run** `terraform plan`, `apply` or `destroy`. Use no AWS credentials and make no AWS calls. In L0, the only Terraform command allowed is `terraform version`.
 5. **Never modify DAIL or TerraPreserve.** They are read-only inputs. Never import from DAIL's `tests/` package; later packages may import only DAIL's `core/`, `llm/`, `evidence/` and `experiments/`.
@@ -34,13 +34,7 @@
 
 ## The UI rule
 
-PLAN §3.7 is binding for any page, style, font or animation:
-- use only its palette tokens, typefaces, grid, borders, shadows and motion rules;
-- self-host the fonts (no CDN);
-- use no colour outside the token table and give no colour a second meaning;
-- add no rounded cards, gradients, blur, glass, emoji, dark or neon theme, or CloudShield branding;
-- any deviation needs a `docs/DECISIONS.md` entry approved by the user **before** it is built;
-- every UI PR attaches screenshots at 1366×768 and at phone width, plus the contrast ratios.
+PLAN §3.7 (Mint and tomato) is binding for every page, style, font and animation; deviations need a `docs/DECISIONS.md` entry approved by the user before they are built; every UI PR attaches screenshots and the contrast table.
 
 ## End-of-package report (end every package with exactly this)
 

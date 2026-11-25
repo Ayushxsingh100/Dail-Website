@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DAIL Live: DAIL's evidence</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#DDF2E6}
+a{color:#0D1B2A;text-decoration-thickness:2px}a:hover{text-decoration-thickness:3px}
+.mono{font-family:'IBM Plex Mono',Consolas,monospace}
+.page{background:#DDF2E6;color:#0D1B2A;font-family:'Poppins',Arial,sans-serif;position:relative;overflow:hidden}
+.card3{background:#FFFFFF;border:3px solid #0D1B2A;border-radius:22px;box-shadow:10px 10px 0 #0D1B2A}
+.meta{font-size:13px;font-weight:600;color:#48566A}
+.h{font-size:15px;font-weight:700;margin:0}
+.box{border:2px solid #0D1B2A;border-radius:14px;overflow:hidden}
+.row{display:grid;align-items:center;gap:14px;padding:10px 14px;border-top:2px solid #0D1B2A;font-size:15px}
+.row:first-child{border-top:0}
+.tag{display:inline-block;text-align:center;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:2px solid #0D1B2A;border-radius:999px;padding:3px 10px;background:#FFFFFF}
+.pass{background:#CFEFDD}.fail{background:#FBD9D9}.hit{background:#FFD60A}.carry{background:#DCE3FF;border-color:#2340E0}
+</style>
+</helmet>
+<div class="page" style="width: 1440px; height: 1500px">
+  <div style="position: absolute; left: 300px; top: 60px; width: 840px; display: flex; flex-direction: column; gap: 18px">
+    <p class="meta" style="margin: 0; color: #33445A">The DAIL card from attempt 1, with "DAIL's evidence" opened</p>
+
+    <article class="card3" aria-label="DAIL's decision on attempt 1, with evidence" style="padding: 24px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; gap: 28px; align-items: center">
+        <div style="flex-shrink: 0; transform: rotate(-4deg); border: 3px solid #0D1B2A; border-radius: 14px; background: #C0262D; color: #FFFFFF; box-shadow: 6px 6px 0 #0D1B2A; padding: 8px 18px"><span style="font-size: 40px; font-weight: 800; line-height: 1">REJECT</span></div>
+        <p style="margin: 0; font-size: 24px; font-weight: 600; line-height: 1.25">Rejected: the app would lose its connection to the database.</p>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #0D1B2A; padding-top: 14px">
+        <span style="font-size: 16px">A normal checker would have <span style="font-weight: 700; padding: 2px 10px; border: 2px solid #0E8A5F; border-radius: 999px">accepted</span> this fix (3 checks).</span>
+        <a href="Reject.dc.html" style="font-size: 14px; font-weight: 600">DAIL's evidence ↑ Hide</a>
+      </div>
+
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <h3 class="h">What changed</h3>
+        <div class="box">
+          <div class="row" style="grid-template-columns: 110px 1fr 1fr"><span class="tag">Edits</span><span>the security group</span><span class="mono" style="font-size: 13px">aws_security_group.app · MODIFIED</span></div>
+          <div class="row" style="grid-template-columns: 110px 1fr 1fr"><span class="tag">Edits</span><span>the security group</span><span class="mono" style="font-size: 13px">aws_security_group.db · MODIFIED</span></div>
+          <div class="row" style="grid-template-columns: 110px 1fr 1fr"><span class="tag">Removes</span><span>the rule</span><span class="mono" style="font-size: 13px">aws_security_group_rule.app_ssh_public · DELETED</span></div>
+          <div class="row" style="grid-template-columns: 110px 1fr 1fr"><span class="tag">Removes</span><span>the rule</span><span class="mono" style="font-size: 13px">aws_security_group_rule.app_to_db_5432 · DELETED</span></div>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <h3 class="h">What it affects</h3>
+        <div class="box">
+          <div class="row" style="grid-template-columns: 150px 1fr"><span class="tag hit">Re-checked</span><span><span style="font-weight: 600">The app can reach the database</span> <span class="mono" style="font-size: 12px; color: #48566A">INV-FUNC-001 · dependency</span><br><span class="mono" style="font-size: 12px">app_to_db_5432 → security_group.db → db_instance.database</span></span></div>
+          <div class="row" style="grid-template-columns: 150px 1fr"><span class="tag hit">Re-checked</span><span><span style="font-weight: 600">SSH is closed to the internet</span> <span class="mono" style="font-size: 12px; color: #48566A">INV-SEC-001 · direct · the repair target</span></span></div>
+          <div class="row" style="grid-template-columns: 150px 1fr"><span class="tag hit">Re-checked</span><span><span style="font-weight: 600">The database port is closed to the internet</span> <span class="mono" style="font-size: 12px; color: #48566A">INV-SEC-002 · direct</span></span></div>
+          <div class="row" style="grid-template-columns: 150px 1fr"><span class="tag carry">Carried forward</span><span><span style="font-weight: 600">The database is not public</span> <span class="mono" style="font-size: 12px; color: #48566A">INV-SEC-003 · nothing it reads changed</span></span></div>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <h3 class="h">Every check</h3>
+        <div class="box">
+          <div class="row" style="grid-template-columns: 110px 260px 1fr"><span class="tag pass">✓ Pass</span><span class="mono" style="font-size: 13px">STRUCTURAL</span><span class="mono" style="font-size: 13px; color: #48566A">dail.verify.structural</span></div>
+          <div class="row" style="grid-template-columns: 110px 260px 1fr"><span class="tag pass">✓ Pass</span><span class="mono" style="font-size: 13px">CONSISTENCY</span><span class="mono" style="font-size: 13px; color: #48566A">dail.verify.consistency</span></div>
+          <div class="row" style="grid-template-columns: 110px 260px 1fr"><span class="tag fail">✕ Fail</span><span class="mono" style="font-size: 13px">INVARIANT:INV-FUNC-001:1</span><span style="font-size: 14px">path.missing: no ingress rule on group <span class="mono">db</span> admits the app (condition E6)</span></div>
+          <div class="row" style="grid-template-columns: 110px 260px 1fr"><span class="tag pass">✓ Pass</span><span class="mono" style="font-size: 13px">INVARIANT:INV-SEC-001:2</span><span class="mono" style="font-size: 13px; color: #48566A">dail.verify.public_ingress</span></div>
+          <div class="row" style="grid-template-columns: 110px 260px 1fr"><span class="tag pass">✓ Pass</span><span class="mono" style="font-size: 13px">INVARIANT:INV-SEC-002:2</span><span class="mono" style="font-size: 13px; color: #48566A">dail.verify.public_ingress</span></div>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 6px; background: #F1FAF5; border: 2px solid #0D1B2A; border-radius: 14px; padding: 14px 16px">
+        <h3 class="h">Decision record</h3>
+        <span class="mono" style="font-size: 13px">REJECT · REQUIRED_CHECK_FAILED · blocking INVARIANT:INV-FUNC-001:1</span>
+        <span class="mono" style="font-size: 13px; color: #48566A">parent state v0 1864e83fac29d12a… · candidate fdcba16c11661ad2…</span>
+        <span class="mono" style="font-size: 13px; color: #48566A">target-only (condition A): PROMOTE · ALL_REQUIRED_PROVEN · 3 checks</span>
+      </section>
+    </article>
+    <p style="margin: 0; font-size: 13px; color: #33445A">Values shown are DAIL's real output on its canonical regression patch.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
