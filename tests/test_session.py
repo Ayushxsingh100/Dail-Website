@@ -72,6 +72,25 @@ class SessionTests(unittest.TestCase):
         self.assertEqual([s.state_hash for s in stored], [c["state_hash"] for c in ledger])
         self.assertEqual(head.state_id, ledger[0]["state_id"])
 
+    def test_dails_audit_events_are_reported_as_they_are_committed(self) -> None:
+        import shutil
+
+        from dail_demo import evaluate_core as core
+
+        events: list[str] = []
+        self.session.run.on_event = events.append
+        again = self.root / "candidate-again"
+        shutil.copytree(self.root / "candidate-2", again)
+        trace = self.session.submit(
+            core.Candidate(source=core.FIXED_PATCH, label="again", directory=again), label="test", versions={}
+        )
+        with self.session.run.factory() as uow:
+            stored = uow.audit.list_for_candidate(self.session.candidates[-1])
+        self.assertEqual(events, [e.event_type.value for e in stored])
+        order = [events.index(n) for n in ("IDENTITY_COMPLETED", "IMPACT_COMPLETED", "VERIFICATION_COMPLETED", "PROMOTION_DECIDED")]
+        self.assertEqual(order, sorted(order))
+        self.assertEqual(trace["conditions"]["C"]["decision"]["type"], "REJECT")
+
     def test_target_only_never_touches_the_session(self) -> None:
         self.assertEqual(self.traces[1]["conditions"]["A"]["decision"]["type"], "PROMOTE")
         self.assertIsNone(self.traces[1]["conditions"]["A"]["store"])

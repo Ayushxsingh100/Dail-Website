@@ -1,0 +1,16 @@
+# gitleaks' default rules, all of them (D-30).
+# The one exception: DAIL's dependency-graph field `edge_key` (a SHA-256) in the recorded traces, which
+# the generic-api-key rule flags because of its name. Only a line that is exactly that field with
+# 64 hexadecimal digits, and only in site/runs/; anything else there is still scanned.
+# tests/test_gitleaks_config.py fails if this file allows more.
+title = "DAIL Live"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "DAIL edge_key hashes in site/runs/"
+condition = "AND"
+regexTarget = "line"
+paths = ['''^site/runs/[A-Za-z0-9._-]+\.json$''']
+regexes = ['''^\s*"edge_key": "[0-9a-f]{64}",?\s*$''']

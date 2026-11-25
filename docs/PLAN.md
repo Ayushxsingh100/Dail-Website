@@ -118,7 +118,7 @@ Only DAIL's lineage advances. Condition A never becomes the session's trusted st
   - it took under 1 second;
   - Pyodide's `sqlite3` package could not be fetched in that sandbox, so the SQLite-backed orchestrator path in the browser is **not yet verified**. Package C must verify it first.
 - **Ledger:** an in-memory SQLite store per browser tab. A promotion advances the tab's trusted state; reloading the page starts over.
-- **Pyodide** is self-hosted: the pinned release's runtime files and its `sqlite3` package are copied into `site/vendor/pyodide/<version>/` with SHA-256 hashes, so the site has no runtime CDN dependency and works on networks that block CDNs. The site states that it needs internet for this.
+- **Pyodide** is self-hosted: the pinned release's runtime files and its `sqlite3` package are copied into `site/vendor/pyodide/<version>/` with SHA-256 hashes, so the site has no runtime CDN dependency and works on networks that block CDNs.
 - **Honest limit:** `terraform validate` cannot run in a browser. In live mode, admission is DAIL's own parser and patch validator only. The page says so plainly next to every live decision: "Terraform validation is not run in the browser."
 
 **2. Replays** (guaranteed to work).

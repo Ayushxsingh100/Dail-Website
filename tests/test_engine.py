@@ -117,6 +117,16 @@ class CanonicalEngineTests(DataDirCase):
         self.assertTrue(path.read_text(encoding="utf-8").startswith("{"))
         assert_no_key(self, path.read_text(encoding="utf-8"), str(path))
 
+    def test_the_canonical_inputs_are_dails_committed_bytes(self) -> None:
+        import json
+
+        trace, _ = self.run_patch("regression")
+        pack = json.loads(
+            (Path(__file__).resolve().parent.parent / "site/vendor/scenarios/canonical/scenario.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(trace["scenario"]["step_hashes"][0], pack["hashes"]["0"])
+        self.assertEqual(trace["admission"]["content_hash"], pack["patches"]["regression"]["content_hash"])
+
     def test_only_cs_store_is_kept(self) -> None:
         trace, path = self.run_patch("regression")
         run_root = self.data / "runs" / trace["run_id"]

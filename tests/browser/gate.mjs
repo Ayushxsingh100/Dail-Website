@@ -62,12 +62,11 @@ try {
     for (const pair of pairs) {
       const [scenario, patch] = pair.split(":");
       const t = performance.now();
-      const answer = dail.call("evaluate_fixed", scenario, patch);
+      const answer = await dail.call("evaluate_fixed", scenario, patch);
       timings[pair] = performance.now() - t;
       traces[pair] = answer;
     }
-    const versions = dail.pyodide.runPython("import sys, sqlite3\nf'{sys.version} | sqlite {sqlite3.sqlite_version}'");
-    return { loadMs, traces, timings, bytes: dail.bytes, files: dail.files, python: versions };
+    return { loadMs, traces, timings, bytes: dail.bytes, files: dail.files, python: dail.python };
   }, cases);
   result.wallMs = Date.now() - started;
   result.browser = browser.version();

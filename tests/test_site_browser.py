@@ -65,6 +65,14 @@ class SiteInBrowserTests(DataDirCase):
         self.assertEqual(self.r["third"]["clippings"], ["v2", "v1", "v0"])
         self.assertIn("Chain verified by DAIL: 3 trusted states, 4 candidates", self.r["verifyAfterThree"])
 
+    def test_the_stages_fill_while_dail_works(self) -> None:
+        fills = self.r["fills"]
+        self.assertEqual([f["done"] for f in fills], [1, 2, 3, 4, 5])  # one by one, in order
+        self.assertFalse(any(f["stamp"] for f in fills))  # before the trace and the stamp
+        times = [f["t"] for f in fills]
+        self.assertEqual(times, sorted(times))
+        self.assertGreater(times[-1] - times[0], 50)  # spread over DAIL's own work, not one burst
+
     def test_switching_modes_keeps_the_session(self) -> None:
         self.assertTrue(self.r["verifyHiddenInReplays"])
         for key in ("clippings", "stamp", "issue"):
@@ -72,9 +80,11 @@ class SiteInBrowserTests(DataDirCase):
 
     def test_presenter_mode_fits_in_live_mode(self) -> None:
         fits = self.r["presenterLive"]
-        for key in ("stages", "stamp", "ovf", "ledger"):
+        for key in ("stages", "stamp", "ovf", "ledger", "newest"):
             self.assertLessEqual(fits[key], fits["vh"], key)
-        self.assertEqual(fits["clippings"], 2)  # the two newest
+        self.assertEqual(fits["clippings"], 3)  # every state is there
+        self.assertTrue(fits["mastheadKept"])
+        self.assertGreaterEqual(fits["labelTop"], 0)  # the demo label stays visible
         self.assertEqual(fits["over"], [])
 
     def test_the_candidate_card_crosses_the_trust_boundary(self) -> None:
@@ -105,6 +115,8 @@ class SiteInBrowserTests(DataDirCase):
                 if "gemini" in replay["file"]:
                     self.assertGreater(replay["gemini"], 0)
         self.assertFalse(self.r["pyodideRequestedInReplays"])
+        self.assertLess(self.r["firstLoad_replays"]["bytes"], 1_000_000)
+        self.assertGreater(self.r["firstLoad_live"]["bytes"], 15_000_000)  # the worker's downloads are counted
 
     def test_motion_presenter_and_layout(self) -> None:
         self.assertTrue(self.r["reducedMotionClass"])

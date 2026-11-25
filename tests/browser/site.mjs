@@ -33,7 +33,10 @@ async function waitFor(url) {
 const port = await freePort();
 const server = spawn(python, ["-m", "http.server", "--bind", "127.0.0.1", "-d", siteDir, String(port)], { stdio: "ignore" });
 const origin = `http://127.0.0.1:${port}`;
-const browser = await (async () => { await waitFor(`${origin}/index.html`); return chromium.launch(); })();
+const browser = await (async () => { await waitFor(`${origin}/index.html`); return chromium.launch({
+  channel: process.env.DAIL_LIVE_BROWSER || undefined, // "chrome" or "msedge": the installed browser
+  headless: process.env.DAIL_LIVE_HEADED !== "1",
+}); })();
 
 async function newPage(viewport, options = {}) {
   const context = await browser.newContext({ viewport, reducedMotion: options.reducedMotion || "no-preference" });
@@ -56,8 +59,19 @@ async function goLive(page) {
 }
 async function fill(page, name) {
   await page.click(`[data-fill="${name}"]`);
+  await page.waitForFunction(() => document.activeElement === document.querySelector("#editor"));
 }
 async function submit(page) {
+  await page.evaluate(() => {
+    window.__fills = [];
+    window.__watch?.disconnect();
+    window.__watch = new MutationObserver(() => {
+      if (document.querySelector("#submit").textContent === "Submit to the gate") return;
+      const done = [...document.querySelectorAll(".stage")].filter((s) => s.classList.contains("is-done")).length;
+      if (done && done !== window.__fills.at(-1)?.done) window.__fills.push({ done, t: performance.now(), stamp: !!document.querySelector("#stamp") });
+    });
+    window.__watch.observe(document.querySelector("#stages"), { subtree: true, childList: true, attributes: true });
+  });
   await page.click("#submit");
   await page.waitForFunction(() => document.querySelector("#submit").textContent === "Submit to the gate" && document.querySelector("#announce").textContent.length > 0 && !document.querySelector("#announce").textContent.startsWith("DAIL is checking"), null, { timeout: 120000 });
   await waitDecision(page);
@@ -95,6 +109,7 @@ try {
       await page.waitForSelector("#editor-panel:not([hidden])", { timeout: 180000 });
       out.liveReadyMs = Date.now() - t0;
       await fill(page, "regression"); await submit(page); out.regression = await readDecision(page);
+      out.fills = await page.evaluate(() => window.__fills);
       await fill(page, "safe"); await submit(page); out.safe = await readDecision(page);
       // a third candidate from v1, typed: a harmless instance size change
       const v1 = await page.inputValue("#editor");
@@ -115,13 +130,12 @@ try {
       out.resumed = await readDecision(page);
       // presenter mode in live mode with three clippings, page at the top
       await page.click("#presenter");
-      await page.evaluate(() => window.scrollTo(0, 0));
       await page.waitForTimeout(1500);
       out.presenterLive = await page.evaluate(() => {
         const r = (e) => e.getBoundingClientRect();
         const shown = (sel) => [...document.querySelectorAll(sel)].filter((e) => getComputedStyle(e).display !== "none");
         const over = shown(".stage, .ovf__col, .ovf, .clipping").filter((e) => r(e).right > window.innerWidth || e.scrollWidth > e.clientWidth + 1).map((e) => e.className);
-        return { vh: window.innerHeight, stages: Math.max(...shown(".stage").map((e) => r(e).bottom)), stamp: r(document.querySelector("#stamp")).bottom, ovf: r(document.querySelector(".ovf")).bottom, ledger: Math.max(...shown(".clipping").map((e) => r(e).bottom)), clippings: shown(".clipping").length, over };
+        return { vh: window.innerHeight, stages: Math.max(...shown(".stage").map((e) => r(e).bottom)), stamp: r(document.querySelector("#stamp")).bottom, ovf: r(document.querySelector(".ovf")).bottom, ledger: r(document.querySelector("#ledger")).bottom, newest: r(document.querySelector(".clipping")).bottom, mastheadKept: getComputedStyle(document.querySelector(".masthead")).display !== "none", labelTop: r(document.querySelector("#demo-label")).top, clippings: shown(".clipping").length, over };
       });
       await page.click("#presenter");
       // a refusal before DAIL: an edit outside resource blocks
@@ -175,15 +189,13 @@ try {
     }
     // first page load per mode (fresh pages, nothing cached)
     for (const [name, url, ready] of [["replays", "/index.html", "#stamp"], ["live", "/index.html?mode=live", "#editor-panel:not([hidden])"]]) {
-      const { page } = await newPage({ width: 1366, height: 768 });
+      const { page, context } = await newPage({ width: 1366, height: 768 });
+      const finished = [];  // at the network level: the worker's downloads count too
+      context.on("requestfinished", (r) => finished.push(r));
       await page.goto(`${origin}${url}`);
       await page.waitForSelector(ready, { timeout: 180000 });
-      out[`firstLoad_${name}`] = await page.evaluate(() => {
-        const entries = performance.getEntriesByType("resource");
-        const nav = performance.getEntriesByType("navigation")[0];
-        const size = (e) => e.encodedBodySize || e.transferSize || 0;
-        return { bytes: entries.reduce((n, e) => n + size(e), 0) + size(nav), requests: entries.length + 1 };
-      });
+      const sizes = await Promise.all(finished.map((r) => r.sizes().then((z) => z.responseBodySize)));
+      out[`firstLoad_${name}`] = { bytes: sizes.reduce((n, z) => n + z, 0), requests: sizes.length };
     }
     // motion and presenter mode classes
     {
@@ -200,7 +212,7 @@ try {
         const vh = window.innerHeight;
         const box = (sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; };
         const stages = [...document.querySelectorAll(".stage")].map((s) => s.getBoundingClientRect().bottom);
-        const clips = [...document.querySelectorAll(".clipping")].filter((c) => getComputedStyle(c).display !== "none").map((c) => c.getBoundingClientRect().bottom);
+        const clips = [document.querySelector("#ledger").getBoundingClientRect().bottom];
         return { vh, stagesBottom: Math.max(...stages), stamp: box("#stamp"), ovf: box(".ovf"), ledgerBottom: Math.max(...clips), top: box("#zones").top };
       });
       out.noHorizontalScroll = {};
@@ -209,6 +221,7 @@ try {
         out.noHorizontalScroll[width] = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
       }
     }
+    out.browser = `${process.env.DAIL_LIVE_BROWSER || "chromium"} ${browser.version()}`;
     writeFileSync(target, JSON.stringify(out, null, 1));
     console.log(JSON.stringify({ regression: out.regression.stamp, safe: out.safe.stamp, refused: out.refusal.refused, verify: out.verify, replays: out.replays.length }));
   } else if (command === "shots") {
@@ -224,7 +237,7 @@ try {
       await fill(page, "safe"); await submit(page);
       await page.screenshot({ path: `${target}/1366-live-promote-two-clippings.png`, fullPage: true });
       await page.click("#presenter");
-      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(300);
       await page.screenshot({ path: `${target}/1366-presenter.png` });
     }
     {
