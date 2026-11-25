@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAIL Live: Demo, not part of the DAIL evaluation</title>
+<meta name="description" content="DAIL Live: a person or an AI proposes a Terraform fix, and the released DAIL decides whether to promote it. Demo, not part of the DAIL evaluation.">
+<link rel="preload" href="assets/fonts/archivo-latin-wdth-wght.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/dail.css">
+<script>
+  // Before anything paints: reduced motion and presenter mode as classes on <html>.
+  (function () {
+    var root = document.documentElement;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) root.classList.add("reduce-motion");
+    if (/[?&]presenter=1\b/.test(location.search)) root.classList.add("presenter");
+  })();
+</script>
+</head>
+<body>
+<a class="visually-hidden" href="#zones">Skip to the gate</a>
+
+<div class="band" role="banner">
+  <div class="wrap band__inner">
+    <span class="band__name" aria-hidden="true">DAIL LIVE</span>
+    <span class="demo-label" id="demo-label">Demo, not part of the DAIL evaluation</span>
+    <div class="band__tools">
+      <div class="toggle-group" role="group" aria-label="Mode">
+        <button type="button" class="btn btn--small" id="mode-live" aria-pressed="false">Live</button>
+        <button type="button" class="btn btn--small" id="mode-replays" aria-pressed="true">Replays</button>
+      </div>
+      <button type="button" class="btn btn--small" id="presenter" aria-pressed="false">Presenter mode</button>
+    </div>
+  </div>
+</div>
+
+<header class="masthead wrap">
+  <div class="masthead__rules-top"></div>
+  <div class="masthead__row">
+    <p class="kicker">The gate that promotes only what it can prove</p>
+    <p class="label">Untrusted fixes, real decisions</p>
+  </div>
+  <h1 class="masthead__title">DAIL LIVE</h1>
+  <div class="masthead__row">
+    <p class="issue" id="issue">Replay · Candidate 01 · Trusted state v0</p>
+    <p class="label">Demo, not part of the DAIL evaluation</p>
+  </div>
+  <div class="masthead__rules-bottom"></div>
+</header>
+
+<main class="wrap">
+  <div class="zones" id="zones">
+
+    <section class="zone zone--untrusted hatch" aria-labelledby="untrusted-title">
+      <div class="boundary" aria-hidden="true"><span class="boundary__label">Trust boundary</span></div>
+      <div class="zone__head">
+        <h2 class="zone__title" id="untrusted-title">Untrusted</h2>
+        <p class="zone__sub kicker">The proposal. Nothing here is trusted until DAIL says so.</p>
+      </div>
+
+      <div class="panel">
+        <div class="field">
+          <label class="label" for="scenario">Scenario</label>
+          <select id="scenario"></select>
+        </div>
+        <div class="field" id="replay-field">
+          <label class="label" for="replay">Recorded run</label>
+          <select id="replay"></select>
+        </div>
+        <p id="scenario-why" class="muted"></p>
+      </div>
+
+      <div id="candidate"></div>
+
+      <div id="live-panel" hidden>
+        <div class="loading" id="loading" role="status" aria-live="polite">
+          <p class="loading__title" id="loading-title">Loading DAIL into your browser</p>
+          <p id="loading-detail" class="muted">The released DAIL v1.0 runs here, unmodified, through Pyodide. Replays work meanwhile.</p>
+          <div class="meter" aria-hidden="true"><div class="meter__fill" id="meter"></div></div>
+          <p class="loading__error" id="loading-error" hidden></p>
+        </div>
+        <div id="editor-panel" class="panel" hidden>
+          <p class="panel__title">Write your own patch</p>
+          <p class="muted">Edit the trusted configuration and submit it. Quick fill:</p>
+          <div class="row" id="quick-fill" style="margin: 8px 0 16px"></div>
+          <div class="files" id="files" role="tablist" aria-label="Configuration files"></div>
+          <div class="editor">
+            <pre class="editor__lines" id="lines" aria-hidden="true">1</pre>
+            <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Configuration file"></textarea>
+          </div>
+          <div class="row" style="margin-top: 16px">
+            <button type="button" class="btn btn--ink" id="submit">Submit to the gate</button>
+            <button type="button" class="btn" id="reset">Reset</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="zone zone--gate" aria-labelledby="gate-title">
+      <div class="zone__head">
+        <h2 class="zone__title" id="gate-title">The gate</h2>
+        <p class="zone__sub kicker">DAIL's five stages, as DAIL ran them.</p>
+      </div>
+      <div class="gate-cols">
+        <ol class="stages" id="stages"></ol>
+        <div>
+          <div class="decision" id="decision"></div>
+          <div id="ovf"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="zone zone--ledger" aria-labelledby="ledger-title">
+      <div class="zone__head">
+        <h2 class="zone__title" id="ledger-title">The ledger</h2>
+        <p class="zone__sub kicker">Trusted states, newest on top, each linked to its parent.</p>
+      </div>
+      <div class="clippings" id="ledger"></div>
+      <div class="row" style="margin-top: 24px" id="ledger-tools" hidden>
+        <button type="button" class="btn" id="verify">Verify chain</button>
+      </div>
+      <div id="verify-result" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div class="visually-hidden" id="announce" aria-live="assertive"></div>
+</main>
+
+<footer class="footer wrap">
+  <p><strong>DAIL Live is a demonstration, not part of the DAIL evaluation.</strong> The research results are in DAIL's repository and paper.</p>
+  <p>Every decision on this page comes from the released DAIL v1.0: in live mode it runs in your browser; replays were recorded with DAIL on the authors' laptop. <a href="credits.html">Credits and licences</a>.</p>
+</footer>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
