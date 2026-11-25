@@ -1,0 +1,8 @@
+# The bundled DAIL, TerraPreserve and Pyodide files must stay byte-identical to their sources
+# (python -m dail_demo bundle checks the hashes): git never rewrites their line endings.
+site/vendor/** -text
+# Recorded traces are written with LF and hashed as they are.
+site/runs/** -text
+# Bundled into site/vendor/dail_live/ byte for byte: the same LF bytes on every platform.
+dail_demo/** text eol=lf
+config/** text eol=lf

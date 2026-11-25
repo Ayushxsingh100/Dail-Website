@@ -1,0 +1,1431 @@
+{
+ "schema": "dail-live-files/1",
+ "pyodide": {
+  "version": "0.27.7",
+  "dir": "pyodide/0.27.7",
+  "size": 14446087
+ },
+ "files": [
+  {
+   "path": "dail/config/base/application.toml",
+   "sha256": "9efa5de2507c8fe54215297ed674e8a38189065911a4ee6d7fa6e5ca500477eb",
+   "size": 191
+  },
+  {
+   "path": "dail/config/base/artifact_store.toml",
+   "sha256": "073ab2d9aac4396f0f7a0a733cf27a8ded58b26ce1ef4b3491b68237ab064f2b",
+   "size": 197
+  },
+  {
+   "path": "dail/config/base/database.toml",
+   "sha256": "0b71ffc9ac1e3f3d9e92ec08bb6d4df3f4f5748cb1c584bdabd9c3659b6bbea5",
+   "size": 183
+  },
+  {
+   "path": "dail/config/base/experiments.toml",
+   "sha256": "3cca5c804164f79df418dde17ea32d5fb2276620ba749cb748da68df5e26b44f",
+   "size": 149
+  },
+  {
+   "path": "dail/config/base/llm.toml",
+   "sha256": "a48f215803a66ba3e35bcca44595dc9ec0ec49274c857116b16e723b6cff6d21",
+   "size": 463
+  },
+  {
+   "path": "dail/config/base/observability.toml",
+   "sha256": "b52ec223323e95a6bc54d38f87dff83a728f06bd9db1ae4a644b345234844572",
+   "size": 281
+  },
+  {
+   "path": "dail/config/base/promotion.toml",
+   "sha256": "eee1f7cde2d46aaee72f4011cdfd34bccddd58459094a99cc8653eef005c6193",
+   "size": 359
+  },
+  {
+   "path": "dail/config/base/verification.toml",
+   "sha256": "fd6848775deebf4215d82dee1cf0aba75e4e87613cdbbc227b074ac89eaa47fb",
+   "size": 152
+  },
+  {
+   "path": "dail/config/environments/dev.toml",
+   "sha256": "0be72f46bae70ae6c5102b30fb7d69c960787000e49bbc8aca509ec13dbfcfde",
+   "size": 217
+  },
+  {
+   "path": "dail/config/environments/experiment.toml",
+   "sha256": "0b57a5f63a52dc3b3357ba1f536c3fb1191c292732e8ed07bb68e7783a9f9538",
+   "size": 130
+  },
+  {
+   "path": "dail/config/environments/staging.toml",
+   "sha256": "059772d3c22a9942e3f50e0f6ba30fbd4bf6c6d1e0eb09ddbecd35946da8c891",
+   "size": 126
+  },
+  {
+   "path": "dail/config/environments/test.toml",
+   "sha256": "6245426e45853093510ac62f67f042ecaa8c13ffbffe2e042b2e8aa5cc0b88bf",
+   "size": 135
+  },
+  {
+   "path": "dail/core/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "size": 0
+  },
+  {
+   "path": "dail/core/application/__init__.py",
+   "sha256": "21738fe3f07642f4b9e387e2d5e1d44f8fd2bd7e22ccf9dc92b7680cd1e9f5de",
+   "size": 1129
+  },
+  {
+   "path": "dail/core/application/baseline.py",
+   "sha256": "bf62de23641f28e9938dffbce92d295f759478573f97e3b6579828bb06b6b8a9",
+   "size": 18076
+  },
+  {
+   "path": "dail/core/application/candidate_tree.py",
+   "sha256": "4551a05faa4d97df55fe2978da2d65e58a57c92a2feeeb701e7c7b3dfeebc3ed",
+   "size": 1380
+  },
+  {
+   "path": "dail/core/application/chain.py",
+   "sha256": "12adf0769c57d9921e8f6efac93aae75b3bc704c0c2b01f2252d5feeef4ff9d2",
+   "size": 25421
+  },
+  {
+   "path": "dail/core/application/config.py",
+   "sha256": "300eefd817ee5f6a0e9fccae608fc39be5983e4d003cab77ffb23f37a49c1166",
+   "size": 20796
+  },
+  {
+   "path": "dail/core/application/health.py",
+   "sha256": "43745e80371d98d6c46193d7484af3cb3faa4e82f84bf5fccaa3efaf885d32d9",
+   "size": 5452
+  },
+  {
+   "path": "dail/core/application/ids.py",
+   "sha256": "26e3371866dc220672f4c8b98fc0b089f94cd80067cbb2326ff63b017cc80c6a",
+   "size": 5302
+  },
+  {
+   "path": "dail/core/application/orchestrator.py",
+   "sha256": "63e132b51a42f9736c9d646ae357615804db84077a226af25d234b680baddf5a",
+   "size": 37785
+  },
+  {
+   "path": "dail/core/application/recorder.py",
+   "sha256": "76ba25002ed37313e42179947afa817af40403ad779c56709b5b916f12eac796",
+   "size": 19192
+  },
+  {
+   "path": "dail/core/application/scope_policy.py",
+   "sha256": "7e69a0d6d6d182a2ccf69158d995e3e725f38c89e5f0c2bef4493c6b7053885b",
+   "size": 7453
+  },
+  {
+   "path": "dail/core/dependency/__init__.py",
+   "sha256": "f852fd9f14e38d32554316f0148c3d2fa762ddc4f0655d0c4d8f60ac57745891",
+   "size": 816
+  },
+  {
+   "path": "dail/core/dependency/addresses.py",
+   "sha256": "1f114c39d54502eb9c30971b0445214a2e3ca8c967c84053578c4bcc45851aec",
+   "size": 3449
+  },
+  {
+   "path": "dail/core/dependency/build.py",
+   "sha256": "56bb3dde0e63aa9fa289e323597ca5fb874b97b6c31668c8464b423c1787fbe6",
+   "size": 3979
+  },
+  {
+   "path": "dail/core/dependency/edges.py",
+   "sha256": "a02e4240b5b3815fd8ae501723979e5d41f6cbeee8f6ff829d8df6bf395537f7",
+   "size": 5434
+  },
+  {
+   "path": "dail/core/dependency/encoded.py",
+   "sha256": "f3761df16e927d0bbdc4fc6a6fa5472600f117b35d877132e29020342b309d77",
+   "size": 4566
+  },
+  {
+   "path": "dail/core/dependency/errors.py",
+   "sha256": "5189e97a0019a375f9d0290dadb1b82cb54826e3dd53ea1f892d0b96fdb10dd4",
+   "size": 573
+  },
+  {
+   "path": "dail/core/dependency/index.py",
+   "sha256": "bb1f05aa95f69cba31ed8e3eba04ff47806c1e1c639a299aadffc50d8c71e49b",
+   "size": 2257
+  },
+  {
+   "path": "dail/core/dependency/infrastructure.py",
+   "sha256": "a08abec48ca3630807a683960c07fb9e8dcf7aa08219ec2aa043b18a088b75dc",
+   "size": 14719
+  },
+  {
+   "path": "dail/core/dependency/invariants.py",
+   "sha256": "e5e658ca9cb1e8d88c496c1c1fba5ef240283e025c8bf620c5276d3bf9601861",
+   "size": 11082
+  },
+  {
+   "path": "dail/core/dependency/nodes.py",
+   "sha256": "e00cede19d89c7528245fe767629ce76c7215c9e8d8d8f278cf30e3cdc2b6148",
+   "size": 6652
+  },
+  {
+   "path": "dail/core/dependency/references.py",
+   "sha256": "1e6fcc83f06385bc7be1de3e14db474d4e1cb8ce17a2ae0ea859fca9a6d0bbb3",
+   "size": 4283
+  },
+  {
+   "path": "dail/core/dependency/slots.py",
+   "sha256": "99e84b910ea1bc6a203ba81bae80fa2dd37d572765d0a7d3afa839df9c7713ff",
+   "size": 3993
+  },
+  {
+   "path": "dail/core/dependency/traversal.py",
+   "sha256": "a959fcfe0db8992a767f82340cb20f3d9bd34f993ca5705b72dfe658eb892dc7",
+   "size": 4606
+  },
+  {
+   "path": "dail/core/dependency/versions.py",
+   "sha256": "e51d5b75e9da94a8c542df3e7de3dea15c5d199c3e6fa5570d337ee46869b3d2",
+   "size": 493
+  },
+  {
+   "path": "dail/core/domain/__init__.py",
+   "sha256": "9fb5aac16c40f91330ef4e3b49df3a822e3f21b9946afe21395cc3b0bf9645e5",
+   "size": 2920
+  },
+  {
+   "path": "dail/core/domain/audit.py",
+   "sha256": "c48018d3845d16bd8df14d59f47d65a4883ca717f755d41766d09aed171848e2",
+   "size": 14302
+  },
+  {
+   "path": "dail/core/domain/change_scope.py",
+   "sha256": "96ee2e15dee133348a61b940701b455d4d54a32406207141a98d582e353797cc",
+   "size": 4953
+  },
+  {
+   "path": "dail/core/domain/codec.py",
+   "sha256": "30a2d4094d81651874d9ef9a7239212d4138fb44d16b5ad713882b7dcf7d4e81",
+   "size": 1748
+  },
+  {
+   "path": "dail/core/domain/enums.py",
+   "sha256": "b114baf345af44d1c11f5e2622f04bd277615d0e70d7912a6b195bbea109a3f8",
+   "size": 4372
+  },
+  {
+   "path": "dail/core/domain/errors.py",
+   "sha256": "84464e8d5e9e78f170fde264aa537c5b48a447a86e8d05e0960d67642ab40783",
+   "size": 2369
+  },
+  {
+   "path": "dail/core/domain/evidence.py",
+   "sha256": "f94d1f3fd249a00ca21d49f6ef4f5bf55ca245da83c25c27b4b9dd461ccfa850",
+   "size": 40023
+  },
+  {
+   "path": "dail/core/domain/graph.py",
+   "sha256": "78577ef4b6596741c25527b60c9491d087ca28455718cdd3a95f24e2b22b9f12",
+   "size": 27760
+  },
+  {
+   "path": "dail/core/domain/hashing.py",
+   "sha256": "1d99d1d995ee1dba42b428d691f19bc78ed0fa68075b39ecd91e4035f6cdc7ba",
+   "size": 3315
+  },
+  {
+   "path": "dail/core/domain/identity.py",
+   "sha256": "cf0eaaed7e7dc3f27bac4369521ec2afe73beb5559e41f2646351fece2cc04bd",
+   "size": 29418
+  },
+  {
+   "path": "dail/core/domain/ids.py",
+   "sha256": "80ee3291616a2b924aafba6d5d03ab86be9750bd9c943364f8d66b1b762c09f6",
+   "size": 1112
+  },
+  {
+   "path": "dail/core/domain/impact.py",
+   "sha256": "4eb11a0da6abaffbc77101e1cddab3f3b1d4c6ae8c96e38edc925da47a85def9",
+   "size": 49663
+  },
+  {
+   "path": "dail/core/domain/invariant.py",
+   "sha256": "c4ee6f9b0cbdc4f1a2b0e10422d60a39e4c97db4765b24756009174caf5e85ac",
+   "size": 38718
+  },
+  {
+   "path": "dail/core/domain/jsonvalue.py",
+   "sha256": "0add9a4338fc3e3862ce59dcef02ed38e5bc477b4570cb0afe9073b89c81069a",
+   "size": 6209
+  },
+  {
+   "path": "dail/core/domain/lifecycle.py",
+   "sha256": "1d0db84990cf004c62b883aae81f81689f77369c85b4bb7f3399a3adb1470cd1",
+   "size": 6058
+  },
+  {
+   "path": "dail/core/domain/patch.py",
+   "sha256": "cc2fc0af044b1943c69a5b56325d76f492d76cf4a2ee35400938f510346d3f19",
+   "size": 5334
+  },
+  {
+   "path": "dail/core/domain/promotion.py",
+   "sha256": "e0351f86ab1ffb1ba924adac8335f879de469a53c1b20d48d8ee26ce4c136c30",
+   "size": 39255
+  },
+  {
+   "path": "dail/core/domain/redaction.py",
+   "sha256": "367bba7538728fc5be7c235f8571678a3537551b149fc1cf52ebde73e6b20cd4",
+   "size": 5283
+  },
+  {
+   "path": "dail/core/domain/registry_v1.py",
+   "sha256": "a60fbadbedfe3a5088f27d2b1b04a4ab79238b5e2f19dbe8c1858f145430db45",
+   "size": 9405
+  },
+  {
+   "path": "dail/core/domain/registry_v1_1.py",
+   "sha256": "e1bdfda401307d739cefae6eed2b9e1b73e475c2076800e58ac6e25a25b4e69c",
+   "size": 2570
+  },
+  {
+   "path": "dail/core/domain/repositories.py",
+   "sha256": "c3315d824a0a099ebdeb21596f01b983742afdd34da5499923767dbc252d0871",
+   "size": 10290
+  },
+  {
+   "path": "dail/core/domain/resource.py",
+   "sha256": "b674d38d87abd866312a76bd6aea1b77af25b0bf13503322a3f09e433541874e",
+   "size": 10661
+  },
+  {
+   "path": "dail/core/domain/state.py",
+   "sha256": "f967327bf09767107fcb5dc5644ca0f47c3498d43ebd2568fa4cd325626907d8",
+   "size": 36903
+  },
+  {
+   "path": "dail/core/domain/values.py",
+   "sha256": "ac9a80fbf10ba5225a40cb66e2df94b60c408d0dd0211fddc93206df8d5ef73c",
+   "size": 6073
+  },
+  {
+   "path": "dail/core/domain/verification.py",
+   "sha256": "f44ce2e599eb31c868cfded5cf456a1340dc22c4e655e26e288be3cab92b7f43",
+   "size": 35139
+  },
+  {
+   "path": "dail/core/identity/__init__.py",
+   "sha256": "40d3521ebe17ca5b178424c7403d2274d4c1dc6ff45682c92a130072d45c000e",
+   "size": 951
+  },
+  {
+   "path": "dail/core/identity/addresses.py",
+   "sha256": "896e6260d4579b8c6efa1790aea2513dd126c4e66b7d1f46de0a759763b6378e",
+   "size": 2941
+  },
+  {
+   "path": "dail/core/identity/engine.py",
+   "sha256": "ef99e6b798f1a0bc296cd454647507d73539afababf540b3a21e16355cbb7bdf",
+   "size": 5795
+  },
+  {
+   "path": "dail/core/identity/errors.py",
+   "sha256": "0acb41a72ca673c16b77e546ebb03b93b2c23dd9ec68f354183c4042ed43ee53",
+   "size": 849
+  },
+  {
+   "path": "dail/core/identity/findings.py",
+   "sha256": "5561d0b07ea8e0a8654a411c1584d39e8d2c2cdcecf1fa080a3c15ab717d9cc3",
+   "size": 14662
+  },
+  {
+   "path": "dail/core/identity/moves.py",
+   "sha256": "ca3584d8c8ad75743854d2dfe759b52e9a3adf2f150ea2e05993b8ad4bba1faf",
+   "size": 15148
+  },
+  {
+   "path": "dail/core/identity/strategy.py",
+   "sha256": "c601e2d8da19e4340b86ba143d2778f96dfaeed1360be785bba7308841db6f2a",
+   "size": 22529
+  },
+  {
+   "path": "dail/core/impact/__init__.py",
+   "sha256": "668d0a62ffc0cb12f43a06ea7e2b6adee364746465a346a392d64113a95159f9",
+   "size": 1512
+  },
+  {
+   "path": "dail/core/impact/addresses.py",
+   "sha256": "c5e781e54f7f9572a269695575932d3c268ed63ca4a082511266823b0dcac0ef",
+   "size": 3192
+  },
+  {
+   "path": "dail/core/impact/changes.py",
+   "sha256": "2b01200a64630e5352c1b20ad113968f15bc38caab75d9ae852432ab5997c015",
+   "size": 7485
+  },
+  {
+   "path": "dail/core/impact/engine.py",
+   "sha256": "9354ca0f303b69bf9dd3b98945d3e9f0815388c08f4849420b629bd44b07dc43",
+   "size": 16645
+  },
+  {
+   "path": "dail/core/impact/errors.py",
+   "sha256": "a0a5fc416d52fd0664a7dea526844f20854e54aeb0afd73413a7e4b7afb2b858",
+   "size": 664
+  },
+  {
+   "path": "dail/core/impact/inputs.py",
+   "sha256": "a269269c11d20c51b00c77a15864cc07dc644ed127b3cb906654ad5b4aa5c8ea",
+   "size": 8173
+  },
+  {
+   "path": "dail/core/impact/walk.py",
+   "sha256": "236f143e179bddcbff10e62e174140357bb510d87f012ec306bf9018fb5ad925",
+   "size": 20850
+  },
+  {
+   "path": "dail/core/persistence/__init__.py",
+   "sha256": "32e007684e061f249cba711d144610760d1f7207769554fec3a5ba3473c10c15",
+   "size": 532
+  },
+  {
+   "path": "dail/core/persistence/schema.py",
+   "sha256": "7c2d85650c3236ed6cc614d03b89782ba9bdd55646ea7b339a0e047dc5939ced",
+   "size": 48454
+  },
+  {
+   "path": "dail/core/persistence/sqlite.py",
+   "sha256": "f11b0f7810eec9e5387397cf38643fcfb60621bc3335b4db1c080cfeed60d8c2",
+   "size": 69803
+  },
+  {
+   "path": "dail/core/promotion/__init__.py",
+   "sha256": "864e35c3ed565e06d7dab6260c50b32b8a08bad86b343fa49495647cb7c93e98",
+   "size": 1578
+  },
+  {
+   "path": "dail/core/promotion/binding.py",
+   "sha256": "48e47684d07634dde3bba13e316ded8f3aeab10faa8bd3b3759612926079ca18",
+   "size": 12569
+  },
+  {
+   "path": "dail/core/promotion/commit.py",
+   "sha256": "bc6e9cb0993e7b8d76f45fe255c16a1e913e4733c9d338c3df12e7a0514443fd",
+   "size": 31045
+  },
+  {
+   "path": "dail/core/promotion/decide.py",
+   "sha256": "88ebecc6b4bade5e1624872176ba63926d3f6632d5ce16aa8c71e5d5b29e4d79",
+   "size": 34940
+  },
+  {
+   "path": "dail/core/promotion/ids.py",
+   "sha256": "98d15e3201f826a74dfd1ce175a219532ecc193b270eb7307c296e48167b5550",
+   "size": 2981
+  },
+  {
+   "path": "dail/core/promotion/lifecycle.py",
+   "sha256": "0d6bb553db49bff5733d38a75e5b5e79259892776558c3bfaca26b76c80f49dd",
+   "size": 3671
+  },
+  {
+   "path": "dail/core/promotion/newstate.py",
+   "sha256": "9bf845604af2bceff44f2c7a47529388b154ea4c5a8228992290c0a6458a1d34",
+   "size": 2316
+  },
+  {
+   "path": "dail/core/promotion/policy.py",
+   "sha256": "ab9ca9b93e8a7d5c5574f3b7f98d8fa60f100d63a972ba40fb9a9378837b8f79",
+   "size": 6391
+  },
+  {
+   "path": "dail/core/promotion/proofs.py",
+   "sha256": "86e9091d368caea15e88d4db88db1d392e8769a59206b4c2df77d5891dcbca84",
+   "size": 8226
+  },
+  {
+   "path": "dail/core/terraform_model/__init__.py",
+   "sha256": "39ee145d95ed7be716314a996073cf6c2afda7f4b2b0e718c77f609c2a74c09f",
+   "size": 1332
+  },
+  {
+   "path": "dail/core/terraform_model/canonical.py",
+   "sha256": "13f8e013ea538daa410858d49388bad5a9996ce93ba6752819d017f6ce4c198e",
+   "size": 9364
+  },
+  {
+   "path": "dail/core/terraform_model/config.py",
+   "sha256": "87e0e67daa390eaaa7d37de8f1d0b6bf5f3dcf0cf2f3102a60f8e1dc276dc7db",
+   "size": 37432
+  },
+  {
+   "path": "dail/core/terraform_model/convert.py",
+   "sha256": "e30d46ab8468c6cdf1ee5b5836c5e96679c2b767a7127628f0e8c6916f3d6381",
+   "size": 20434
+  },
+  {
+   "path": "dail/core/terraform_model/evaluate.py",
+   "sha256": "6bf25f74a69c6be8b69ede508ae9e976ff1725743e430fec22d29a8c23fda145",
+   "size": 42244
+  },
+  {
+   "path": "dail/core/terraform_model/evaluation.py",
+   "sha256": "81990b5a7fcb4983b82cbbfc1f8ec71ffd7d7aad281d71266a800be782b718f8",
+   "size": 22223
+  },
+  {
+   "path": "dail/core/terraform_model/functions.py",
+   "sha256": "0309856a04be096bfc489cc8597d8d67a4e0aecf4bb557dd112bf8539597b408",
+   "size": 20334
+  },
+  {
+   "path": "dail/core/terraform_model/hcl/__init__.py",
+   "sha256": "ab1fd69896dba63a5a610e19033e6f8845fb7293390ab7a22a5850514979130c",
+   "size": 247
+  },
+  {
+   "path": "dail/core/terraform_model/hcl/ast.py",
+   "sha256": "2bd0a7122146f9171c632180ae109f6e845af53954e47ab2bbe098a38967e353",
+   "size": 10958
+  },
+  {
+   "path": "dail/core/terraform_model/hcl/errors.py",
+   "sha256": "02ed9567f52afd8bbb3d14650e928afa0141dca2ec1e5535768c9d4aa4ab7280",
+   "size": 4449
+  },
+  {
+   "path": "dail/core/terraform_model/hcl/lexer.py",
+   "sha256": "91e1064705586f6e88ee3d7e44f93a7260766e00b36a43d8e43a1f27acaa3aeb",
+   "size": 32285
+  },
+  {
+   "path": "dail/core/terraform_model/hcl/parser.py",
+   "sha256": "2ecf60e39ba73d7450349a7b6caf056a24f868642fada1687a621ac18d90ad00",
+   "size": 51517
+  },
+  {
+   "path": "dail/core/terraform_model/hcl/unicode_tables.py",
+   "sha256": "9192932b460779deeecf1d44813acf4a013c5b0f8dec3fb5fdae681203eb0348",
+   "size": 29824
+  },
+  {
+   "path": "dail/core/terraform_model/instances.py",
+   "sha256": "ad8880e80f0284ca6b11ad32421e917aee61ddbf0edae7bacfbc8f171979dccb",
+   "size": 33286
+  },
+  {
+   "path": "dail/core/terraform_model/normalization.py",
+   "sha256": "ba779bd13fd2b23cfb380626d6664929c204d150db953d7c7b828c01a7359c2b",
+   "size": 9531
+  },
+  {
+   "path": "dail/core/terraform_model/normalize.py",
+   "sha256": "ef6995313915367c78448f2d68a667e34b772ce5be08d1233ecd218f35f67f58",
+   "size": 12477
+  },
+  {
+   "path": "dail/core/terraform_model/print_table.py",
+   "sha256": "9c5ca3c7ae6940fe21b1029d04c8c538057d8cc8c3c735afa2fc8198cb8081b5",
+   "size": 17495
+  },
+  {
+   "path": "dail/core/terraform_model/references.py",
+   "sha256": "8318caeb109fb460bf7c50d9eefca60d334f2ae28f8ebcb4ef96d9534326ebc7",
+   "size": 21487
+  },
+  {
+   "path": "dail/core/terraform_model/security_rules.py",
+   "sha256": "b0746b060f9b6f39f05fd40ba4ddcef3f6400c0811a87603332546d3ed89d3b7",
+   "size": 26325
+  },
+  {
+   "path": "dail/core/terraform_model/values.py",
+   "sha256": "66f03c894fca9dda3eb1770d2ec54c71a03978ff1934975cafc8a11803471ccd",
+   "size": 14750
+  },
+  {
+   "path": "dail/core/verification/__init__.py",
+   "sha256": "0cbef4840938d1b57aad5058663b2ac0762013a7d6013b634dd0ef3c75b201de",
+   "size": 2135
+  },
+  {
+   "path": "dail/core/verification/baseline.py",
+   "sha256": "20a673b322e80b665acb7da437952a036f1a368f538fb5ec6efa173cfeaa7a1e",
+   "size": 9503
+  },
+  {
+   "path": "dail/core/verification/cidr.py",
+   "sha256": "babbc82a839f937cf8c950d8d19e0a0a0592d1856784e22fc8c71d83b32e499f",
+   "size": 3607
+  },
+  {
+   "path": "dail/core/verification/dispatch.py",
+   "sha256": "e047c28551010781cb5cd315cd83c79cafe431fb205cb6f791f75ba7a1f0889b",
+   "size": 3302
+  },
+  {
+   "path": "dail/core/verification/engine.py",
+   "sha256": "8ad33d802da67fb4a30d9f811437446011bf4f504e203310b040be6b8c62dbb4",
+   "size": 23847
+  },
+  {
+   "path": "dail/core/verification/errors.py",
+   "sha256": "770219a142a7c9ddb9c22277d8c104189195f4e79346d620ed71f2dd052ad1d3",
+   "size": 542
+  },
+  {
+   "path": "dail/core/verification/func_view.py",
+   "sha256": "5a9b57085881ca0708f3b1f79a387fd33165b8a9845fca05d0367922c77a5e5e",
+   "size": 13156
+  },
+  {
+   "path": "dail/core/verification/inputs.py",
+   "sha256": "47f7002d40b9f0a175335af44a533bfe95d7e033b9b4da4eae9aa5014e28d736",
+   "size": 5179
+  },
+  {
+   "path": "dail/core/verification/outcome.py",
+   "sha256": "d94fb7b1d45b6927f961f6bd72b4ff389a37aa347cfea5325679a925d06da2cc",
+   "size": 1571
+  },
+  {
+   "path": "dail/core/verification/ports.py",
+   "sha256": "58c8ba58d06a7510b1a730465e3b22cc85adbcdeeac76198950d627c5672aced",
+   "size": 1941
+  },
+  {
+   "path": "dail/core/verification/public_ingress.py",
+   "sha256": "2b897c0b070666f6d4cb2ef93cb2765fc2b80ca3648f2628ce7418c4a717a3b8",
+   "size": 15332
+  },
+  {
+   "path": "dail/core/verification/rds_public_flag.py",
+   "sha256": "66f300929d351a5e55c8f2159593e6f51cef0455d992e501e9da3871a7711a83",
+   "size": 5614
+  },
+  {
+   "path": "dail/core/verification/reachability.py",
+   "sha256": "d0bc277583b6758f0015bda2460335cf4aa4eb0ffe72d9c07ed2074bf9662cab",
+   "size": 40534
+  },
+  {
+   "path": "dail/core/verification/retention.py",
+   "sha256": "55a519ca65beaab5569c12969f36e9e3d790fb79632598e503c66c5c2c089214",
+   "size": 5101
+  },
+  {
+   "path": "dail/core/verification/structural.py",
+   "sha256": "dac9fb22e928a96a1cac3040059042a501f459e1236b0c2f0cfcd22ac6be40d7",
+   "size": 12926
+  },
+  {
+   "path": "dail/core/verification/values.py",
+   "sha256": "0804a99830c27f9f72c99624c7a332d8a077f8026d3e3e26706e5e23c6778c2b",
+   "size": 9457
+  },
+  {
+   "path": "dail/core/verification/views.py",
+   "sha256": "d7157035cd7e4d35145db04811a8562b44209141c2d3af81016f917814d0f39e",
+   "size": 22445
+  },
+  {
+   "path": "dail/evidence/__init__.py",
+   "sha256": "c185b21b944bf109f58b690896f093de59c3f5aa094b6c7c74e244fd5ccbfac3",
+   "size": 206
+  },
+  {
+   "path": "dail/evidence/ids.py",
+   "sha256": "2a15bfb2b6fd0819b23a15fad3940cff102264ba4d3e3bef10fb2e16b3c7ed0b",
+   "size": 3035
+  },
+  {
+   "path": "dail/evidence/models.py",
+   "sha256": "1d654e71708e28af6d360243be85ceb2c172b531a3916f7bea95cd87366985e2",
+   "size": 4324
+  },
+  {
+   "path": "dail/evidence/service.py",
+   "sha256": "750d0215404fbff699918def9abc580b431f329ae631f5f546865900f55d57f0",
+   "size": 19372
+  },
+  {
+   "path": "dail/evidence/structured_log.py",
+   "sha256": "4c0ab239aaed0d4ec03549f1e171a8e75b71ba096e7303c68dffa3cc871602d0",
+   "size": 3206
+  },
+  {
+   "path": "dail/experiments/__init__.py",
+   "sha256": "eb5c3e073d963474722dcd6afd2740062f75def00521468fd4e5aabe0734f177",
+   "size": 1214
+  },
+  {
+   "path": "dail/experiments/__main__.py",
+   "sha256": "1b1b8bb18836ec70438e86b6efffa75260543f2c288343e4e7085208569b885f",
+   "size": 7841
+  },
+  {
+   "path": "dail/experiments/artifacts.py",
+   "sha256": "387a4fa8196503b1f6b4513bcb3172d6752929f2fb595215166c827cdd0ee394",
+   "size": 4785
+  },
+  {
+   "path": "dail/experiments/conditions.py",
+   "sha256": "d8b8a677e583fc82f26598ef8b396c2cecd6fafb8d976832b5356cdba439eec2",
+   "size": 8846
+  },
+  {
+   "path": "dail/experiments/definition.py",
+   "sha256": "427c72b7f3d6c17f8a796f8e78d9678b12b9fec794c1e31d161ca7abb93978b5",
+   "size": 7413
+  },
+  {
+   "path": "dail/experiments/generation/__init__.py",
+   "sha256": "04a324d56314546e125d8c3268fd161f108cdd5061ac90476d08089fd1def870",
+   "size": 536
+  },
+  {
+   "path": "dail/experiments/generation/__main__.py",
+   "sha256": "2467f56b6724d31857a2eafa8d78ff6a312cf027023ddc962a3a0fe5cbf0cd89",
+   "size": 9095
+  },
+  {
+   "path": "dail/experiments/generation/export.py",
+   "sha256": "e3c8aed8577bf5098fe59b58fa1ed4b6c008395833dc06679432782c735bc4c9",
+   "size": 6513
+  },
+  {
+   "path": "dail/experiments/generation/models.py",
+   "sha256": "b2e4590706888b1902980ecc8cd8cb23d1713dc455df3b14d6ef985bec8e4727",
+   "size": 5042
+  },
+  {
+   "path": "dail/experiments/generation/parent.py",
+   "sha256": "b34a8b0890d434413102458200d2140dcf51cd3276097a138c115b2601bad99a",
+   "size": 4791
+  },
+  {
+   "path": "dail/experiments/generation/readmit.py",
+   "sha256": "d066c2d12b27ac57463279a710586ac681bc15b5e7acdd04da5aa834c949f085",
+   "size": 6735
+  },
+  {
+   "path": "dail/experiments/generation/replay.py",
+   "sha256": "b267b0309fcd470dbdb36ac6cf0a791957dc82d9ecaa98566ca803d991c7c6cc",
+   "size": 11153
+  },
+  {
+   "path": "dail/experiments/generation/run.py",
+   "sha256": "9d03e25b8a2e1a51b3cfee14acdfd0dc09bfa9ebac2967d2e577e262c7ee78b5",
+   "size": 19128
+  },
+  {
+   "path": "dail/experiments/generation/task.py",
+   "sha256": "55979b49c7411ceb0afa7b0bd3ede55de40442f8093cc962cb00d94940ee5ddd",
+   "size": 4801
+  },
+  {
+   "path": "dail/experiments/loader.py",
+   "sha256": "96a6dc88c4c2a6ea3044bbc49d251ebb08b9a3f3b31ac55ce9814ecef0b1612a",
+   "size": 13773
+  },
+  {
+   "path": "dail/experiments/mainrun/__init__.py",
+   "sha256": "206e7a304807666930a5ae75bcbb632bb9bbc5ffc726aaa09f28b12db9b0e786",
+   "size": 182
+  },
+  {
+   "path": "dail/experiments/mainrun/__main__.py",
+   "sha256": "96f53d150b651572ad2c05f2d8115187de882055373710b9faa35d1906dabfcd",
+   "size": 13234
+  },
+  {
+   "path": "dail/experiments/mainrun/lock.py",
+   "sha256": "af6b3a1af1892c0bb76f1c75cb6dd452cd3cfde8ae72bb27bb7c7a64cdce91f7",
+   "size": 2276
+  },
+  {
+   "path": "dail/experiments/mainrun/order.py",
+   "sha256": "58281a47144251a4791527d5b4f124a14c2d3aeb091559fd545fcb76f0b8667b",
+   "size": 4052
+  },
+  {
+   "path": "dail/experiments/mainrun/power.py",
+   "sha256": "68ce4b7d33561aee02c83d16d8c787ac08e50489e815e8fca9f23acda03be2bf",
+   "size": 12399
+  },
+  {
+   "path": "dail/experiments/mainrun/run.py",
+   "sha256": "aa9ec625c58fee4564ad2db9aa4fc11016f7af4630f819c9d8f6c13d12e35f9e",
+   "size": 3274
+  },
+  {
+   "path": "dail/experiments/mainrun/unblind.py",
+   "sha256": "03441e8e552616eacc401dc781868e65fff77afa4d634fa032ad5d99731df05a",
+   "size": 7250
+  },
+  {
+   "path": "dail/experiments/metrics/__init__.py",
+   "sha256": "1108b908f5931a40518bdb99e48402d3a080650b8fd9a44a25af430adfef6e16",
+   "size": 485
+  },
+  {
+   "path": "dail/experiments/metrics/extractor.py",
+   "sha256": "b4d1960e8bfa273328dda3b09bd493b2dd20bd580ccec35c2c447bbe53b92834",
+   "size": 31066
+  },
+  {
+   "path": "dail/experiments/metrics/final.py",
+   "sha256": "6de47ff1487130053ec803e6a650a0c3396412a2bd002bc4c0b3e11222da2a3a",
+   "size": 11225
+  },
+  {
+   "path": "dail/experiments/metrics/generation.py",
+   "sha256": "6348ab37ed5a6e49ad67e7a658c86488c9445b41baf2fa32ec500463fdad97b9",
+   "size": 9819
+  },
+  {
+   "path": "dail/experiments/metrics/llm_final.py",
+   "sha256": "e54e2680b29ead4ac6b1078110858f77589902c34a01e0aeec43fc4bac621614",
+   "size": 3827
+  },
+  {
+   "path": "dail/experiments/metrics/model.py",
+   "sha256": "a5dd918933f579ba3940ae40b121862d17a1828c1dd40a2044c1a59fc4ad40eb",
+   "size": 4931
+  },
+  {
+   "path": "dail/experiments/records.py",
+   "sha256": "01e880534e5875dd7b6ab48fba8c82f00bac1e6ebe8b9332de8d4914c65acd81",
+   "size": 10358
+  },
+  {
+   "path": "dail/experiments/report/__init__.py",
+   "sha256": "f0c169db2c7de707d72fdb57b735f7df7e1c73bb014e3f01815fcb27e2902e19",
+   "size": 360
+  },
+  {
+   "path": "dail/experiments/report/__main__.py",
+   "sha256": "12ea387e7f76a42c613e61b17d7a0ce0f67ddc8ca79997f0f9dbffc995f15d27",
+   "size": 15070
+  },
+  {
+   "path": "dail/experiments/report/build.py",
+   "sha256": "495353d131d38343c21ad1a6a2d9039ed54b244527d26c757a9f529f2000e038",
+   "size": 3613
+  },
+  {
+   "path": "dail/experiments/report/llm_scoring.py",
+   "sha256": "047129946cd1a3c2dfcf3f8d41c1cdde57dd22bf76432d1ee9be52db77bfa61d",
+   "size": 6542
+  },
+  {
+   "path": "dail/experiments/report/pilot.py",
+   "sha256": "19aee8f5f51ffd2ae61579fafedf874b15c37117ecdef2f2417d3f90d05c51be",
+   "size": 13206
+  },
+  {
+   "path": "dail/experiments/report/pilot_b.py",
+   "sha256": "aafc0dce585b618ad446ac49b18225ba80f96b908eb212d3ed24e59ce342ce2d",
+   "size": 11273
+  },
+  {
+   "path": "dail/experiments/report/protocol.py",
+   "sha256": "82eb7c8a18abbef88530bb542c237975c5837ba0bdaed94a35d9ce1bd8525427",
+   "size": 23144
+  },
+  {
+   "path": "dail/experiments/report/render.py",
+   "sha256": "287cba48c5d06a51f9fbbb4290e684216c7fb856021d90112eb7e4050adde616",
+   "size": 15233
+  },
+  {
+   "path": "dail/experiments/runner.py",
+   "sha256": "1477eace4b38229a78f750fd686048a70a172ba8554424f094fc3ad90f7ecbb4",
+   "size": 17311
+  },
+  {
+   "path": "dail/experiments/scoring/__init__.py",
+   "sha256": "21d9a99ab1e3940e32527a636cf99f26df6cb2af1ac3889200e239b823a55cfb",
+   "size": 641
+  },
+  {
+   "path": "dail/experiments/scoring/identity.py",
+   "sha256": "d013126488a890307182613f3e86165f133da2f0982d15e221ba96d86637e0e2",
+   "size": 8686
+  },
+  {
+   "path": "dail/experiments/scoring/labels.py",
+   "sha256": "74cd17e9af8f19852b64e6595716fe1a927f61ffc6572fc9fe9138827dda5b5f",
+   "size": 7152
+  },
+  {
+   "path": "dail/experiments/scoring/llm_pilot.py",
+   "sha256": "f61c1e263f5fa9e222659f6edd0beab0302fa3174ce914efc5e2029b84d0e11f",
+   "size": 14918
+  },
+  {
+   "path": "dail/experiments/scoring/selection.py",
+   "sha256": "51516d90214dd3a83f90def16c43ae7c7dc1046090b7c7805440a2115599e2aa",
+   "size": 1051
+  },
+  {
+   "path": "dail/experiments/scoring/truth.py",
+   "sha256": "c52661fe07ae608eadb167a86119e0e2f96d40c9400114c9227652505da787d2",
+   "size": 2549
+  },
+  {
+   "path": "dail/experiments/split_guard.py",
+   "sha256": "00a026e20e3a17f2cca6c419db740ad8cc0eeb8149b8b966d8bc3cd030df2bbb",
+   "size": 4092
+  },
+  {
+   "path": "dail/experiments/stats/__init__.py",
+   "sha256": "ee29ec274938eb79c50a8cd7d768a1995b92a44c2b2da03e64bb83c8988b525e",
+   "size": 86
+  },
+  {
+   "path": "dail/experiments/stats/__main__.py",
+   "sha256": "8efb0b3c9799c5af4c0ac2e35fe77456440b78248e7d5ca94df0a1f9b7478388",
+   "size": 3942
+  },
+  {
+   "path": "dail/experiments/stats/analysis.py",
+   "sha256": "98f40646ec723ecbd8168b95f3d49f186d496b40a55f459a6d7833efd16b5fa2",
+   "size": 10730
+  },
+  {
+   "path": "dail/experiments/stats/dry_run.py",
+   "sha256": "e3d6bec3f11ef1aae3844bf2474849058fb4e47ba022114fa20045b3b3c3e528",
+   "size": 11086
+  },
+  {
+   "path": "dail/experiments/stats/procedures.py",
+   "sha256": "560ada255a63a28946350de64066da2d780db6f9ef2bd46cceed226fc5982cfb",
+   "size": 6172
+  },
+  {
+   "path": "dail/experiments/stats/render.py",
+   "sha256": "937f11d60ecdf7e935e74633fa221572fea2bba1751700f0878eff3e5c6b1515",
+   "size": 10367
+  },
+  {
+   "path": "dail/experiments/stats/simulate.py",
+   "sha256": "8f980de98cb9369056cbe1c4245dd045800be2cb8161389198b9a2e524bf7296",
+   "size": 5650
+  },
+  {
+   "path": "dail/experiments/task_text.py",
+   "sha256": "e5b66b565a303938f637dcca349ec335e32d4902b38cf9a2b044b6438fc99b2d",
+   "size": 1327
+  },
+  {
+   "path": "dail/experiments/terraform_validate.py",
+   "sha256": "fae3d27630d70c4e52dfa6ffa979d3b6706e0fff12ff210974df2252986d1719",
+   "size": 8986
+  },
+  {
+   "path": "dail/experiments/trial.py",
+   "sha256": "fd7a364aa1d770e82c80bd106ded7327801f21d16d64ae6d2dfc733a9f572da2",
+   "size": 14251
+  },
+  {
+   "path": "dail/LICENSE",
+   "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+   "size": 11560
+  },
+  {
+   "path": "dail/llm/__init__.py",
+   "sha256": "c46ccc14bb34088cd2d07bdc43b05a799d83bab315e196197ca457f9610a28d6",
+   "size": 427
+  },
+  {
+   "path": "dail/llm/adapter/__init__.py",
+   "sha256": "b639e962b2b2084fd7950de766867bfbef60e4a90d3e2722a4229ee937f1e4de",
+   "size": 297
+  },
+  {
+   "path": "dail/llm/adapter/budget.py",
+   "sha256": "0149fdd7551d4af2445c17770624239c30fa40953470ba3e1c8203675cbb3257",
+   "size": 5414
+  },
+  {
+   "path": "dail/llm/adapter/context.py",
+   "sha256": "c0d212fe40539033969303b1ed12b63226e65995d252f02dc8bef0b6e8a7af4a",
+   "size": 11543
+  },
+  {
+   "path": "dail/llm/adapter/fake.py",
+   "sha256": "7ac5186b4449c05d610857136ba1e8ad5d0731ccf37d467b67602c6e594e1407",
+   "size": 1158
+  },
+  {
+   "path": "dail/llm/adapter/generate.py",
+   "sha256": "d090206070761325fac4a82afa0083b3b6c4f59bf2c68e4c2d14ef7bba6934ff",
+   "size": 14588
+  },
+  {
+   "path": "dail/llm/adapter/ollama.py",
+   "sha256": "8b395347fb043100fa1d24bde015b9692490cea263683fa1bd89bf007066ad01",
+   "size": 8948
+  },
+  {
+   "path": "dail/llm/adapter/provider.py",
+   "sha256": "1c56411c62f45243b5d4bbf44e433cf3e0d66c81db9f2287bebc256f1b9cc078",
+   "size": 1880
+  },
+  {
+   "path": "dail/llm/prompts/__init__.py",
+   "sha256": "a59696f7ca29269691b482b39a8edc6efeeaf0d6ae5ca6bc880416006c60f851",
+   "size": 215
+  },
+  {
+   "path": "dail/llm/prompts/templates.py",
+   "sha256": "b83265a61c2deefaa81589a719be862e51dd335ce938b1cf4267b06319b1c24b",
+   "size": 12513
+  },
+  {
+   "path": "dail/llm/schemas/__init__.py",
+   "sha256": "22f5609db92a66c9d56d64b2aa9e223f4396b903a8af57b00d944efadd2f8ef5",
+   "size": 209
+  },
+  {
+   "path": "dail/llm/schemas/records.py",
+   "sha256": "020f0e94211e03f9def558646de14c3e4baf97ae2c9c79d86d94d4ee1c16e3d0",
+   "size": 14533
+  },
+  {
+   "path": "dail/llm/schemas/repair_response.py",
+   "sha256": "6112039d42dbd12959f1efdd4c8f2433a4990dbb55be4deb2bcd48ef353f8291",
+   "size": 3024
+  },
+  {
+   "path": "dail/llm/validation/__init__.py",
+   "sha256": "07148039fce4592d81e172d16b5d0dbb2051cbb7002773d7487f730a06f468ae",
+   "size": 229
+  },
+  {
+   "path": "dail/llm/validation/parser.py",
+   "sha256": "62031d47cca7ac28615e42e3b03b7c973ae2f008c7c8538f69b9f47d79be04cd",
+   "size": 7303
+  },
+  {
+   "path": "dail/llm/validation/patch.py",
+   "sha256": "34969cd02fdf1069dc1f7bd6fb2e5533fbf4f24fcbe2fd0aeffa82d706e85131",
+   "size": 28563
+  },
+  {
+   "path": "dail/MANIFEST.sha256",
+   "sha256": "d2f25e92032f24eb21da4a7a9f4c12e5d01dc3aabc0aea768c6f0c881d743017",
+   "size": 19031
+  },
+  {
+   "path": "dail/VERSION.json",
+   "sha256": "2bd1c8e22a3b5915b94b6dc13dfaa67acda311bf30913f3401fc154f30d8c9c5",
+   "size": 91
+  },
+  {
+   "path": "dail_live/config/llm.toml",
+   "sha256": "ef1df68e07bd0fe0ecd6718b72280a17085124aab5cc2679e607cef314cfa97c",
+   "size": 710
+  },
+  {
+   "path": "dail_live/config/promotion.toml",
+   "sha256": "8d2c0057ff65381a48ecbd1ff25803ba59239421af2e319bd0f7984e98e6d5b8",
+   "size": 837
+  },
+  {
+   "path": "dail_live/dail_demo/__init__.py",
+   "sha256": "d2e686f41abb0b9c26182eecdfe0be0f3aeb559adf2d73a74ecc9b244a4770d3",
+   "size": 287
+  },
+  {
+   "path": "dail_live/dail_demo/browser.py",
+   "sha256": "f53d3d47b5c1b2664b0f43cd34db92f32ba9a7f62ba95cce62f2646056704126",
+   "size": 12164
+  },
+  {
+   "path": "dail_live/dail_demo/evaluate_core.py",
+   "sha256": "4e8fa4f8792e8285b263fe657cd71174438913fe4d316fff68d1d4647cc9a1b2",
+   "size": 40282
+  },
+  {
+   "path": "dail_live/MANIFEST.sha256",
+   "sha256": "65a3628ce1a92688733d27ed03f6a808a35f94975b148a5d0039f5159c0419f9",
+   "size": 438
+  },
+  {
+   "path": "scenarios/ATTRIBUTION.md",
+   "sha256": "3daa3ff4e69339ccefd6e2dcf67529677d2658d2726f546028f4d114ab4a0f5d",
+   "size": 764
+  },
+  {
+   "path": "scenarios/canonical/patches/regression/main.tf",
+   "sha256": "8f2eecb62dd2b679e3a5519ffb11307b1fe4775392bf23cf4a160e7fdd8fd3be",
+   "size": 2775
+  },
+  {
+   "path": "scenarios/canonical/patches/regression/versions.tf",
+   "sha256": "2ccf22f8c9edcd506afee395bf68f58b9fd40337f7ec1d9f0c1929a0724b3681",
+   "size": 160
+  },
+  {
+   "path": "scenarios/canonical/patches/safe/main.tf",
+   "sha256": "c2d241769115774f0287755d36c0b727837602bb4bd434ce0986407d1c946a50",
+   "size": 3066
+  },
+  {
+   "path": "scenarios/canonical/patches/safe/versions.tf",
+   "sha256": "2ccf22f8c9edcd506afee395bf68f58b9fd40337f7ec1d9f0c1929a0724b3681",
+   "size": 160
+  },
+  {
+   "path": "scenarios/canonical/s0/main.tf",
+   "sha256": "390a05d00a30e60498e12cb9bf9a4f85223d28fb5de4525b65a1483aa4f3af77",
+   "size": 3302
+  },
+  {
+   "path": "scenarios/canonical/s0/versions.tf",
+   "sha256": "2ccf22f8c9edcd506afee395bf68f58b9fd40337f7ec1d9f0c1929a0724b3681",
+   "size": 160
+  },
+  {
+   "path": "scenarios/canonical/scenario.json",
+   "sha256": "18ab900768bd83f58a1cfc5cef2ca1d2aacee48a6e7d30e663f2e5ee1b49c627",
+   "size": 1339
+  },
+  {
+   "path": "scenarios/CC-BY-4.0.txt",
+   "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411",
+   "size": 18657
+  },
+  {
+   "path": "scenarios/index.json",
+   "sha256": "6dde7a5cb107fd4eafccdbfb11221730ce8aafa161d688d0c1b863ed25ebb9a3",
+   "size": 3238
+  },
+  {
+   "path": "scenarios/MANIFEST.sha256",
+   "sha256": "7d59dfbd5e9c1febec1daf8b8f9cbfda7af5d83d0b29eb774610ad137264062b",
+   "size": 7207
+  },
+  {
+   "path": "scenarios/TerraGoat-LICENSE.txt",
+   "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+   "size": 11357
+  },
+  {
+   "path": "scenarios/TerraGoat-NOTICE.txt",
+   "sha256": "dbb8466b33a5f31c7b72326d893a3bb96b3d2f1ffc369461b23f16694ae25266",
+   "size": 751
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/patches/step-1/main.tf",
+   "sha256": "078f2b2666f547f0ab9d4c02a4eab39d24a6d4dd83187c3ff6233a149ba0bb10",
+   "size": 3048
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/patches/step-1/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/s0/main.tf",
+   "sha256": "dbb7eb35c4e26ffcca3ff9b20d72b0669ea728790b4e3830c57e76d28f6815df",
+   "size": 3047
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/s0/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0027/scenario.json",
+   "sha256": "2a02636ac3fde25bf713fab4a9788d423eefabceda65fa44f081dc2d837f1738",
+   "size": 1623
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/patches/step-1/main.tf",
+   "sha256": "2acdcd6fcc4245f51e10e57540d59f0f844efcc417af7a3bdf4ba23a3121ba1d",
+   "size": 3116
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/patches/step-1/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/s0/main.tf",
+   "sha256": "608a86a48e28afb05a85ebffa42694216eddb161788e6618875b0d732fe82009",
+   "size": 3084
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/s0/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F2-0040/scenario.json",
+   "sha256": "c3b686b15a1378392bfbf4cc6fc100d0ce2585a52d7af8b3217d8cbe7b395e3f",
+   "size": 1605
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/patches/step-1/main.tf",
+   "sha256": "abb8697b8b231c672f02e970c68d78b90c541fc86cea840ab805510db7ce1cef",
+   "size": 3085
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/patches/step-1/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/s0/main.tf",
+   "sha256": "44e508e31de65316354497a27fdce4c5f06d7d10aa01fda12e7aaeff41022937",
+   "size": 3084
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/s0/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0079/scenario.json",
+   "sha256": "c5178f526bf85d3d017fdb3b104b20434dce941772554ceb13c2d93dd5d10e97",
+   "size": 1605
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/patches/step-1/main.tf",
+   "sha256": "6e8b9a4775a618145b3570093a0e45e9ac3860da6ddd3520381257474941e6d7",
+   "size": 3014
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/patches/step-1/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/s0/main.tf",
+   "sha256": "1966f30f1dc7c9aef3750bc7c40c662dcec9a7fb8256a2e8314fe04a0c66f6d6",
+   "size": 3013
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/s0/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0092/scenario.json",
+   "sha256": "1223c00624204011ceb02244f99dfa489804fa4e275bcae46add56470d4837c2",
+   "size": 1617
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/patches/step-1/main.tf",
+   "sha256": "866da01be517b05a2aa8bd52c7bf4f245afcd0895a6d1308e8ab155d9e19e7cc",
+   "size": 3319
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/patches/step-1/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/s0/main.tf",
+   "sha256": "8cdb6fb1b0120c3602118aea654773aa9dd0a8d11891fe5bbc3fd57399b18222",
+   "size": 3203
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/s0/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F4-0093/scenario.json",
+   "sha256": "fb20da3da7decaad431a6f251bfb0e3e7e8dae77416d0f2ec3730f4c2b4879d9",
+   "size": 1623
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-1/compute.tf",
+   "sha256": "50f6a70b857e7e92c98211e966b41ab618858a0f2aae7d747d5a6013cf1f62d1",
+   "size": 616
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-1/database.tf",
+   "sha256": "59431dd41454da056aae9e776082cf145dd620eb7d0acdfb111207b035db5ee0",
+   "size": 1079
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-1/network.tf",
+   "sha256": "0b0eaf4a31e15e44df328171cf121433fdb39cccc98c7d8c35b990fa7ba0f5f5",
+   "size": 1091
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-1/variables.tf",
+   "sha256": "2e3dda708a5a2fec99efbafeb21d91a02bb4e6cffc157572d91df5ab1fe75ebd",
+   "size": 690
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-2/compute.tf",
+   "sha256": "8f6982e10203f61e68e20f6e6a8af01e40b3e8c15f216f2476c0eaf231c3d65d",
+   "size": 617
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-2/database.tf",
+   "sha256": "59431dd41454da056aae9e776082cf145dd620eb7d0acdfb111207b035db5ee0",
+   "size": 1079
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-2/network.tf",
+   "sha256": "0b0eaf4a31e15e44df328171cf121433fdb39cccc98c7d8c35b990fa7ba0f5f5",
+   "size": 1091
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-2/variables.tf",
+   "sha256": "2e3dda708a5a2fec99efbafeb21d91a02bb4e6cffc157572d91df5ab1fe75ebd",
+   "size": 690
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/patches/step-2/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/s0/compute.tf",
+   "sha256": "872131809e54e15334978f42e7b8a3d81eb6d4148e1da97bed9dbc328efb633b",
+   "size": 627
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/s0/database.tf",
+   "sha256": "59431dd41454da056aae9e776082cf145dd620eb7d0acdfb111207b035db5ee0",
+   "size": 1079
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/s0/network.tf",
+   "sha256": "0b0eaf4a31e15e44df328171cf121433fdb39cccc98c7d8c35b990fa7ba0f5f5",
+   "size": 1091
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/s0/variables.tf",
+   "sha256": "2e3dda708a5a2fec99efbafeb21d91a02bb4e6cffc157572d91df5ab1fe75ebd",
+   "size": 690
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0192/scenario.json",
+   "sha256": "cc0a4a805b65f8cd1d681a92de5ae0e998a0a4224a25696fe262ca189c74ffb0",
+   "size": 2002
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/patches/step-1/main.tf",
+   "sha256": "5c14af958e76a1b1ea88bdffe5291fcc95295ea3f38cea6cbc6cc60da23752b0",
+   "size": 3537
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/patches/step-1/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/patches/step-1/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/patches/step-2/main.tf",
+   "sha256": "801b280e294d0b2c3d9ba1c83a39bf9cb9968b102f9e07b9a1e140833d8c70fd",
+   "size": 3538
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/patches/step-2/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/patches/step-2/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/s0/main.tf",
+   "sha256": "43bc0d4bb4810e828b2115a41a1d790c1f8198231875fec0026634e43a3978bc",
+   "size": 3536
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/s0/variables.tf",
+   "sha256": "a00afc994ec8b4d55a4f86a24a07f8f0ac4464b94dfd1cdc0b7e956fcf328fb2",
+   "size": 270
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/s0/versions.tf",
+   "sha256": "80232bb62a0748e7069340a368cd646441ae183891f0463879f44d5452c82599",
+   "size": 150
+  },
+  {
+   "path": "scenarios/tp-v1-F8-0196/scenario.json",
+   "sha256": "9db7673740b7091052e6f574582b0c10da2a79b3b24d076b2d16aaa2af437403",
+   "size": 2008
+  }
+ ],
+ "size": 2336274
+}

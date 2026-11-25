@@ -1,0 +1,57 @@
+{
+  "schema": "dail-live-scenario-pack/1",
+  "kind": "canonical",
+  "record": {
+    "scenario_id": "canonical",
+    "family": "canonical",
+    "split": "fixture",
+    "template_id": "canonical_baseline_eligible_v1",
+    "source_lineage_id": null,
+    "target_kind": "repair",
+    "target_invariant_id": "INV-SEC-001",
+    "protected_invariants": [
+      [
+        "INV-FUNC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-002",
+        "1.0"
+      ],
+      [
+        "INV-SEC-003",
+        "1.0"
+      ]
+    ],
+    "endpoints": {
+      "S": "aws_instance.app",
+      "D": "aws_db_instance.database"
+    },
+    "variable_values": {},
+    "step_hashes": [
+      "cfbb9d054022803d12cf0eaa47dcb6742a3a3cb85151e6a02285e5adde42cecf"
+    ]
+  },
+  "s0": "s0",
+  "hashes": {
+    "0": "cfbb9d054022803d12cf0eaa47dcb6742a3a3cb85151e6a02285e5adde42cecf"
+  },
+  "patches": {
+    "safe": {
+      "dir": "patches/safe",
+      "content_hash": "6fb0ecfaff7f16f04fbf671e9e4f4a4f387578145fc28c47e1278486f47138bb",
+      "step": 1
+    },
+    "regression": {
+      "dir": "patches/regression",
+      "content_hash": "fc7992c6194899d381bdb08ac99126f3b116da991b1b513be50f37797443f95e",
+      "step": 1
+    }
+  },
+  "steps": [],
+  "source": "DAIL dail-v1.0 fixtures/canonical_regression (Apache-2.0)"
+}

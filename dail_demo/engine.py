@@ -116,11 +116,14 @@ def run_evaluate(
     environ: Mapping[str, str],
     out: Path | None = None,
     terraform: Any = None,
+    validate_fixed: bool = False,
 ) -> Outcome:
     """Evaluate one candidate under DAIL (C) and target-only (A) and write the trace.
 
     ``patch`` is ``safe`` or ``regression`` (canonical), ``fixed`` (a TerraPreserve scenario's step
     1) or a directory (a typed patch). ``terraform`` replaces the real validate gate (tests only).
+    With ``validate_fixed`` (``record``), a fixed patch also passes the pinned ``terraform
+    validate`` gate before DAIL, and the gate's result is recorded in its admission.
     """
     run = new_run(environ, "evaluate")
     from dail_demo import evaluate_core as core
@@ -162,6 +165,12 @@ def run_evaluate(
                 raise SetupError(f"{scenario_id} step 1: the content hash is not the manifest's")
         else:
             admission["origin"] = f"DAIL fixture {sc.CANONICAL_DIR.as_posix()}/{sc.CANONICAL_PATCHES[patch]}"
+        if validate_fixed:
+            gate = terraform if terraform is not None else terraform_runner(environ, run.root / "terraform")
+            check = gate(candidate_dir)
+            admission["terraform_validate_run"] = check.to_dict()
+            if not check.ok:
+                raise SetupError(f"{scenario_id} {patch}: terraform validate refused it: {check.error}")
     else:
         gate = terraform if terraform is not None else terraform_runner(environ, run.root / "terraform")
         check = gate(candidate_dir)

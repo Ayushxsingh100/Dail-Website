@@ -34,13 +34,14 @@ from pathlib import Path
 from typing import Any, Final
 
 from core.application.baseline import BaselineRefused, BaselineRequest, establish_baseline
+from core.application.chain import describe_chain
 from core.application.orchestrator import (
     EvaluationOrchestrator,
     EvaluationRequest,
     EvaluationResult,
     LLMEvaluationRequest,
 )
-from core.domain.enums import CandidateSource
+from core.domain.enums import CandidateSource, DecisionType
 from core.domain.patch import Patch
 from core.domain.registry_v1_1 import REGISTRY_VERSION_V1_1
 from core.domain.repositories import UnitOfWork
@@ -135,6 +136,26 @@ def unified_diff(parent_dir: Path, candidate_dir: Path) -> str:
             )
         )
     return "".join(line if line.endswith("\n") else line + "\n" for line in chunks)
+
+
+# --- configuration -----------------------------------------------------------------------------
+
+
+def build_config(dail_config_dir: Path, promotion_file: Path, llm_file: Path, work: Path) -> Any:
+    """DAIL's configuration with DAIL Live's two reviewed files in place of DAIL's
+    ``base/promotion.toml`` and ``base/llm.toml`` (D-14), loaded by DAIL's ``load_config`` for the
+    ``experiment`` environment with no environment variables. ``work`` (which must not exist) gets
+    the copy; DAIL's own files are never changed."""
+    from core.application.config import load_config
+
+    target = Path(work) / "config"
+    shutil.copytree(dail_config_dir, target)
+    shutil.copyfile(promotion_file, target / "base" / "promotion.toml")
+    shutil.copyfile(llm_file, target / "base" / "llm.toml")
+    config = load_config(target, "experiment", environ={})
+    if config.get("promotion.automatic_enabled") is not True:
+        raise CoreError("the reviewed promotion file must enable promotion.automatic_enabled")
+    return config
 
 
 # --- scenarios -------------------------------------------------------------------------------
@@ -346,22 +367,10 @@ def _result(run: _Run, parent: TrustedState, opened: Sequence[str], evaluated: E
     }
 
 
-def _condition(
-    *,
-    root: Path,
-    condition: Condition,
-    scenario: ScenarioInput,
-    s0_dir: Path,
-    candidate: Candidate,
-    config: Any,
-    run_id: str,
-) -> tuple[dict[str, Any], str | None]:
-    """One condition: (its trace section, the diff of an LLM build or None)."""
-    started = time.perf_counter()
-    run = _Run(root, condition, scenario, run_id, config)
-    section: dict[str, Any] = {
-        "condition": condition.value,
-        "name": CONDITION_NAMES[condition],
+def _section(run: _Run) -> dict[str, Any]:
+    return {
+        "condition": run.condition.value,
+        "name": CONDITION_NAMES[run.condition],
         "versions": run.setup.versions(),
         "registry": dict(REGISTRY_RECORD),
         "baseline": None,
@@ -369,17 +378,26 @@ def _condition(
         "check_count": None,
         "rebuild_failure": None,
     }
-    parent, section["baseline"] = run.baseline(s0_dir)
-    diff: str | None = None
-    if parent is None:
-        section["wall_seconds"] = time.perf_counter() - started
-        return section, diff
+
+
+def _submit(
+    run: _Run,
+    *,
+    parent: TrustedState,
+    parent_dir: Path,
+    scenario: ScenarioInput,
+    candidate: Candidate,
+    sequence: int,
+    opened: Sequence[str],
+) -> tuple[dict[str, Any], EvaluationResult | None, str | None]:
+    """One candidate against ``parent`` on ``run``'s store: (the section's fields, DAIL's result or
+    None when an LLM rebuild was refused, the diff of an LLM build or None)."""
     orchestrator = run.orchestrator()
-    opened = run.setup.open_targets(scenario, 1)
+    diff: str | None = None
     if candidate.source == LLM:
         assert candidate.response is not None and candidate.request_id is not None
         validator = PatchValidator(
-            parent_dir=s0_dir,
+            parent_dir=parent_dir,
             trusted=parent,
             scope=change_scope(parent.resources),
             work_root=run.dir / "builds",
@@ -387,39 +405,39 @@ def _condition(
             now=run.clock(),
         )
         outcome = validator.validate(
-            candidate.response, request_id=candidate.request_id, patch_id=run.id("patch", 1)
+            candidate.response, request_id=candidate.request_id, patch_id=run.id("patch", sequence)
         )
         build = outcome.build
         if build is None:
-            section["rebuild_failure"] = {
-                "failure_class": None if outcome.failure_class is None else outcome.failure_class.value,
-                "errors": list(outcome.errors),
-            }
-            section["wall_seconds"] = time.perf_counter() - started
-            return section, diff
+            failure = None if outcome.failure_class is None else outcome.failure_class.value
+            return {"rebuild_failure": {"failure_class": failure, "errors": list(outcome.errors)}}, None, None
         try:
             if build.tree_hash != candidate.built_tree_hash:
-                section["rebuild_failure"] = {
-                    "failure_class": None,
-                    "errors": [
-                        f"the rebuilt tree {build.tree_hash} is not the generated "
-                        f"{candidate.built_tree_hash}"
-                    ],
-                }
-                section["wall_seconds"] = time.perf_counter() - started
-                return section, diff
-            diff = unified_diff(s0_dir, build.candidate_dir)
+                return (
+                    {
+                        "rebuild_failure": {
+                            "failure_class": None,
+                            "errors": [
+                                f"the rebuilt tree {build.tree_hash} is not the generated "
+                                f"{candidate.built_tree_hash}"
+                            ],
+                        }
+                    },
+                    None,
+                    None,
+                )
+            diff = unified_diff(parent_dir, build.candidate_dir)
             request: EvaluationRequest = LLMEvaluationRequest(
                 lineage_id=run.lineage_id,
-                candidate_id=run.id("candidate", 1),
-                candidate_sequence=1,
+                candidate_id=run.id("candidate", sequence),
+                candidate_sequence=sequence,
                 attempt_number=1,
                 patch=build.patch,
                 candidate_dir=build.candidate_dir,
                 variables=dict(scenario.variable_values),
                 definitions=run.setup.definitions,
                 bindings=run.setup.bindings,
-                context=run.context(1),
+                context=run.context(sequence),
                 open_targets=opened,
                 built_tree_hash=build.tree_hash,
             )
@@ -433,24 +451,54 @@ def _condition(
             content=f"DAIL Live {candidate.source} candidate: {candidate.label}\n",
             parent_state_id=parent.state_id,
             now=run.clock(),
-            patch_id=run.id("patch", 1),
+            patch_id=run.id("patch", sequence),
         )
         request = EvaluationRequest(
             lineage_id=run.lineage_id,
-            candidate_id=run.id("candidate", 1),
-            candidate_sequence=1,
+            candidate_id=run.id("candidate", sequence),
+            candidate_sequence=sequence,
             attempt_number=1,
             patch=patch,
             candidate_dir=candidate.directory,
             variables=dict(scenario.variable_values),
             definitions=run.setup.definitions,
             bindings=run.setup.bindings,
-            context=run.context(1),
+            context=run.context(sequence),
             open_targets=opened,
         )
         evaluated = orchestrator.evaluate(request)
-    section.update(_result(run, parent, opened, evaluated, candidate.admission))
-    section["store"] = run.store.relative_to(root).as_posix()
+    return _result(run, parent, opened, evaluated, candidate.admission), evaluated, diff
+
+
+def _condition(
+    *,
+    root: Path,
+    condition: Condition,
+    scenario: ScenarioInput,
+    s0_dir: Path,
+    candidate: Candidate,
+    config: Any,
+    run_id: str,
+) -> tuple[dict[str, Any], str | None]:
+    """One condition: (its trace section, the diff of an LLM build or None)."""
+    started = time.perf_counter()
+    run = _Run(root, condition, scenario, run_id, config)
+    section = _section(run)
+    parent, section["baseline"] = run.baseline(s0_dir)
+    diff: str | None = None
+    if parent is not None:
+        fields, _, diff = _submit(
+            run,
+            parent=parent,
+            parent_dir=s0_dir,
+            scenario=scenario,
+            candidate=candidate,
+            sequence=1,
+            opened=run.setup.open_targets(scenario, 1),
+        )
+        section.update(fields)
+        if "result_kind" in fields:
+            section["store"] = run.store.relative_to(root).as_posix()
     section["wall_seconds"] = time.perf_counter() - started
     return section, diff
 
@@ -619,6 +667,63 @@ def typed_response(parent_dir: Path, edited_dir: Path) -> LLMRepairResponse:
     )
 
 
+def _admit(
+    *,
+    parent: TrustedState,
+    parent_dir: Path,
+    edited_dir: Path,
+    scenario: ScenarioInput,
+    work_root: Path,
+    request_id: str,
+    terraform_validate: TerraformValidate | None,
+) -> dict[str, Any]:
+    """DAIL's patch validator on the typed directory, against ``parent`` (see ``admit_typed``)."""
+    record: dict[str, Any] = {
+        "stage": "dail_patch_validator",
+        "admitted": False,
+        "failure_class": None,
+        "errors": [],
+        "operations": [],
+        "terraform_validate": None,
+        "terraform_validate_run": terraform_validate is not None,
+    }
+    try:
+        response = typed_response(parent_dir, edited_dir)
+    except CoreError as refused:
+        record["errors"] = [str(refused)]
+        return record
+    validator = PatchValidator(
+        parent_dir=parent_dir,
+        trusted=parent,
+        scope=change_scope(parent.resources),
+        work_root=work_root,
+        variables=dict(scenario.variable_values),
+        now=DAIL_CLOCK_BASE,
+        terraform_validate=terraform_validate,
+    )
+    outcome = validator.validate(response, request_id=request_id)
+    record["operations"] = [[a, op.value] for a, op in outcome.operations]
+    record["terraform_validate"] = None if outcome.terraform is None else dict(outcome.terraform)
+    build = outcome.build
+    if build is None:
+        record["failure_class"] = None if outcome.failure_class is None else outcome.failure_class.value
+        record["errors"] = list(outcome.errors)
+        return record
+    try:
+        typed = normalize_directory(edited_dir, dict(scenario.variable_values), now=DAIL_CLOCK_BASE)
+        if typed.resource_set_hash != build.resource_set_hash:
+            record["errors"] = [
+                "the validator's build is not the typed configuration (resource-set hash "
+                f"{build.resource_set_hash} against {typed.resource_set_hash})"
+            ]
+            return record
+    finally:
+        shutil.rmtree(build.candidate_dir.parent, ignore_errors=True)
+    record["admitted"] = True
+    record["patch_changed_addresses"] = list(response.changed_addresses)
+    return record
+
+
 def admit_typed(
     *,
     root: Path,
@@ -637,51 +742,214 @@ def admit_typed(
     """
     root = Path(root).resolve()
     s0_dir, edited_dir = _inside(s0_dir, root), _inside(edited_dir, root)
-    record: dict[str, Any] = {
-        "stage": "dail_patch_validator",
-        "admitted": False,
-        "failure_class": None,
-        "errors": [],
-        "operations": [],
-        "terraform_validate": None,
-    }
-    try:
-        response = typed_response(s0_dir, edited_dir)
-    except CoreError as refused:
-        record["errors"] = [str(refused)]
-        return record
     run = _Run(root / "admission", Condition.C, s0_only(scenario), run_id)
     try:
         parent, baseline = run.baseline(s0_dir)
         if parent is None:
-            record["errors"] = [f"the S0 baseline was refused: {baseline['reasons']}"]
-            return record
-        validator = PatchValidator(
+            return {
+                "stage": "dail_patch_validator",
+                "admitted": False,
+                "failure_class": None,
+                "errors": [f"the S0 baseline was refused: {baseline['reasons']}"],
+                "operations": [],
+                "terraform_validate": None,
+            }
+        return _admit(
+            parent=parent,
             parent_dir=s0_dir,
-            trusted=parent,
-            scope=change_scope(parent.resources),
+            edited_dir=edited_dir,
+            scenario=scenario,
             work_root=run.dir / "builds",
-            variables=dict(scenario.variable_values),
-            now=DAIL_CLOCK_BASE,
+            request_id=run.id("typed-request"),
             terraform_validate=terraform_validate,
         )
-        outcome = validator.validate(response, request_id=run.id("typed-request"))
-        record["operations"] = [[a, op.value] for a, op in outcome.operations]
-        record["terraform_validate"] = None if outcome.terraform is None else dict(outcome.terraform)
-        build = outcome.build
-        if build is None:
-            record["failure_class"] = None if outcome.failure_class is None else outcome.failure_class.value
-            record["errors"] = list(outcome.errors)
-            return record
-        typed = normalize_directory(edited_dir, dict(scenario.variable_values), now=DAIL_CLOCK_BASE)
-        if typed.resource_set_hash != build.resource_set_hash:
-            record["errors"] = [
-                "the validator's build is not the typed configuration (resource-set hash "
-                f"{build.resource_set_hash} against {typed.resource_set_hash})"
-            ]
-            return record
-        record["admitted"] = True
-        record["patch_changed_addresses"] = list(response.changed_addresses)
-        return record
     finally:
         shutil.rmtree(root / "admission", ignore_errors=True)
+
+
+# --- sessions (L4) -----------------------------------------------------------------------------
+
+
+def _clipping(state: TrustedState) -> dict[str, Any]:
+    """A ledger entry, copied from DAIL's trusted state."""
+    return {**records.state_summary(state), "parent_state_id": state.parent_state_id}
+
+
+class Session:
+    """One session (a browser tab, PLAN §3.8, L4): one DAIL lineage (condition C) on one store.
+
+    A PROMOTE makes the candidate the session's trusted state; any other decision leaves it where it
+    was. Every candidate is also run under target-only (A) against the same parent configuration, in
+    a throwaway store of its own, so A never touches the session's lineage (PLAN §3.6). Only
+    ``FIXED_PATCH`` and ``TYPED`` candidates are taken (LLM runs are recorded locally, PLAN §3.8).
+    """
+
+    def __init__(
+        self, *, root: Path, scenario: ScenarioInput, s0_dir: Path, config: Any, session_id: str
+    ) -> None:
+        self.root = Path(root).resolve()
+        self.scenario = scenario
+        self.config = config
+        self.session_id = session_id
+        self.s0_dir = _inside(s0_dir, self.root)
+        self.run = _Run(self.root / "session", Condition.C, scenario, session_id, config)
+        parent, self.baseline = self.run.baseline(self.s0_dir)
+        if parent is None:
+            raise CoreError(f"DAIL refused the S0 baseline: {self.baseline['reasons']}")
+        self.parent: TrustedState = parent
+        self.parent_dir = self.s0_dir
+        self.sequence = 0
+        self.candidates: list[str] = []
+        self.states: list[TrustedState] = [parent]
+
+    def ledger(self) -> list[dict[str, Any]]:
+        """The session's trusted states, newest first."""
+        return [_clipping(state) for state in reversed(self.states)]
+
+    def admit_typed(
+        self, edited_dir: Path, terraform_validate: TerraformValidate | None = None
+    ) -> dict[str, Any]:
+        edited_dir = _inside(edited_dir, self.root)
+        work = self.root / "admission" / str(self.sequence + 1)
+        try:
+            return _admit(
+                parent=self.parent,
+                parent_dir=self.parent_dir,
+                edited_dir=edited_dir,
+                scenario=self.scenario,
+                work_root=work,
+                request_id=self.run.id("typed-request", self.sequence + 1),
+                terraform_validate=terraform_validate,
+            )
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+
+    def submit(
+        self,
+        candidate: Candidate,
+        *,
+        label: str,
+        versions: Mapping[str, Any],
+        step: int | None = None,
+        extra: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Evaluate one candidate against the session's trusted state; return its trace.
+
+        ``step`` is the scenario step a fixed patch is (its open targets follow DAIL's C-196 rule
+        for that step); a typed candidate has none."""
+        if candidate.source == LLM or candidate.directory is None:
+            raise CoreError("a session takes FIXED_PATCH and TYPED candidates only")
+        candidate = dataclasses.replace(candidate, directory=_inside(candidate.directory, self.root))
+        self.sequence += 1
+        n = self.sequence
+        parent, parent_dir = self.parent, self.parent_dir
+
+        started = time.perf_counter()
+        c_section = _section(self.run)
+        c_section["baseline"] = {"outcome": "SESSION_STATE", **records.state_summary(parent)}
+        opened = () if step is None else self.run.setup.open_targets(self.scenario, step)
+        fields, evaluated, _ = _submit(
+            self.run, parent=parent, parent_dir=parent_dir, scenario=self.scenario,
+            candidate=candidate, sequence=n, opened=opened,
+        )  # fmt: skip
+        c_section.update(fields)
+        c_section["store"] = self.run.store.relative_to(self.root).as_posix()
+        c_section["wall_seconds"] = time.perf_counter() - started
+        if evaluated is not None:
+            self.candidates.append(evaluated.candidate.candidate_id)
+
+        started = time.perf_counter()
+        a_root = self.root / f"A-{n}"
+        a_run = _Run(a_root, Condition.A, self.scenario, f"{self.session_id}-A-{n}", self.config)
+        try:
+            a_section = _section(a_run)
+            a_parent, a_section["baseline"] = a_run.baseline(parent_dir)
+            if a_parent is not None:
+                a_opened = () if step is None else a_run.setup.open_targets(self.scenario, step)
+                a_fields, _, _ = _submit(
+                    a_run, parent=a_parent, parent_dir=parent_dir, scenario=self.scenario,
+                    candidate=candidate, sequence=1, opened=a_opened,
+                )  # fmt: skip
+                a_section.update(a_fields)
+            a_section["store"] = None
+            a_section["wall_seconds"] = time.perf_counter() - started
+        finally:
+            shutil.rmtree(a_root, ignore_errors=True)
+
+        promoted = (
+            evaluated is not None
+            and evaluated.decision is not None
+            and evaluated.decision.decision is DecisionType.PROMOTE
+            and evaluated.state is not None
+        )
+        if promoted:
+            assert evaluated is not None and evaluated.state is not None
+            kept = self.root / "states" / f"v{evaluated.state.version}"
+            kept.mkdir(parents=True)
+            for path in config_files(candidate.directory):
+                shutil.copyfile(path, kept / path.name)
+            self.parent, self.parent_dir = evaluated.state, kept
+            self.states.append(evaluated.state)
+        sections = {"C": c_section, "A": a_section}
+        return {
+            **base_trace(
+                label=label, versions=versions, scenario=self.scenario, candidate=candidate,
+                run_id=f"{self.session_id}-{n}",
+            ),
+            "diff": unified_diff(parent_dir, candidate.directory),
+            "admission": dict(candidate.admission),
+            "conditions": sections,
+            "comparison": {
+                key: {
+                    "name": section["name"],
+                    "decision": None if section["decision"] is None else section["decision"]["type"],
+                    "reason": None if section["decision"] is None else section["decision"]["reason"],
+                    "check_count": section["check_count"],
+                }
+                for key, section in sections.items()
+            },
+            "session": {
+                "session_id": self.session_id,
+                "sequence": n,
+                "step": step,
+                "parent_state_id": parent.state_id,
+                "promoted": promoted,
+                "trusted_state": _clipping(self.parent),
+                "ledger": self.ledger(),
+            },
+            **dict(extra or {}),
+        }
+
+    def verify_chain(self) -> dict[str, Any]:
+        """DAIL's own checks on the session's store: the lineage from the current state back to S0
+        (every state is rebuilt from the store, so its hash is recomputed and each parent link is
+        checked: ``trusted_states.lineage``), the current head, and every candidate's evidence
+        chain (``describe_chain(...).problems()``)."""
+        problems: list[str] = []
+        lineage: list[str] = []
+        try:
+            with self.run.factory() as uow:
+                try:
+                    chain = uow.trusted_states.lineage(self.parent.state_id)
+                    lineage = [state.state_id for state in chain]
+                except Exception as error:  # noqa: BLE001 - every failure is reported, none decides
+                    problems.append(f"LINEAGE: {type(error).__name__}: {error}")
+                head = uow.trusted_states.get_current(self.run.lineage_id)
+                if head is None or head.state_id != self.parent.state_id:
+                    problems.append("HEAD: the lineage head is not the session's trusted state")
+                for candidate_id in self.candidates:
+                    problems.extend(
+                        f"{candidate_id}: {problem}" for problem in describe_chain(uow, candidate_id).problems()
+                    )
+        except Exception as error:  # noqa: BLE001
+            problems.append(f"UNREADABLE: {type(error).__name__}: {error}")
+        expected = [state.state_id for state in reversed(self.states)]
+        if not problems and lineage != expected:
+            problems.append("LINEAGE: the stored lineage is not the session's")
+        return {
+            "ok": not problems,
+            "states": len(lineage),
+            "candidates": len(self.candidates),
+            "lineage": lineage,
+            "problems": problems,
+        }

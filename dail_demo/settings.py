@@ -88,21 +88,15 @@ def versions(dail_root: Path, terrapreserve: Path | None = None) -> dict[str, An
 
 
 def dail_config(dail_root: Path) -> Any:
-    """DAIL's configuration with DAIL Live's two reviewed files in place of DAIL's
-    ``config/base/promotion.toml`` and ``config/base/llm.toml``, loaded by DAIL's ``load_config``
-    for the ``experiment`` environment with no environment variables (as DAIL's
-    ``experiments.runner.experiment_config`` and ``generation.run.generation_config`` do).
-    DAIL's own files are never changed: the copy is temporary."""
-    from core.application.config import load_config
+    """DAIL's configuration with DAIL Live's two reviewed files in place (D-14), built in a
+    temporary folder by ``evaluate_core.build_config`` (the same function the browser uses)."""
+    from dail_demo.evaluate_core import CoreError, build_config
 
     with tempfile.TemporaryDirectory(prefix="dail-live-config-") as tmp:
-        root = Path(tmp) / "config"
-        shutil.copytree(dail_root / "config", root)
-        shutil.copyfile(PROMOTION_FILE, root / "base" / "promotion.toml")
-        shutil.copyfile(LLM_FILE, root / "base" / "llm.toml")
-        config = load_config(root, "experiment", environ={})
-    if config.get("promotion.automatic_enabled") is not True:
-        raise SetupError("config/promotion.toml must enable promotion.automatic_enabled")
+        try:
+            config = build_config(dail_root / "config", PROMOTION_FILE, LLM_FILE, Path(tmp))
+        except CoreError as error:
+            raise SetupError(str(error)) from None
     if config.get("llm.generation_enabled") is not True:
         raise SetupError("config/llm.toml must enable llm.generation_enabled")
     return config

@@ -1,0 +1,66 @@
+{
+  "schema": "dail-live-scenario-pack/1",
+  "kind": "terrapreserve",
+  "record": {
+    "scenario_id": "tp-v1-F4-0093",
+    "family": "F4",
+    "split": "dev",
+    "template_id": "tpl-03",
+    "source_lineage_id": "tpl-03",
+    "target_kind": "repair",
+    "target_invariant_id": "INV-SEC-002",
+    "protected_invariants": [
+      [
+        "INV-FUNC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-002",
+        "1.0"
+      ],
+      [
+        "INV-SEC-003",
+        "1.0"
+      ]
+    ],
+    "endpoints": {
+      "S": "aws_instance.web_instance",
+      "D": "aws_db_instance.data_instance"
+    },
+    "variable_values": {
+      "db_password": "tp-secret-primary"
+    },
+    "step_hashes": [
+      "71e832523ec4c674c3903885b4f6cfcd860f396ed489d12c3ae32bc007e153d6",
+      "162d16eb031e12e28106ca59f3b4f76f9dc67ac428ef7fc1e8e42e6b4b06426b"
+    ]
+  },
+  "s0": "s0",
+  "hashes": {
+    "0": "71e832523ec4c674c3903885b4f6cfcd860f396ed489d12c3ae32bc007e153d6"
+  },
+  "patches": {
+    "step-1": {
+      "dir": "patches/step-1",
+      "content_hash": "162d16eb031e12e28106ca59f3b4f76f9dc67ac428ef7fc1e8e42e6b4b06426b",
+      "step": 1
+    },
+    "fixed": {
+      "dir": "patches/step-1",
+      "content_hash": "162d16eb031e12e28106ca59f3b4f76f9dc67ac428ef7fc1e8e42e6b4b06426b",
+      "step": 1
+    }
+  },
+  "steps": [
+    {
+      "index": 1,
+      "dir": "patches/step-1",
+      "content_hash": "162d16eb031e12e28106ca59f3b4f76f9dc67ac428ef7fc1e8e42e6b4b06426b"
+    }
+  ],
+  "source": "TerraPreserve terrapreserve-v1.0-public-r3 scenarios/dev/tp-v1-F4-0093 (CC-BY-4.0)"
+}

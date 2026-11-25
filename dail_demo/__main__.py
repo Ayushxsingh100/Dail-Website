@@ -36,6 +36,13 @@ def build_parser() -> argparse.ArgumentParser:
     generate.add_argument("--scenario", required=True, help="canonical or a curated TerraPreserve id")
     generate.add_argument("--attempts", type=int, default=3, help="attempts within DAIL's generator (1-3)")
     generate.add_argument("--out", help="write the trace here (never inside a repository)")
+
+    bundle = commands.add_parser("bundle", help="build site/vendor/ (DAIL, the core, scenarios, Pyodide)")
+    bundle.add_argument(
+        "--pyodide",
+        help="a folder with the Pyodide 0.27.7 files to copy in (default: check the ones in site/vendor)",
+    )
+    commands.add_parser("record", help="record the site's replays into site/runs/ (local engine, gate on)")
     return parser
 
 
@@ -67,6 +74,38 @@ def _generate(args: argparse.Namespace) -> int:
     return outcome.exit_code
 
 
+def _bundle(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from dail_demo.bundle import bundle
+    from dail_demo.settings import SetupError
+
+    try:
+        summary = bundle(os.environ, pyodide=None if args.pyodide is None else Path(args.pyodide))
+    except SetupError as error:
+        print(f"FAIL bundle: {error}")
+        return 1
+    print(f"bundle: {summary['out']}")
+    print(f"  dail/: {summary['dail_files']} DAIL files, byte-identical to DAIL_ROOT")
+    print(f"  bundled for the browser: {summary['bundled_files']} files, {summary['bundled_bytes']:,} bytes")
+    print(f"  pyodide: {summary['pyodide_bytes']:,} bytes, every file matches its pinned SHA-256")
+    print(f"  scenarios: {', '.join(summary['scenarios'])}")
+    return 0
+
+
+def _record(args: argparse.Namespace) -> int:
+    from dail_demo.record import run_record
+    from dail_demo.settings import SetupError
+
+    try:
+        summary = run_record(os.environ)
+    except SetupError as error:
+        print(f"FAIL record: {error}")
+        return 1
+    print(f"record: {summary['runs']} runs written to {summary['out']} (Gemini: {summary['gemini']})")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "check":
@@ -78,6 +117,10 @@ def main(argv: list[str] | None = None) -> int:
         return _evaluate(args)
     if args.command == "generate":
         return _generate(args)
+    if args.command == "bundle":
+        return _bundle(args)
+    if args.command == "record":
+        return _record(args)
     return 2  # unreachable: argparse rejects unknown commands
 
 

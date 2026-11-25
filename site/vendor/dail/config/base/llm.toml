@@ -1,0 +1,7 @@
+# Versioned defaults for the llm area (Doc 14 §14-15).
+# Flat keys for this area only; no [llm] header. Validated by core/application/config.py.
+# generation_enabled is safety-critical (Doc 14 §37-38): it may be enabled only in a
+# reviewed configuration file, never by an environment variable or runtime override.
+generation_enabled = false
+# provider: "fake" (CI and the default tests) or "ollama" (a local server only; C-71, C-182).
+provider = "fake"

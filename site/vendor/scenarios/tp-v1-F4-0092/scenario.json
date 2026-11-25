@@ -1,0 +1,66 @@
+{
+  "schema": "dail-live-scenario-pack/1",
+  "kind": "terrapreserve",
+  "record": {
+    "scenario_id": "tp-v1-F4-0092",
+    "family": "F4",
+    "split": "dev",
+    "template_id": "tpl-02",
+    "source_lineage_id": "tpl-02",
+    "target_kind": "repair",
+    "target_invariant_id": "INV-SEC-001",
+    "protected_invariants": [
+      [
+        "INV-FUNC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-001",
+        "1.0"
+      ],
+      [
+        "INV-SEC-002",
+        "1.0"
+      ],
+      [
+        "INV-SEC-003",
+        "1.0"
+      ]
+    ],
+    "endpoints": {
+      "S": "aws_instance.ec2_app",
+      "D": "aws_db_instance.rds_postgres"
+    },
+    "variable_values": {
+      "db_password": "tp-secret-primary"
+    },
+    "step_hashes": [
+      "7610340588d47f92235067d04fc8288b917945a69c29919fefc0b6ab96d50681",
+      "4556b4117a3901697a492154580f441d043f55b6fdc48189afe7c6bacada8ba1"
+    ]
+  },
+  "s0": "s0",
+  "hashes": {
+    "0": "7610340588d47f92235067d04fc8288b917945a69c29919fefc0b6ab96d50681"
+  },
+  "patches": {
+    "step-1": {
+      "dir": "patches/step-1",
+      "content_hash": "4556b4117a3901697a492154580f441d043f55b6fdc48189afe7c6bacada8ba1",
+      "step": 1
+    },
+    "fixed": {
+      "dir": "patches/step-1",
+      "content_hash": "4556b4117a3901697a492154580f441d043f55b6fdc48189afe7c6bacada8ba1",
+      "step": 1
+    }
+  },
+  "steps": [
+    {
+      "index": 1,
+      "dir": "patches/step-1",
+      "content_hash": "4556b4117a3901697a492154580f441d043f55b6fdc48189afe7c6bacada8ba1"
+    }
+  ],
+  "source": "TerraPreserve terrapreserve-v1.0-public-r3 scenarios/dev/tp-v1-F4-0092 (CC-BY-4.0)"
+}
