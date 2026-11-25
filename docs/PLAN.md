@@ -45,8 +45,8 @@
 - Risk scoring, findings dashboards, multi-account or user-account features, logins.
 - CloudShield AI name or branding anywhere.
 - Paid APIs, paid models or paid cloud.
-- Any server-side code, serverless function, database, API key or secret in the website. The site is static files only.
-- Gemini, or any other paid or keyed service, called from the website. AI runs are recorded locally and shown as replays.
+- Server-side code on the website other than the single Gemini proxy function of §3.9.
+- Any key or secret in the repository, in the browser, in a response, or in a log. The Gemini key exists only as the Vercel environment variable `GEMINI_API_KEY`, read only by the proxy function.
 - New safety logic. The demo may not decide anything itself; it only calls DAIL and displays what DAIL returns.
 - Committing any secret, including the Gemini API key.
 
@@ -126,6 +126,16 @@ Only DAIL's lineage advances. Condition A never becomes the session's trusted st
 - The Gemini key never leaves the laptop.
 
 **If the browser check fails** (package C's first step), live mode is dropped and the site ships with replays only. The decision is recorded in `docs/DECISIONS.md`.
+
+### 3.9 The AI loop on the website (authors' decisions, 26 Nov 2026; package D)
+
+This section amends §2 and §3.8, and replaces the *structure* part of §3.7 (the three zones) for the website. §3.7's identity (palette, fonts, borders, shadows, stamp, grid, motion rules) stays binding.
+
+- **The proxy.** One Vercel Python function, `api/propose.py`, reads the authors' key from `GEMINI_API_KEY`, builds DAIL's own repair prompt (`dail-repair-prompt-3`) from the bundled DAIL, adds a clearly separated demo addendum (the visitor's request as untrusted text; on a retry, DAIL's reason), calls Gemini, and returns only the reply text, the model name and the token counts. It accepts only the fixed request format, checks the origin and an optional passcode, and never puts the key in a response, an error or a log.
+- **DAIL judges in the browser.** The reply goes through DAIL's response parser, DAIL's patch validator and the orchestrator in the tab (C, and target-only A on the same patch). Terraform validation is not run in the browser, and the page says so.
+- **The loop.** On a REJECT, or a refusal by DAIL's parser or validator, the page sends DAIL's reason back and the AI tries again, up to 3 attempts in total. It stops at the first PROMOTE. After 3 failed attempts the trusted state is unchanged.
+- **The page.** One column: the system in plain words, then ASK, AI PROPOSES, DAIL CHECKS, and the ledger as a timeline. Technical detail is one click away ("Show the code", "Show DAIL's evidence") and hidden by default. Tabs: Ask the AI, Write your own fix, Replays.
+- **Local preview.** `python -m dail_demo serve` serves `site/` and the same proxy on `127.0.0.1` only.
 
 ### 3.7 Visual design (binding for L3; chosen by the authors on 26 Nov 2026)
 

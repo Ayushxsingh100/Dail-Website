@@ -7,7 +7,7 @@
 1. **Never merge, never enable auto-merge, never create a tag or a release.** Push the branch and open the PR, then stop. The user merges after an external review verdict.
 2. **Every change goes through a PR** from a `feature/<package>` branch to `main`.
 3. **No secrets, ever.**
-   - Never read, print, log or commit the value of `GEMINI_API_KEY`. In L0 you may only test whether it is set.
+   - The value of `GEMINI_API_KEY` may be read only by the process that calls Gemini (the proxy function, or the local `serve`, `generate` and `record`) and by the local leak scan. It is never printed, logged, written, returned or committed.
    - Never create a `.env` file with real values.
 4. **Never run** `terraform plan`, `apply` or `destroy`. Use no AWS credentials and make no AWS calls. In L0, the only Terraform command allowed is `terraform version`.
 5. **Never modify DAIL or TerraPreserve.** They are read-only inputs. Never import from DAIL's `tests/` package; later packages may import only DAIL's `core/`, `llm/`, `evidence/` and `experiments/`.
@@ -27,8 +27,8 @@
 - Risk scoring, findings dashboards, multi-account or user-account features, logins.
 - CloudShield AI name or branding anywhere.
 - Paid APIs, paid models or paid cloud.
-- Any server-side code, serverless function, database, API key or secret in the website. The site is static files only.
-- Gemini, or any other paid or keyed service, called from the website. AI runs are recorded locally and shown as replays.
+- Server-side code on the website other than the single Gemini proxy function of §3.9.
+- Any key or secret in the repository, in the browser, in a response, or in a log. The Gemini key exists only as the Vercel environment variable `GEMINI_API_KEY`, read only by the proxy function.
 - New safety logic. The demo may not decide anything itself; it only calls DAIL and displays what DAIL returns.
 - Committing any secret, including the Gemini API key.
 
