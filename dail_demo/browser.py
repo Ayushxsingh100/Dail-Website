@@ -26,6 +26,7 @@ from typing import Any, Final
 from dail_demo import DEMO_LABEL
 from dail_demo import evaluate_core as core
 from experiments.loader import ScenarioInput, StepInput, step_content_hash
+from llm.validation.parser import parse_response
 
 NOT_VALIDATED: Final = "Terraform validation is not run in the browser."
 _FILE_NAME: Final = re.compile(r"^[A-Za-z0-9_.-]{1,80}\.tf$")
@@ -224,6 +225,56 @@ class Live:
         trace["ledger"] = session.ledger()
         return _json(trace)
 
+    def _refused(self, candidate: core.Candidate, admission: dict[str, Any], diff: str | None,
+                 extra: dict[str, Any] | None = None) -> str:
+        """The trace of a candidate DAIL's parser or patch validator refused: nothing was evaluated."""
+        session = self._need_session()
+        return self._finish({
+            **core.base_trace(
+                label=DEMO_LABEL, versions=self.versions, scenario=session.scenario,
+                candidate=candidate, run_id=f"{self.session_id}-refused-{session.sequence + 1}",
+            ),
+            "diff": diff,
+            "admission": admission,
+            "conditions": None,
+            "refused_before_dail": True,
+            "session": {
+                "session_id": self.session_id,
+                "sequence": session.sequence,
+                "promoted": False,
+                "trusted_state": session.ledger()[0],
+                "ledger": session.ledger(),
+            },
+            **(extra or {}),
+        })
+
+    def submit_reply(self, reply: str, meta_json: str) -> str:
+        """An AI reply (PLAN §3.9): DAIL's response parser, DAIL's patch validator, then C and A."""
+        session = self._need_session()
+        extra = {"ai": {**json.loads(meta_json), "reply": reply}}
+        label = f"{self.scenario_id} AI proposal"
+        parsed = parse_response(reply)
+        if parsed.response is None or parsed.failure_class is not None:
+            admission: dict[str, Any] = {
+                "stage": "dail_parser", "admitted": False, "errors": list(parsed.errors) or ["the AI proposed no patch"],
+                "failure_class": None if parsed.failure_class is None else parsed.failure_class.value,
+            }
+            candidate = None
+        else:
+            admission, candidate = session.admit_reply(parsed.response, label)
+        admission["terraform_validation"] = NOT_VALIDATED
+        if candidate is None:
+            # nothing was built: the record names the reply, not a candidate directory
+            shown = core.Candidate(source=core.TYPED, label=label, directory=session.parent_dir, admission=admission)
+            refused = json.loads(self._refused(shown, admission, None, extra))
+            refused["candidate_source"] = core.LLM
+            return _json(refused)
+        self._notify("ADMITTED")
+        trace = session.submit(
+            candidate, label=DEMO_LABEL, versions=self.versions, extra={"refused_before_dail": False, **extra}
+        )
+        return self._finish(trace)
+
     def submit_files(self, files_json: str) -> str:
         """A typed edit: DAIL's patch validator, then (if admitted) C and A."""
         session = self._need_session()
@@ -233,24 +284,7 @@ class Live:
         admission["terraform_validation"] = NOT_VALIDATED
         candidate = core.Candidate(source=core.TYPED, label=label, directory=edited, admission=admission)
         if not admission["admitted"]:
-            trace = {
-                **core.base_trace(
-                    label=DEMO_LABEL, versions=self.versions, scenario=session.scenario,
-                    candidate=candidate, run_id=f"{self.session_id}-refused-{session.sequence + 1}",
-                ),
-                "diff": core.unified_diff(session.parent_dir, edited),
-                "admission": admission,
-                "conditions": None,
-                "refused_before_dail": True,
-                "session": {
-                    "session_id": self.session_id,
-                    "sequence": session.sequence,
-                    "promoted": False,
-                    "trusted_state": session.ledger()[0],
-                    "ledger": session.ledger(),
-                },
-            }
-            return self._finish(trace)
+            return self._refused(candidate, admission, core.unified_diff(session.parent_dir, edited))
         self._notify("ADMITTED")
         trace = session.submit(
             candidate, label=DEMO_LABEL, versions=self.versions, extra={"refused_before_dail": False}

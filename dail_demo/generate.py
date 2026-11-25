@@ -36,6 +36,7 @@ from dail_demo.engine import (
     write_trace,
 )
 from dail_demo.engine import summary_lines as engine_summary
+from dail_demo.prompting import context_for
 from dail_demo.settings import (
     GeminiSettings,
     SetupError,
@@ -52,55 +53,6 @@ RETRY_ON: Final = ("TRANSIENT_ERROR", "INVALID_OUTPUT", "NO_SOLUTION")
 
 def _wall() -> datetime:
     return datetime.now(UTC)
-
-
-def _context(given: Any, parent: Any) -> tuple[Any, dict[str, Any]]:
-    """DAIL's ``build_context`` with the inputs ``experiments/generation/run.py`` gives it."""
-    from experiments.generation.task import (
-        change_scope,
-        config_address,
-        focus_for,
-        objective_for,
-        scope_record,
-    )
-    from llm.adapter.context import ContextInputs, build_context
-
-    state = parent.state
-    (target,) = (d for d in parent.definitions if d.invariant_id == given.target_invariant_id)
-    scope = change_scope(state.resources)
-    focus = focus_for(target, state.resources)
-    objective = objective_for(target)
-    context = build_context(
-        ContextInputs(
-            parent_state_id=state.state_id,
-            trusted_state_hash=state.state_hash,
-            resources=tuple(state.resources),
-            invariants=parent.definitions,
-            statuses={r.invariant_id: r.status.value for r in state.invariant_refs},
-            objective=objective,
-            repair_targets=(target.invariant_id,),
-            scope=scope,
-            focus=focus,
-        )
-    )
-    facts = {
-        "parent": {
-            "state_id": state.state_id,
-            "state_hash": state.state_hash,
-            "resource_set_hash": state.resource_set_hash(),
-            "resource_addresses": sorted({config_address(r.address) for r in state.resources}),
-            "s0_content_hash": given.s0_content_hash,
-            "invariants": {
-                r.invariant_id: {"version": r.invariant_version, "status": r.status.value}
-                for r in state.invariant_refs
-            },
-        },
-        "scope": scope_record(scope),
-        "objective": objective,
-        "focus": list(focus),
-        "target_invariant_id": target.invariant_id,
-    }
-    return context, facts
 
 
 def _attempt_rows(result: Any) -> list[dict[str, Any]]:
@@ -225,7 +177,7 @@ def run_generate(
 
     gate = terraform if terraform is not None else terraform_runner(environ, run.root / "terraform")
     parent = s0_parent(given, run.root / "parent", "dail-live")
-    context, context_facts = _context(given, parent)
+    context, context_facts = context_for(given, parent)
     policy = RetryPolicy(
         policy_id=f"dail-live-retry-{attempts}",
         max_attempts=attempts,
