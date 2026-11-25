@@ -2,7 +2,7 @@
 
 * every manifest's hashes match its files, with nothing missing or unlisted;
 * nothing from DAIL's ``tests/`` is bundled;
-* the bundled DAIL files are byte-identical to ``DAIL_ROOT`` at ``dail-v1.0``;
+* the bundled DAIL files are byte-identical to those committed at ``dail-v1.0`` (D-28);
 * the bundled scenario packs equal those DAIL's loader gives;
 * Pyodide's files match their pinned SHA-256, and a changed file is refused;
 * a fresh bundle reproduces the committed ``site/vendor/`` exactly.
@@ -76,13 +76,13 @@ class BundleAgainstDailTests(unittest.TestCase):
         cls.dail = dail_root()
         cls.tp = terrapreserve_root()
 
-    def test_bundled_dail_files_are_byte_identical_to_dail_root(self) -> None:
-        from dail_demo.bundle import dail_files
+    def test_bundled_dail_files_are_byte_identical_to_the_committed_ones(self) -> None:
+        from dail_demo.bundle import committed, dail_files
 
         names = dail_files(self.dail)
         self.assertGreater(len(names), 150)
         for name in names:
-            self.assertEqual((VENDOR / "dail" / name).read_bytes(), (self.dail / name).read_bytes(), name)
+            self.assertEqual((VENDOR / "dail" / name).read_bytes(), committed(self.dail, name), name)
         bundled = {
             p.relative_to(VENDOR / "dail").as_posix()
             for p in (VENDOR / "dail").rglob("*")

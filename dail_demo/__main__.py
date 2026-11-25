@@ -86,7 +86,7 @@ def _bundle(args: argparse.Namespace) -> int:
         print(f"FAIL bundle: {error}")
         return 1
     print(f"bundle: {summary['out']}")
-    print(f"  dail/: {summary['dail_files']} DAIL files, byte-identical to DAIL_ROOT")
+    print(f"  dail/: {summary['dail_files']} DAIL files, byte-identical to the committed dail-v1.0")
     print(f"  bundled for the browser: {summary['bundled_files']} files, {summary['bundled_bytes']:,} bytes")
     print(f"  pyodide: {summary['pyodide_bytes']:,} bytes, every file matches its pinned SHA-256")
     print(f"  scenarios: {', '.join(summary['scenarios'])}")

@@ -5,8 +5,8 @@ Local only. It writes, from scratch each time:
 
 * ``dail/``: DAIL v1.0's source files the browser needs (every ``*.py`` file of ``core/``,
   ``llm/``, ``evidence/`` and ``experiments/``, DAIL's ``config/`` and ``LICENSE``), copied
-  byte-for-byte from the clean ``DAIL_ROOT`` checkout at ``dail-v1.0`` (only files git tracks at
-  the tag; never ``tests/``), with ``VERSION.json`` (tag and commit) and ``MANIFEST.sha256``;
+  byte-for-byte as committed at ``dail-v1.0`` (git blobs, not the working files: a Windows checkout
+  may hold CRLF copies, D-28; only files git tracks at the tag; never ``tests/``), with ``VERSION.json`` (tag and commit) and ``MANIFEST.sha256``;
 * ``dail_live/``: ``dail_demo/__init__.py``, ``evaluate_core.py`` and ``browser.py``, and the two
   reviewed configuration files (``config/promotion.toml``, ``config/llm.toml``);
 * ``scenarios/``: one pack per scenario (``canonical`` and every curated id of D-16): S0's
@@ -122,12 +122,22 @@ def dail_files(dail_root: Path) -> list[str]:
     return sorted(files)
 
 
+def committed(root: Path, name: str) -> bytes:
+    """The bytes of ``name`` as committed at HEAD (no line-ending conversion, unlike the checkout)."""
+    done = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{name}"], capture_output=True, check=False
+    )
+    if done.returncode != 0:
+        raise SetupError(f"git cannot read {name} at HEAD of {root}")
+    return done.stdout
+
+
 def _copy_dail(dail_root: Path, out: Path) -> int:
     names = dail_files(dail_root)
     for name in names:
         target = out / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes((dail_root / name).read_bytes())
+        target.write_bytes(committed(dail_root, name))
     (out / "VERSION.json").write_text(
         json.dumps({"dail_tag": DAIL_TAG, "dail_commit": git_commit(dail_root)}, indent=2) + "\n",
         encoding="utf-8",
@@ -154,18 +164,26 @@ def _config_copy(source: Path, target: Path) -> Path:
     return config_only_copy(Path(source), target)
 
 
+def _committed_copy(root: Path, source: Path, target: Path) -> Path:
+    """``_config_copy`` with each file's committed bytes."""
+    _config_copy(source, target)
+    for path in target.iterdir():
+        path.write_bytes(committed(root, (Path(source) / path.name).relative_to(root).as_posix()))
+    return target
+
+
 def _pack_canonical(dail_root: Path, out: Path) -> dict[str, Any]:
     from dail_demo import evaluate_core as core
     from experiments.loader import step_content_hash
 
     source = sc.canonical(dail_root)
     pack = out / sc.CANONICAL
-    s0 = _config_copy(source.s0_dir, pack / "s0")
+    s0 = _committed_copy(dail_root, source.s0_dir, pack / "s0")
     assert source.expected is not None
     scenario = core.canonical_scenario(source.expected, s0)
     patches = {}
     for name, directory in source.fixed.items():
-        copied = _config_copy(directory, pack / "patches" / name)
+        copied = _committed_copy(dail_root, directory, pack / "patches" / name)
         patches[name] = {"dir": f"patches/{name}", "content_hash": step_content_hash(copied), "step": 1}
     data = {
         "schema": "dail-live-scenario-pack/1",
