@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets: the Gemini key lives only in the environment
+.env
+.env.*
+
+# Runtime data (DAIL_LIVE_DATA must be outside the repository anyway)
+*.sqlite
+*.sqlite3
+*.db
+dail-live-data/
+traces/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# OS
+.DS_Store
