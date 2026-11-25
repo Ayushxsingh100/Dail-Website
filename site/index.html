@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DAIL Live: Demo, not part of the DAIL evaluation</title>
-<meta name="description" content="DAIL Live: ask an AI to fix a small cloud system, and watch the released DAIL decide whether its fix is safe. Demo, not part of the DAIL evaluation.">
-<link rel="preload" href="assets/fonts/archivo-latin-wdth-wght.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="description" content="Ask an AI to fix a small cloud system; the released DAIL proves whether the fix is safe. Demo, not part of the DAIL evaluation.">
+<link rel="preload" href="assets/fonts/poppins-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/dail.css">
 <script>
@@ -18,132 +18,121 @@
 </script>
 </head>
 <body>
-<a class="visually-hidden" href="#step-ask">Skip to the first step</a>
+<a class="visually-hidden" href="#main">Skip to the content</a>
 
-<header class="band">
-  <div class="wrap band__inner">
-    <h1 class="band__name">DAIL LIVE</h1>
-    <span class="demo-label" id="demo-label">Demo, not part of the DAIL evaluation</span>
-    <button type="button" class="btn btn--small band__presenter" id="presenter" aria-pressed="false">Presenter mode</button>
+<header class="hdr" id="hdr">
+  <div class="hdr__inner">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">D</span>
+      <span class="brand__name">DAIL Live</span>
+      <button type="button" class="demo" aria-describedby="demo-tip">Demo<span class="demo__tip" role="tooltip" id="demo-tip">Demo, not part of the DAIL evaluation.</span></button>
+    </div>
+    <div class="status" id="status" hidden aria-label="The current trusted state">
+      <span class="status__version" id="status-version">Trusted state v0</span>
+      <span id="status-pills" class="status"></span>
+      <span class="status__dots" id="status-dots" aria-hidden="true"></span>
+    </div>
+    <button type="button" class="sbtn menu-btn" id="menu" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <div class="tabs" role="tablist" aria-label="Mode">
+        <button type="button" class="tab" role="tab" id="tab-ask" aria-selected="true" aria-controls="main">Ask the AI</button>
+        <button type="button" class="tab" role="tab" id="tab-write" aria-selected="false" aria-controls="main">Write your own fix</button>
+        <button type="button" class="tab" role="tab" id="tab-replays" aria-selected="false" aria-controls="main">Replays</button>
+      </div>
+      <button type="button" class="sbtn" id="presenter" aria-pressed="false">Presenter</button>
+      <button type="button" class="sbtn" id="ledger-open" aria-expanded="false" aria-controls="drawer">Ledger</button>
+    </nav>
   </div>
 </header>
 
-<main class="wrap page">
-  <p class="kicker page__lead">An AI proposes a fix. DAIL decides whether it is safe.</p>
-  <div class="tabs" role="tablist" aria-label="Mode">
-    <button type="button" class="tab" role="tab" id="tab-ask" aria-selected="true" aria-controls="main-panel">Ask the AI</button>
-    <button type="button" class="tab" role="tab" id="tab-write" aria-selected="false" aria-controls="main-panel">Write your own fix</button>
-    <button type="button" class="tab" role="tab" id="tab-replays" aria-selected="false" aria-controls="main-panel">Replays</button>
-  </div>
-
-  <div id="main-panel" role="tabpanel" aria-labelledby="tab-ask">
-    <section class="step step--system" aria-labelledby="system-title">
-      <span class="step__num" aria-hidden="true">0</span>
-      <div class="step__body">
-        <h2 class="step__title" id="system-title">The system</h2>
-        <div class="system">
-          <ol class="picture" aria-label="Internet, then app server, then database">
-            <li>Internet</li><li>App server</li><li>Database</li>
-          </ol>
-          <ul class="health" id="health" aria-label="What DAIL says about the trusted system"></ul>
-        </div>
+<main id="main">
+  <!-- Screen 1: Ask -->
+  <section class="ask-screen" id="ask-screen" aria-labelledby="headline">
+    <p class="tagline">AI writes the fix · DAIL proves it is safe</p>
+    <h1 class="headline" id="headline">What should the <span class="headline__ai">AI</span> fix?</h1>
+    <ul class="health" id="health" aria-label="What DAIL says about the trusted system"></ul>
+    <form class="prompt" id="ask-form">
+      <div class="prompt__main">
+        <label class="prompt__label" for="instruction">Your request to Gemini</label>
+        <textarea class="prompt__input" id="instruction" rows="2" maxlength="280" autocomplete="off"></textarea>
       </div>
-    </section>
-
-    <section class="step step--untrusted hatch" id="step-ask" aria-labelledby="ask-title">
-      <span class="step__num" aria-hidden="true">1</span>
-      <div class="step__body">
-        <h2 class="step__title" id="ask-title">Ask</h2>
-
-        <form class="panel" id="ask-form">
-          <label class="ask__label" for="instruction">Ask the AI to fix this infrastructure</label>
-          <textarea class="ask__input" id="instruction" rows="2" maxlength="280" autocomplete="off"></textarea>
-          <div class="chips" id="chips" role="group" aria-label="Suggestions"></div>
-          <div class="field" id="passcode-field" hidden>
-            <label class="label" for="passcode">Passcode</label>
-            <input id="passcode" type="password" autocomplete="off">
-          </div>
-          <button type="submit" class="btn btn--ink btn--big" id="ask" disabled>Ask Gemini</button>
-          <p class="note">Your request and the configuration are sent to Google's Gemini (free tier; Google may use them to improve its products). Don't type personal data.</p>
-        </form>
-
-        <form class="panel" id="write-form" hidden>
-          <p class="ask__label" id="write-label">Edit the system and submit your own fix</p>
-          <div class="chips" id="quick-fill" role="group" aria-label="Ready-made edits"></div>
-          <div class="chips" id="files" role="group" aria-label="Configuration files"></div>
-          <div class="editor">
-            <pre class="editor__lines" id="lines" aria-hidden="true">1</pre>
-            <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Configuration file"></textarea>
-          </div>
-          <button type="submit" class="btn btn--ink btn--big" id="submit" disabled>Submit to DAIL</button>
-        </form>
-
-        <div class="panel" id="replay-form" hidden>
-          <div class="field">
-            <label class="ask__label" for="replay">Watch a recorded run</label>
-            <select id="replay"></select>
-          </div>
-          <p class="note">Recorded on the authors' laptop with the same DAIL, with Terraform validation.</p>
-        </div>
-
-        <div class="panel loading" id="loading" role="status">
-          <p class="loading__title" id="loading-title">Loading DAIL into your browser</p>
-          <p id="loading-detail" class="muted">The released DAIL runs here, unmodified. Replays work meanwhile.</p>
-          <div class="meter" aria-hidden="true"><div class="meter__fill" id="meter"></div></div>
-        </div>
-        <p class="notice" id="notice" role="alert" hidden></p>
-
-        <details class="more" id="system-picker">
-          <summary>Use another system, or start over</summary>
-          <div class="field"><label class="label" for="scenario">System</label><select id="scenario"></select></div>
-          <button type="button" class="btn btn--small" id="reset" disabled>Start over</button>
-        </details>
+      <div class="prompt__foot">
+        <label for="scenario">Scenario</label>
+        <select id="scenario"></select>
+        <span class="prompt__model" id="model-meta">judged by DAIL v1.0</span>
+        <span class="passcode" id="passcode-field" hidden><label for="passcode">Passcode</label><input id="passcode" type="password" autocomplete="off"></span>
+        <button type="submit" class="btn btn--primary" id="ask" disabled>Ask →</button>
       </div>
-    </section>
-
-    <div class="attempts" id="attempts" role="tablist" aria-label="Attempts" hidden></div>
-    <p class="attempt-note" id="attempt-note" role="status" hidden></p>
-
-    <div id="result" hidden>
-      <section class="step step--untrusted hatch" aria-labelledby="propose-title">
-        <span class="step__num" aria-hidden="true">2</span>
-        <div class="step__body">
-          <h2 class="step__title" id="propose-title">AI proposes</h2>
-          <div id="proposal"></div>
-        </div>
-      </section>
-
-      <div class="boundary" aria-hidden="true"><span class="boundary__label">Trust boundary</span></div>
-
-      <section class="step" id="step-check" aria-labelledby="check-title">
-        <span class="step__num" aria-hidden="true">3</span>
-        <div class="step__body">
-          <h2 class="step__title" id="check-title">DAIL checks</h2>
-          <ol class="boxes" id="boxes"></ol>
-          <div id="decision"></div>
-          <details class="more" id="evidence" hidden>
-            <summary>Show DAIL's evidence</summary>
-            <div id="evidence-body"></div>
-          </details>
-        </div>
-      </section>
+    </form>
+    <div class="chips" id="chips" role="group" aria-label="Suggestions"></div>
+    <div class="loading" id="loading" role="status">
+      <span id="loading-title">Loading DAIL into your browser</span>
+      <div class="meter" aria-hidden="true"><div class="meter__fill" id="meter"></div></div>
     </div>
+    <p class="notice" id="ask-notice" role="alert" hidden></p>
+    <p class="footnote">Sent to Google Gemini (free tier; Google may use it to improve its products). Every decision comes from DAIL, not the AI. Demo, not part of the DAIL evaluation.</p>
+  </section>
 
-    <section class="timeline" aria-labelledby="ledger-title">
-      <div class="timeline__head">
-        <h2 class="label" id="ledger-title">The ledger</h2>
-        <button type="button" class="btn btn--small" id="verify" hidden>Verify chain</button>
+  <!-- Screen 2: the thread (Ask), screen 3 (Write your own fix) and opened replays -->
+  <section class="thread-wrap" id="thread-screen" hidden aria-label="The conversation">
+    <div id="write-head" hidden>
+      <div class="page-head">
+        <h2>Beat the gate</h2>
+        <p>Edit the configuration yourself. Try to sneak a break past DAIL.</p>
       </div>
-      <ol class="states" id="ledger"></ol>
-      <div id="state-detail"></div>
-      <div id="verify-result" role="status"></div>
-    </section>
-  </div>
+    </div>
+    <div class="back" id="replay-back" hidden><button type="button" class="sbtn" id="back-to-runs">← All recorded runs</button></div>
+    <ol class="thread" id="thread"></ol>
+    <p class="notice" id="thread-notice" role="alert" hidden></p>
+  </section>
 
-  <div class="visually-hidden" id="announce" aria-live="assertive"></div>
+  <!-- Screen 4: Replays -->
+  <section class="replays-wrap" id="replays-screen" hidden aria-labelledby="replays-title">
+    <div class="replays-head">
+      <div class="page-head">
+        <h2 id="replays-title">Recorded runs</h2>
+        <p>Real runs recorded on the authors' laptop, with the full Terraform check.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filter">
+        <button type="button" class="sbtn" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="sbtn" data-filter="gemini" aria-pressed="false">Gemini</button>
+        <button type="button" class="sbtn" data-filter="reference" aria-pressed="false">Reference patches</button>
+        <button type="button" class="sbtn" data-filter="rejected" aria-pressed="false">Rejected</button>
+      </div>
+    </div>
+    <ul class="grid" id="runs"></ul>
+    <p class="footnote" id="runs-count"></p>
+  </section>
 </main>
 
-<footer class="footer wrap">
+<!-- The docked prompt (screen 2) -->
+<div class="dock" id="dock" hidden>
+  <form class="dock__box" id="dock-form">
+    <label class="dock__label" for="next">Next request</label>
+    <textarea class="dock__input" id="next" rows="1" maxlength="280" autocomplete="off"></textarea>
+    <button type="submit" class="btn btn--primary" id="dock-ask">Ask →</button>
+    <button type="button" class="btn" id="stop" hidden>Stop</button>
+  </form>
+</div>
+
+<!-- The ledger drawer -->
+<aside class="drawer" id="drawer" hidden aria-labelledby="drawer-title">
+  <div class="drawer__head">
+    <h2 id="drawer-title">The ledger</h2>
+    <button type="button" class="sbtn" id="ledger-close">Close</button>
+  </div>
+  <p class="drawer__intro">Every trusted state of this tab, newest first. Each is linked to its parent by a hash. Only DAIL's promotion can add one.</p>
+  <div class="drawer__verify">
+    <button type="button" class="btn" id="verify">Verify chain</button>
+    <div id="verify-result" role="status"></div>
+  </div>
+  <ol class="states" id="states"></ol>
+  <p class="drawer__intro">Rejected fixes never enter the ledger. Reloading the page starts over at v0.</p>
+</aside>
+
+<div class="visually-hidden" id="announce" aria-live="polite"></div>
+
+<footer class="site-foot">
   <p><strong>DAIL Live is a demonstration, not part of the DAIL evaluation.</strong> The research results are in DAIL's repository and paper. Every decision here comes from the released DAIL v1.0. <a href="credits.html">Credits and licences</a>.</p>
 </footer>
 

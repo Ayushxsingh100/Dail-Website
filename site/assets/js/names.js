@@ -1,25 +1,29 @@
-// The plain words of the first screen (PLAN §3.9, D-35). Fixed descriptions of DAIL's four invariants,
-// written once, here. They describe what DAIL reports; they never decide anything.
+// Plain language (PLAN §3.9; work package D §3; D-37). Fixed texts, written once, here. They only
+// describe what DAIL returned and never decide anything.
 
 export const NAMES = {
-  "INV-SEC-001": { holds: "SSH is closed to the internet", broken: "SSH would be open to the internet" },
-  "INV-SEC-002": { holds: "The database port is closed to the internet", broken: "the database port would be open to the internet" },
-  "INV-SEC-003": { holds: "The database is not public", broken: "the database would be public" },
-  "INV-FUNC-001": { holds: "The app can reach the database", broken: "the app would lose its connection to the database" },
+  "INV-SEC-001": { holds: "SSH closed to the internet", broken: "SSH open to the internet", wouldBreak: "SSH would be open to the internet", shortHolds: "SSH closed", shortBroken: "SSH open" },
+  "INV-SEC-002": { holds: "Database port closed", broken: "Database port open to the internet", wouldBreak: "the database port would be open to the internet", shortHolds: "DB port closed", shortBroken: "DB port open" },
+  "INV-SEC-003": { holds: "Database not public", broken: "Database is public", wouldBreak: "the database would become public", shortHolds: "DB not public", shortBroken: "DB public" },
+  "INV-FUNC-001": { holds: "App reaches database", broken: "App can't reach database", wouldBreak: "the app would lose its connection to the database", shortHolds: "App reaches DB", shortBroken: "App can't reach DB" },
 };
+export const ORDER = ["INV-SEC-001", "INV-SEC-002", "INV-SEC-003", "INV-FUNC-001"];
 
-const VERBS = { CREATED: "Adds", DELETED: "Deletes", MODIFIED: "Changes", REPLACED: "Replaces" };
-const KINDS = {
-  aws_security_group_rule: "rule", aws_security_group: "firewall group", aws_instance: "server",
-  aws_db_instance: "database", aws_db_subnet_group: "database subnet group", aws_subnet: "subnet",
-  aws_vpc: "network", aws_route_table: "route table", aws_route_table_association: "route table link",
-  aws_internet_gateway: "internet gateway",
-};
+// A status from DAIL's ledger as a pill: { kind: "pass" | "fail" | "unknown", text, short, mark }.
+export function healthOf(id, status) {
+  const name = NAMES[id];
+  if (status === "PROTECTED") return { kind: "pass", text: name.holds, short: name.shortHolds, mark: "✓" };
+  if (status === "VIOLATED") return { kind: "fail", text: name.broken, short: name.shortBroken, mark: "✕" };
+  return { kind: "unknown", text: `${name.holds}: unknown`, short: `${name.shortHolds}: unknown`, mark: "?" };
+}
 
-// One change of DAIL's identity stage, in plain words: [words, resource name].
-export function changeWords(change) {
-  const [type, ...rest] = String(change.address).split(".");
-  return [`${VERBS[change.change_type] || "May change"} ${KINDS[type] || "resource"}`, rest.join(".")];
+const VERBS = { CREATED: "Adds", MODIFIED: "Edits", DELETED: "Removes", REPLACED: "Replaces", UNCERTAIN: "Unclear change" };
+const NOUNS = { aws_security_group_rule: "the rule", aws_security_group: "the security group", aws_instance: "the app server", aws_db_instance: "the database" };
+
+// One changed resource of DAIL's identity stage: { verb, noun, name }.
+export function changeWords(address, changeType) {
+  const [type, ...rest] = String(address).split(".");
+  return { verb: changeType === null ? "Keeps" : VERBS[changeType] || "Unclear change", noun: NOUNS[type] || type, name: rest.join(".") };
 }
 
 export function invariantOf(target) {
@@ -27,35 +31,76 @@ export function invariantOf(target) {
   return match && NAMES[match[1]] ? match[1] : null;
 }
 
+// The verification result a blocking condition names ("result <id>: FAIL path.missing").
+function resultOf(blocking) {
+  const match = /:\s*(PASS|FAIL|UNKNOWN|UNSUPPORTED|VERIFIER_ERROR)\b/.exec(String(blocking.detail || ""));
+  if (match) return match[1];
+  return blocking.code === "REQUIRED_CHECK_FAILED" ? "FAIL" : "UNKNOWN";
+}
+
 function joined(parts) {
   return parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 }
 
-// The one-sentence reason, built only from DAIL's decision, its blocking conditions and the names above.
-export function plainReason(decision) {
-  if (decision.type === "PROMOTE") return "Accepted: DAIL proved that everything that must hold still holds.";
-  const word = decision.type === "REJECT" ? "Rejected" : "Not accepted";
-  const parts = [];
-  for (const b of decision.blocking || []) {
-    const id = invariantOf(b.target);
-    const text = !id ? "one of DAIL's required checks did not pass"
-      : b.code === "REQUIRED_CHECK_FAILED" ? NAMES[id].broken
-        : `DAIL could not prove that ${NAMES[id].holds.charAt(0).toLowerCase()}${NAMES[id].holds.slice(1)}`;
-    const fixed = text.replace("that sSH", "that SSH");
-    if (!parts.includes(fixed)) parts.push(fixed);
-  }
-  if (!parts.length) parts.push("DAIL's rules do not allow it");
-  return `${word}: ${joined(parts)}.`;
+function inSentence(text) {
+  // "Database port closed" -> "database port closed"; "SSH closed..." keeps its capitals
+  return /^[A-Z][a-z]/.test(text) ? text.charAt(0).toLowerCase() + text.slice(1) : text;
 }
 
-// The plain names of the invariants DAIL's blocking conditions name (for the feedback to the AI).
+// The decision sentence, built only from DAIL's decision type and its blocking conditions.
+export function decisionSentence(decision, target) {
+  if (decision.type === "PROMOTE") {
+    return `Promoted: ${NAMES[target] ? NAMES[target].holds : "the repair"}, and everything that held before still holds.`;
+  }
+  if (decision.type === "ESCALATE") return "DAIL hit an error and stopped. Nothing was changed.";
+  const failed = [];
+  const unproven = [];
+  for (const b of decision.blocking || []) {
+    const id = invariantOf(b.target);
+    if (!id) continue;
+    const list = resultOf(b) === "FAIL" ? failed : unproven;
+    if (!list.includes(id)) list.push(id);
+  }
+  if (failed.length) return `Rejected: ${joined(failed.map((id) => NAMES[id].wouldBreak))}.`;
+  if (unproven.length) {
+    return `DAIL couldn't prove that ${joined(unproven.map((id) => inSentence(NAMES[id].holds)))}, so it won't promote. DAIL never guesses.`;
+  }
+  return decision.type === "REJECT" ? "Rejected: one of DAIL's required checks did not pass." : "DAIL did not promote this fix. Nothing was changed.";
+}
+
+export function refusedSentence(reason) {
+  return `DAIL's patch checker refused this fix: ${reason}.`.replace(/\.\.$/, ".");
+}
+
+// DAIL's raw decision line, e.g. "REQUIRED_CHECK_FAILED · INVARIANT:INV-FUNC-001:1 · path.missing".
+export function rawLine(decision, carried = []) {
+  const parts = [decision.reason];
+  for (const b of decision.blocking || []) {
+    parts.push(b.target);
+    const tail = /:\s*(?:FAIL|UNKNOWN|UNSUPPORTED|VERIFIER_ERROR)\s+(.+)$/.exec(String(b.detail || ""));
+    if (tail) parts.push(tail[1]);
+  }
+  for (const id of carried) parts.push(`${id} carried forward`);
+  return parts.join(" · ");
+}
+
+// The plain names of the invariants DAIL's blocking conditions name (sent back to Gemini).
 export function failedNames(decision) {
   return [...new Set((decision.blocking || []).map((b) => invariantOf(b.target)).filter(Boolean))].map((id) => NAMES[id].holds);
 }
 
-// What target-only checking (condition A) decided on the same patch.
-export function normalChecker(decision) {
-  if (decision === "PROMOTE") return ["A normal checker would have ", "accepted", " this fix."];
-  if (decision === "REJECT") return ["A normal checker would have also ", "rejected", " this fix."];
-  return ["A normal checker would have ", "reached no clear answer", " on this fix."];
+// What target-only checking (condition A) decided on the same patch: [before, word, after, kind].
+export function comparison(entry) {
+  const checks = `(${entry.check_count} checks)`;
+  if (entry.decision === "PROMOTE") return ["A normal checker would have ", "accepted", ` this fix ${checks}.`, "pass"];
+  if (entry.decision === "REJECT") return ["A normal checker would also have ", "rejected", ` it ${checks}.`, "fail"];
+  return ["A normal checker would have ", "reached no decision", ` ${checks}.`, "unknown"];
+}
+
+// Plain names of the systems (the scenario select and the replays).
+const PROBLEM = { "INV-SEC-001": "SSH open to the internet", "INV-SEC-002": "Database port open to the internet" };
+export function scenarioName(scenario) {
+  if (!scenario) return "";
+  if (scenario.id === "canonical") return "App and database (canonical)";
+  return `${PROBLEM[scenario.target] || "A repair"} · ${scenario.family} variant ${scenario.id.slice(-4)}`;
 }
