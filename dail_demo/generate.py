@@ -39,6 +39,7 @@ from dail_demo.engine import summary_lines as engine_summary
 from dail_demo.settings import (
     GeminiSettings,
     SetupError,
+    committed_copy,
     dail_config,
     gemini_settings,
     terraform_runner,
@@ -182,7 +183,11 @@ def run_generate(
 
     source, tp_root = resolve(scenario_id, environ, run.dail_root)
     meta = versions(run.dail_root, tp_root)
-    s0_copy = config_only_copy(source.s0_dir, run.root / "inputs" / "s0")
+    s0_target = run.root / "inputs" / "s0"
+    if source.scenario is None:  # DAIL's own fixture: its committed bytes (D-28)
+        s0_copy = committed_copy(run.dail_root, source.s0_dir, s0_target)
+    else:
+        s0_copy = config_only_copy(source.s0_dir, s0_target)
     if source.scenario is None:
         assert source.expected is not None
         scenario = core.canonical_scenario(source.expected, s0_copy)

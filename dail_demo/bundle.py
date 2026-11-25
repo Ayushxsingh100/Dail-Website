@@ -34,7 +34,15 @@ from typing import Any, Final
 
 from dail_demo import scenarios as sc
 from dail_demo.environment import DAIL_TAG, REPO_ROOT, TERRAPRESERVE_TAG
-from dail_demo.settings import CONFIG_DIR, SetupError, git_commit, import_dail, terrapreserve_root
+from dail_demo.settings import (
+    CONFIG_DIR,
+    SetupError,
+    committed,
+    committed_copy,
+    git_commit,
+    import_dail,
+    terrapreserve_root,
+)
 
 SITE: Final = REPO_ROOT / "site"
 VENDOR: Final = SITE / "vendor"
@@ -122,16 +130,6 @@ def dail_files(dail_root: Path) -> list[str]:
     return sorted(files)
 
 
-def committed(root: Path, name: str) -> bytes:
-    """The bytes of ``name`` as committed at HEAD (no line-ending conversion, unlike the checkout)."""
-    done = subprocess.run(
-        ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{name}"], capture_output=True, check=False
-    )
-    if done.returncode != 0:
-        raise SetupError(f"git cannot read {name} at HEAD of {root}")
-    return done.stdout
-
-
 def _copy_dail(dail_root: Path, out: Path) -> int:
     names = dail_files(dail_root)
     for name in names:
@@ -164,26 +162,18 @@ def _config_copy(source: Path, target: Path) -> Path:
     return config_only_copy(Path(source), target)
 
 
-def _committed_copy(root: Path, source: Path, target: Path) -> Path:
-    """``_config_copy`` with each file's committed bytes."""
-    _config_copy(source, target)
-    for path in target.iterdir():
-        path.write_bytes(committed(root, (Path(source) / path.name).relative_to(root).as_posix()))
-    return target
-
-
 def _pack_canonical(dail_root: Path, out: Path) -> dict[str, Any]:
     from dail_demo import evaluate_core as core
     from experiments.loader import step_content_hash
 
     source = sc.canonical(dail_root)
     pack = out / sc.CANONICAL
-    s0 = _committed_copy(dail_root, source.s0_dir, pack / "s0")
+    s0 = committed_copy(dail_root, source.s0_dir, pack / "s0")
     assert source.expected is not None
     scenario = core.canonical_scenario(source.expected, s0)
     patches = {}
     for name, directory in source.fixed.items():
-        copied = _committed_copy(dail_root, directory, pack / "patches" / name)
+        copied = committed_copy(dail_root, directory, pack / "patches" / name)
         patches[name] = {"dir": f"patches/{name}", "content_hash": step_content_hash(copied), "step": 1}
     data = {
         "schema": "dail-live-scenario-pack/1",

@@ -22,6 +22,7 @@ from dail_demo import scenarios as sc
 from dail_demo.environment import REPO_ROOT
 from dail_demo.settings import (
     SetupError,
+    committed_copy,
     dail_config,
     data_dir,
     import_dail,
@@ -131,7 +132,10 @@ def run_evaluate(
 
     source, tp_root = resolve(scenario_id, environ, run.dail_root)
     inputs = run.root / "inputs"
-    s0 = _copy(source.s0_dir, inputs / "s0")
+    if source.scenario is None:  # DAIL's own fixture: its committed bytes (D-28)
+        s0 = committed_copy(run.dail_root, source.s0_dir, inputs / "s0")
+    else:
+        s0 = _copy(source.s0_dir, inputs / "s0")
     meta = versions(run.dail_root, tp_root)
     if patch in source.fixed:
         kind, origin = core.FIXED_PATCH, source.fixed[patch]
@@ -139,7 +143,10 @@ def run_evaluate(
         raise SetupError(f"--patch {patch} does not exist for {scenario_id}; use one of {sorted(source.fixed)}")
     else:
         kind, origin = core.TYPED, Path(patch)
-    candidate_dir = _copy(origin, inputs / "candidate")
+    if kind == core.FIXED_PATCH and source.scenario is None:
+        candidate_dir = committed_copy(run.dail_root, origin, inputs / "candidate")
+    else:
+        candidate_dir = _copy(origin, inputs / "candidate")
 
     if source.scenario is None:
         assert source.expected is not None
@@ -154,7 +161,7 @@ def run_evaluate(
         admission: dict[str, Any] = {
             "stage": "fixed_patch",
             "admitted": True,
-            "content_hash": step_content_hash(Path(origin)),
+            "content_hash": step_content_hash(candidate_dir if source.scenario is None else Path(origin)),
         }
         if source.scenario is not None and tp_root is not None:
             admission["content_hash_matches_manifest"] = (

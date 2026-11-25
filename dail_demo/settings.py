@@ -75,6 +75,26 @@ def git_commit(root: Path) -> str:
     return done.stdout.strip() if done.returncode == 0 else "unknown"
 
 
+def committed(root: Path, name: str) -> bytes:
+    """The bytes of ``name`` as committed at HEAD (no line-ending conversion, unlike the checkout)."""
+    done = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{name}"], capture_output=True, check=False
+    )
+    if done.returncode != 0:
+        raise SetupError(f"git cannot read {name} at HEAD of {root}")
+    return done.stdout
+
+
+def committed_copy(root: Path, source: Path, target: Path) -> Path:
+    """DAIL's ``config_only_copy`` of ``source`` (inside ``root``), with the committed bytes (D-28)."""
+    from experiments.generation.parent import config_only_copy
+
+    config_only_copy(Path(source), target)
+    for path in target.iterdir():
+        path.write_bytes(committed(root, (Path(source) / path.name).relative_to(root).as_posix()))
+    return target
+
+
 def versions(dail_root: Path, terrapreserve: Path | None = None) -> dict[str, Any]:
     found: dict[str, Any] = {
         "dail_tag": DAIL_TAG,

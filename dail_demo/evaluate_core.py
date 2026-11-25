@@ -27,7 +27,7 @@ import difflib
 import re
 import shutil
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -247,9 +247,30 @@ class _Run:
         initialize_database(self.store)
         self.clock = LogicalClock()
         self.lineage_id = self.id("lineage")
+        self.on_event: Callable[[str], None] | None = None  # display only, see ``watch``
+        self._watched: str | None = None
+        self._seen = 0
 
     def factory(self) -> UnitOfWork:
+        self.report()
         return SqliteUnitOfWork(self.store)
+
+    def watch(self, candidate_id: str | None) -> None:
+        """Report ``candidate_id``'s audit events to ``on_event`` as DAIL commits them (D-29).
+
+        DAIL's orchestrator opens one unit of work per stage, so when it opens the next one the
+        previous stage's records are committed. They are read back through DAIL's own audit
+        repository in a unit of work of their own; nothing is written and nothing is decided."""
+        self._watched, self._seen = candidate_id, 0
+
+    def report(self) -> None:
+        if self.on_event is None or self._watched is None:
+            return
+        with SqliteUnitOfWork(self.store) as uow:
+            events = uow.audit.list_for_candidate(self._watched)
+        for event in events[self._seen :]:
+            self.on_event(event.event_type.value)
+        self._seen = len(events)
 
     def id(self, *parts: object) -> str:
         return name_id(ID_NAMESPACE, self.run_id, self.condition.value, *parts)
@@ -848,10 +869,13 @@ class Session:
         c_section = _section(self.run)
         c_section["baseline"] = {"outcome": "SESSION_STATE", **records.state_summary(parent)}
         opened = () if step is None else self.run.setup.open_targets(self.scenario, step)
+        self.run.watch(self.run.id("candidate", n))
         fields, evaluated, _ = _submit(
             self.run, parent=parent, parent_dir=parent_dir, scenario=self.scenario,
             candidate=candidate, sequence=n, opened=opened,
         )  # fmt: skip
+        self.run.report()
+        self.run.watch(None)
         c_section.update(fields)
         c_section["store"] = self.run.store.relative_to(self.root).as_posix()
         c_section["wall_seconds"] = time.perf_counter() - started

@@ -58,8 +58,18 @@ class Live:
         }
         self.index = json.loads((self.vendor / "scenarios" / "index.json").read_text(encoding="utf-8"))
         self.session: core.Session | None = None
+        self._listener: Any = None
         self.session_id: str | None = None
         self.scenario_id: str | None = None
+
+    def listen(self, listener: Any) -> None:
+        """``listener(name)`` is called with ``ADMITTED`` and then with each audit event DAIL commits
+        for the session's candidate, as it commits it (the page fills its stages from these)."""
+        self._listener = listener
+
+    def _notify(self, name: str) -> None:
+        if self._listener is not None:
+            self._listener(name)
 
     # --- helpers ---------------------------------------------------------------------------------
 
@@ -173,6 +183,7 @@ class Live:
         self.session = core.Session(
             root=root, scenario=scenario, s0_dir=s0, config=self.config, session_id=self.session_id
         )
+        self.session.run.on_event = self._notify
         self.scenario_id = scenario_id
         return _json(
             {
@@ -240,6 +251,7 @@ class Live:
                 },
             }
             return self._finish(trace)
+        self._notify("ADMITTED")
         trace = session.submit(
             candidate, label=DEMO_LABEL, versions=self.versions, extra={"refused_before_dail": False}
         )
