@@ -30,6 +30,7 @@ FILES = {p.name: p.read_text(encoding="utf-8") for p in (PACK / "s0").glob("*.tf
 FEEDBACK = {"decision": "REJECT", "reason": "REQUIRED_CHECK_FAILED", "blocking": ["INVARIANT:INV-FUNC-001:1"],
             "failed": ["The app can reach the database"]}  # fmt: skip
 PASSCODE = "open-sesame"
+MODEL = __import__("dail_demo.settings", fromlist=["x"]).gemini_settings().model
 
 
 def body(**changes: Any) -> bytes:
@@ -169,11 +170,11 @@ class RequestTests(ProxyCase):
                 self.assertEqual(self.send(headers=headers, environ=environ).status, 401)
         self.assertEqual(self.server.seen, [])
         self.assertEqual(self.send(headers={**HEADERS, "x-demo-passcode": PASSCODE}, environ=environ).status, 200)
-        self.assertEqual(self.send(method="GET", environ=environ).body, {"available": True, "passcode_required": True})
+        self.assertEqual(self.send(method="GET", environ=environ).body, {"available": True, "passcode_required": True, "model": MODEL})
 
     def test_other_methods_and_status(self) -> None:
         self.assertEqual(self.send(method="PUT").status, 405)
-        self.assertEqual(self.send(method="GET").body, {"available": True, "passcode_required": False})
+        self.assertEqual(self.send(method="GET").body, {"available": True, "passcode_required": False, "model": MODEL})
         self.assertEqual(self.send(method="GET", environ={"GEMINI_API_KEY": " "}).body["available"], False)
 
 
@@ -279,7 +280,7 @@ class ServeTests(ProxyCase):
     def test_the_page_the_status_and_a_proposal(self) -> None:
         self.assertIn("Demo, not part of the DAIL evaluation", self.call("/index.html")[1])
         status, text, headers = self.call("/api/propose")
-        self.assertEqual((status, json.loads(text)), (200, {"available": True, "passcode_required": False}))
+        self.assertEqual((status, json.loads(text)), (200, {"available": True, "passcode_required": False, "model": MODEL}))
         self.assertEqual(headers["Cache-Control"], "no-store")
         status, text, _ = self.call("/api/propose", body(), Origin=f"http://127.0.0.1:{self.port}")
         self.assertEqual((status, json.loads(text)["reply"]), (200, "the reply"))
@@ -294,6 +295,11 @@ class ServeTests(ProxyCase):
         self.assertEqual(self.call("/../README.md")[0], 404)
         self.assertEqual(self.call("/%2e%2e/dail_demo/proxy.py")[0], 404)
 
+    def test_no_bytecode_is_written_into_the_served_vendor_folder(self) -> None:
+        self.call("/api/propose", body(), Origin=f"http://127.0.0.1:{self.port}")
+        self.assertIsNotNone(sys.pycache_prefix)
+        self.assertEqual(list((REPO_ROOT / "site" / "vendor").rglob("__pycache__")), [])
+
     def test_the_vercel_function_is_the_same_handler(self) -> None:
         import importlib.util
 
@@ -306,12 +312,13 @@ class ServeTests(ProxyCase):
         sys.path[:] = before
         self.assertTrue(issubclass(module.handler, ProposeHandler))
 
-    def test_vercel_json_holds_one_function_and_no_rewrites(self) -> None:
+    def test_vercel_json_holds_one_function_and_the_root_rewrite(self) -> None:
         config = json.loads((REPO_ROOT / "vercel.json").read_text(encoding="utf-8"))
         self.assertEqual(list(config["functions"]), ["api/propose.py"])
         self.assertEqual([p.name for p in (REPO_ROOT / "api").iterdir() if p.suffix == ".py"], ["propose.py"])
         self.assertEqual(config["outputDirectory"], "site")
-        for field in ("rewrites", "routes", "redirects", "env", "build"):
+        self.assertEqual(config["rewrites"], [{"source": "/", "destination": "/index.html"}])
+        for field in ("routes", "redirects", "headers", "env", "build", "cleanUrls"):
             self.assertNotIn(field, config)
         self.assertGreater(config["functions"]["api/propose.py"]["maxDuration"], 120)
 
