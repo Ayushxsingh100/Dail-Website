@@ -1,0 +1,17 @@
+# Gemini settings for `python -m dail_demo generate` (PLAN §3.5; B work package §3.3; D-15).
+# Checked against Google's official documentation on 26 Nov 2026 (URLs in docs/DECISIONS.md, D-15).
+# The key is never here: it is read only from the GEMINI_API_KEY environment variable.
+
+# A model the pricing page lists as "Free of charge" (free tier, input and output) on 26 Nov 2026.
+model = "gemini-3.5-flash-lite"
+# REST endpoint host; requests go to /v1beta/models/{model}:generateContent with the key in the
+# x-goog-api-key header, never in the URL.
+endpoint = "https://generativelanguage.googleapis.com"
+api_version = "v1beta"
+
+# Fixed generation settings (B work package §3.3), recorded in every trace.
+temperature = 0.7
+top_p = 0.95
+seed = 20261126
+max_output_tokens = 8192
+timeout_seconds = 120.0
