@@ -4,6 +4,7 @@
   "installCommand": null,
   "buildCommand": null,
   "outputDirectory": "site",
+  "rewrites": [{ "source": "/", "destination": "/index.html" }],
   "functions": {
     "api/propose.py": {
       "maxDuration": 150,

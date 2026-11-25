@@ -19,10 +19,12 @@ def make_server(port: int, environ: Mapping[str, str], *, settings: Any = None) 
         def __init__(self, *args: Any) -> None:
             SimpleHTTPRequestHandler.__init__(self, *args, directory=str(REPO_ROOT / "site"))
 
-        def _local(self) -> bool:
+        def _local(self, *, drain: bool = False) -> bool:
             """Only requests addressed to this machine (a rebound DNS name is refused)."""
             if self.headers.get("Host", "").rsplit(":", 1)[0] in ("127.0.0.1", "localhost"):
                 return True
+            if drain:
+                self.discard_body()
             self.send_error(403)
             return False
 
@@ -39,12 +41,13 @@ def make_server(port: int, environ: Mapping[str, str], *, settings: Any = None) 
                 SimpleHTTPRequestHandler.do_HEAD(self)
 
         def do_POST(self) -> None:  # noqa: N802
-            if not self._local():
+            if not self._local(drain=True):
                 return
-            if self.path.split("?")[0] == PATH:
-                self._answer("POST")
-            else:
+            if self.path.split("?")[0] != PATH:
+                self.discard_body()
                 self.send_error(404)
+                return
+            self._answer("POST")
 
     Handler.environ = environ
     Handler.settings = settings
