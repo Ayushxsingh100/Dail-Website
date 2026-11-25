@@ -19,14 +19,18 @@
 3. **Never fails on stage.** The typed-patch mode needs no network and always reaches a decision. The AI mode is optional; when Gemini is unavailable (no key, no internet, rate limit), the page says so and the demo continues.
 4. **Zero cost.** Only the Gemini free tier is used; no paid API, no paid cloud, no AWS account.
 5. **Honest labelling.** The page and every saved trace say "Demo, not part of the DAIL evaluation". The demo never presents its output as research results.
-6. **Runs on the demo laptop.** Windows 11, Python 3.12, in a browser on `localhost`.
+6. **Two deliverables, both free.**
+   - **The website:** static files only (HTML, CSS, JS, JSON, the bundled DAIL source), ready for the authors to deploy themselves on Vercel's free Hobby plan.
+   - **The local tools:** Python 3.12 on Windows 11. They record the AI runs and verify everything.
+
+   Nobody but the authors deploys anything.
 
 ---
 
 ## 2. Scope
 
 ### In scope
-- A local web page served on `localhost` only.
+- A **static website** (no server code, no build step) that the authors deploy on Vercel themselves (§3.8). For local preview, use `python -m http.server --bind 127.0.0.1`.
 - A scenario picker: the canonical SSH/database example from DAIL's fixtures, plus a small set of public TerraPreserve repair scenarios.
 - An **"Ask the AI"** button (Gemini), with up to 3 attempts, which is DAIL's retry limit.
 - A **"Write your own patch"** editor: the "Beat the gate" mode.
@@ -41,7 +45,8 @@
 - Risk scoring, findings dashboards, multi-account or user-account features, logins.
 - CloudShield AI name or branding anywhere.
 - Paid APIs, paid models or paid cloud.
-- Serving the app to the network. It binds to `127.0.0.1` only.
+- Any server-side code, serverless function, database, API key or secret in the website. The site is static files only.
+- Gemini, or any other paid or keyed service, called from the website. AI runs are recorded locally and shown as replays.
 - New safety logic. The demo may not decide anything itself; it only calls DAIL and displays what DAIL returns.
 - Committing any secret, including the Gemini API key.
 
@@ -99,6 +104,28 @@ DAIL keeps automatic promotion off in its default configuration (`config/`). The
 For every candidate, the demo runs DAIL (condition C) on the session's lineage. It also runs target-only checking (condition A) on the same candidate, against the same parent, in a throwaway store. The page shows both decisions and both check counts.
 
 Only DAIL's lineage advances. Condition A never becomes the session's trusted state, so a bad patch that A would have accepted cannot poison the demo.
+
+### 3.8 The website: static, free, on Vercel (authors' decision, 26 Nov 2026)
+
+**Why it's static.** Vercel cannot run Terraform, keep a SQLite ledger between requests, or hold a key safely on a public page. The website is therefore static files only, with two modes.
+
+**1. Live "Beat the gate"** (the visitor types a patch; the real DAIL judges it in the visitor's browser).
+- **How it works:** DAIL v1.0 is pure Python 3.12 standard library, so it runs in the browser through **Pyodide**, a WebAssembly build of CPython.
+  - The site bundles DAIL's source files from the `dail-v1.0` checkout, **copied unmodified**, with DAIL's `LICENSE` and a manifest of SHA-256 hashes.
+  - The website's engine calls the same DAIL entry points as the local engine.
+- **Feasibility.** On 26 Nov 2026 the build chat ran DAIL v1.0's canonical pipeline under Pyodide 0.27.7 (Python 3.12) in Node:
+  - it returned the same decisions and check counts as native Python: PROMOTE / ALL_REQUIRED_PROVEN with 5 checks, and REJECT / REQUIRED_CHECK_FAILED with 5 checks;
+  - it took under 1 second;
+  - Pyodide's `sqlite3` package could not be fetched in that sandbox, so the SQLite-backed orchestrator path in the browser is **not yet verified**. Package C must verify it first.
+- **Ledger:** an in-memory SQLite store per browser tab. A promotion advances the tab's trusted state; reloading the page starts over.
+- **Pyodide** is loaded from the jsDelivr CDN at a pinned version (free). The site states that it needs internet for this.
+- **Honest limit:** `terraform validate` cannot run in a browser. In live mode, admission is DAIL's own parser and patch validator only. The page says so plainly next to every live decision: "Terraform validation is not run in the browser."
+
+**2. Replays** (guaranteed to work).
+- Runs recorded on the authors' laptop with the local engine, including Gemini-generated fixes and the `terraform validate` gate, are stored as JSON traces in the site and shown in the same three-zone layout.
+- The Gemini key never leaves the laptop.
+
+**If the browser check fails** (package C's first step), live mode is dropped and the site ships with replays only. The decision is recorded in `docs/DECISIONS.md`.
 
 ### 3.7 Visual design (binding for L3; chosen by the authors on 26 Nov 2026)
 
@@ -187,7 +214,7 @@ All text on colour blocks is ink, except on red, green and cobalt, where it is p
 
 ## 4. What the user sees (the flow)
 
-1. **Start.** `python -m dail_demo serve` checks the DAIL and TerraPreserve tags, the Terraform binary and mirror, and the Gemini key (optional). It prints `http://127.0.0.1:<port>`.
+1. **Start.** On the website: open the page. On the laptop: `python -m dail_demo check` verifies the pins, Terraform and the Gemini key before recording runs.
 2. **Pick a scenario.** The page shows:
    - the configuration files;
    - a simple network view;
@@ -211,14 +238,16 @@ All text on colour blocks is ink, except on red, green and cobalt, where it is p
 
 Each package is one Claude Code prompt and one PR. Each PR is reviewed before the next prompt is written.
 
+**Fast track (authors' decision, 26 Nov 2026):** after L0 (PR #1), the remaining packages are built as two PRs: **B = L1 + L2** (local engine and inputs) and **C = L3 + L4 + L5** (the static website of §3.8, its in-browser sessions, and the recorded replays). The acceptance criteria below apply, as amended by §3.8; each combined PR must meet the criteria of all its packages.
+
 | # | Package | Delivers | Accepted when |
 |---|---|---|---|
 | **L0** | **Bootstrap** | The repo skeleton (layout, `README`, `LICENSE`, `.gitignore`, CI with tests and gitleaks); this plan as `docs/PLAN.md`; `docs/DECISIONS.md`; the startup checks for the DAIL tag, the TerraPreserve tag, `DAIL_LIVE_DATA` and Terraform | CI green. The startup check refuses a DAIL checkout that is not at `dail-v1.0` or not clean (tested). No secret in the repo |
 | **L1** | **Engine** | `python -m dail_demo evaluate --scenario <id> --patch <dir>`: establishes the baseline with DAIL, runs the candidate through DAIL (C) and target-only (A), and writes a trace | On the canonical example, the results equal DAIL's own fixture expectations: the safe repair is PROMOTE, the breaking repair is REJECT, blocked by INV-FUNC-001, and DAIL runs 5 checks against A's 3. Proven by tests that compare against DAIL's `expected.json`, not against numbers typed into the demo |
 | **L2** | **AI and typed input** | `GeminiProvider`; generation through DAIL's `Generator`, prompt, parser, patch validator and the `terraform validate` gate; up to 3 attempts; typed-patch input from edited files | Tested with DAIL's `FakeProvider` (no network in CI): an invalid response never reaches the orchestrator; a valid one does. Missing key, 429 and time-out give clear errors. The key appears in no file, log or trace (tested) |
-| **L3** | **Live page** | The local web app: scenario picker, configuration view, ledger, AI button, editor, live stages, comparison panel, "Demo, not part of the DAIL evaluation" label | The full flow works in Chrome and Edge on Windows, offline in typed mode. The server binds to `127.0.0.1` only (tested). The page follows the visual design of §3.7, with screenshots and contrast ratios in the PR |
-| **L4** | **Sessions and ledger** | Promotion advances the session's trusted state; ledger view with hash links; reset; stale-parent protection shown if two candidates race | Three patches in a row (promote, reject, promote) leave exactly DAIL's lineage. The ledger's hash chain verifies with DAIL's own check |
-| **L5** | **Traces and export** | Trace export for the public replay page; the demo script (`docs/DEMO_SCRIPT.md`) | An exported trace replays to the same decisions. The build chat then builds the public replay page from real exported traces |
+| **L3** | **Website** | The static site of §3.8 in `site/`: scenario picker, configuration view, editor (live mode), replay viewer, five stages, comparison panel, ledger, the "Demo, not part of the DAIL evaluation" label | Live mode gives the same decisions in the browser as the local engine on the canonical patches and the curated scenarios (tested headless), or is dropped as §3.8 says. Replays render every recorded trace. It works in Chrome and Edge. No server code and no secret in `site/`. It follows §3.7, with screenshots and contrast ratios in the PR |
+| **L4** | **Sessions and ledger** | In the browser tab: promotion advances the tab's trusted state; ledger view with hash links; reset | Three patches in a row (promote, reject, promote) leave exactly DAIL's lineage. The ledger's hash chain verifies with DAIL's own check |
+| **L5** | **Recordings** | `python -m dail_demo record`: runs the curated scenarios (fixed and Gemini patches) locally and writes the traces into `site/runs/`; `docs/DEMO_SCRIPT.md`; `docs/DEPLOY.md` (how the authors deploy `site/` on Vercel's free plan) | Every trace in `site/runs/` comes from a real local run and contains no key. The site replays each one to the recorded decisions |
 
 **After L5:** a full rehearsal on the demo laptop, then the 2-minute screen recording.
 

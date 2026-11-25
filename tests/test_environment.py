@@ -32,7 +32,7 @@ from dail_demo.environment import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-FAKE_KEY = "TEST-KEY-123456"
+FAKE_KEY = "TEST-KEY-123456"  # gitleaks:allow  (a fake value; see D-11)
 
 
 def _git(root: Path, *args: str) -> None:
