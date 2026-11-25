@@ -1,6 +1,6 @@
 """``site/`` is static files only and follows PLAN §3.7 (C work package §2, §5). No DAIL needed.
 
-* no server code, no ``api/`` folder, no Vercel functions, no secret-looking strings, no runtime
+* no server code in ``site/`` (the one proxy function is ``api/propose.py``, PLAN §3.9), no secret-looking strings, no runtime
   CDN: every script, style, font and module the pages load comes from ``site/`` itself;
 * the stylesheet uses only the §3.7 palette, radius 0 except status pills, no gradients, blur,
   glass or CloudShield; fonts are self-hosted woff2 files with their OFL texts;
@@ -36,8 +36,7 @@ def own_files() -> list[Path]:
 class StaticOnlyTests(unittest.TestCase):
     def test_no_server_code(self) -> None:
         self.assertFalse((SITE / "api").exists())
-        self.assertFalse((SITE / "vercel.json").exists() and "functions" in (SITE / "vercel.json").read_text())
-        self.assertFalse((REPO_ROOT / "vercel.json").exists())
+        self.assertFalse((SITE / "vercel.json").exists())  # the one function is api/propose.py (test_proxy)
         for path in own_files():
             with self.subTest(file=path.name):
                 self.assertNotIn(path.suffix, (".py", ".php", ".rb", ".go", ".ts", ".cjs"))
