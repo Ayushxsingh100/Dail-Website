@@ -1,6 +1,7 @@
-// Rendering a DAIL Live trace (dail-live-trace/1) into the three zones (PLAN §3.7).
-// Every value shown is read from the trace, which holds DAIL's own records; nothing is decided here.
-// Elements are built with textContent only: no trace text is ever parsed as HTML.
+// Rendering a DAIL Live trace (dail-live-trace/1) as the simple story of PLAN §3.9, and DAIL's full
+// evidence on request. Every value shown is read from the trace, which holds DAIL's own records;
+// nothing is decided here. Elements are built with textContent only.
+import { NAMES, changeWords, normalChecker, plainReason } from "./names.js";
 
 export function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
@@ -8,6 +9,7 @@ export function h(tag, attrs = {}, ...children) {
     if (value === undefined || value === null || value === false) continue;
     if (key === "class") el.className = value;
     else if (key === "text") el.textContent = value;
+    else if (key === "hidden") el.hidden = true;
     else el.setAttribute(key, value === true ? "" : String(value));
   }
   for (const child of children.flat()) {
@@ -19,335 +21,292 @@ export function h(tag, attrs = {}, ...children) {
 
 const svgNS = "http://www.w3.org/2000/svg";
 const DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
+export const STAGES = [["01", "Admission"], ["02", "Identity and change"], ["03", "Impact"], ["04", "Verify"], ["05", "Decide"]];
+const PLAIN = ["Let in", "What changed", "What it touches", "Check it", "Decide"];
 
 export function formatDate(iso) {
   const date = iso ? new Date(iso) : new Date();
   return Number.isNaN(date.getTime()) ? "" : DATE.format(date);
 }
 
-export function pad(n) {
-  return String(n).padStart(2, "0");
-}
-
-function words(code) {
-  if (!code) return "";
-  const text = String(code).toLowerCase().replace(/_/g, " ");
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function short(hash, n = 12) {
+function short(hash, n = 16) {
   return hash ? `${hash.slice(0, n)}…` : "";
 }
 
 function resultPill(result) {
   const value = String(result || "").toUpperCase();
-  const cls = value === "PASS" ? "pill pill--pass" : value === "FAIL" ? "pill pill--fail" : "pill";
-  return h("span", { class: cls, text: value || "NONE" });
+  return h("span", { class: value === "PASS" ? "pill pill--pass" : value === "FAIL" ? "pill pill--fail" : "pill", text: value || "NONE" });
 }
 
 function statusPill(status) {
   // PROTECTED: the invariant's check passed; VIOLATED: it failed (PASS and FAIL colours, D-23)
   const value = String(status || "").toUpperCase();
-  const cls = value === "PROTECTED" ? "pill pill--pass" : value === "VIOLATED" ? "pill pill--fail" : "pill";
-  return h("span", { class: cls, text: value });
+  return h("span", { class: value === "PROTECTED" ? "pill pill--pass" : value === "VIOLATED" ? "pill pill--fail" : "pill", text: value });
 }
 
 function decisionClass(type) {
   return type === "PROMOTE" ? "promote" : type === "REJECT" ? "reject" : "other";
 }
 
-// ---- untrusted zone ------------------------------------------------------------------------
+// ---- 0. the system -------------------------------------------------------------------------
 
-function diffBlock(diff) {
-  const pre = h("pre", { class: "diff", "aria-label": "Unified diff against the trusted state" });
+export function renderHealth(list, state) {
+  list.replaceChildren(...Object.entries(NAMES).map(([id, name]) => {
+    const status = state && state.invariants && state.invariants[id] ? state.invariants[id].status : null;
+    const pill = status === "PROTECTED" ? h("span", { class: "pill pill--pass", text: "Yes" })
+      : status === "VIOLATED" ? h("span", { class: "pill pill--fail", text: "No" })
+        : h("span", { class: "pill", text: status || "…" });
+    return h("li", {}, h("span", { class: "health__name", text: name.holds }), h("span", { class: "health__id mono", text: id }), pill);
+  }));
+}
+
+// ---- 2. the proposal ------------------------------------------------------------------------
+
+export function diffBlock(diff) {
+  const pre = h("pre", { class: "diff", "aria-label": "The change, line by line" });
   for (const line of String(diff || "").split("\n")) {
     if (!line) continue;
-    const cls = line.startsWith("+++") || line.startsWith("---") ? "hunk" : line.startsWith("@@") ? "hunk" : line.startsWith("+") ? "add" : line.startsWith("-") ? "del" : null;
+    const cls = /^(\+\+\+|---|@@)/.test(line) ? "hunk" : line.startsWith("+") ? "add" : line.startsWith("-") ? "del" : null;
     pre.append(h("span", { class: cls }, line), "\n");
   }
   if (!pre.childNodes.length) pre.append("No configuration change.");
   return pre;
 }
 
-function sourceLabel(trace) {
-  if (trace.candidate_source === "LLM") return "AI proposal";
-  if (trace.candidate_source === "TYPED") return "Typed patch";
-  return "Fixed patch";
+export function sourceLabel(trace) {
+  if (trace.candidate_source === "LLM") return "The AI's fix";
+  return trace.candidate_source === "TYPED" ? "Your fix" : "A recorded fix";
 }
 
-function attemptList(generation) {
-  const list = h("ol", { class: "attempts" });
-  for (const row of generation.attempts || []) {
-    let summary = null;
-    try {
-      const parsed = JSON.parse(row.response.raw_response || "null");
-      if (parsed && typeof parsed.summary === "string") summary = parsed.summary;
-    } catch {}
-    const verdict = row.failure_class ? row.failure_class : "valid patch";
-    list.append(
-      h("li", {},
-        h("span", { class: "label", text: `Attempt ${row.attempt}: ${verdict}` }),
-        h("p", {}, h("strong", { text: "DAIL's parser: " }), row.parse_errors.length ? row.parse_errors.join("; ") : `${row.parsed_status || "no reply"}`),
-        h("p", {}, h("strong", { text: "DAIL's patch validator: " }), row.validation_errors.length ? row.validation_errors.join("; ") : row.failure_class ? "not reached" : "valid"),
-        summary ? h("p", { class: "kicker" }, `The model's own summary (untrusted): “${summary}”`) : null,
-      ),
-    );
-  }
-  if (!list.childNodes.length && generation.detail) list.append(h("li", {}, generation.detail));
-  return list;
+function proposedCode(trace) {
+  if (trace.diff) return diffBlock(trace.diff);
+  const reply = trace.ai && trace.ai.reply;
+  return reply ? h("pre", { class: "diff", text: reply }) : null;
 }
 
-export function renderCandidate(container, trace, { mode }) {
-  container.replaceChildren();
-  const generation = trace.generation;
-  const card = h("article", { class: "card", id: "candidate-card", "aria-label": "The candidate" },
-    h("span", { class: "card__source", text: sourceLabel(trace) }),
-    h("p", { class: "card__label", text: trace.candidate.label }),
-  );
-  if (generation) {
-    const model = (generation.settings || {}).model || "unknown model";
-    card.append(h("p", { class: "label", style: "margin-top: 8px" }, `Generated by Gemini (${model}), recorded on ${formatDate(trace.created_at)}`));
-    card.append(attemptList(generation));
-  }
-  if (trace.diff) card.append(diffBlock(trace.diff));
-  if (trace.refused_before_dail) {
-    const admission = trace.admission || {};
-    const reasons = admission.errors && admission.errors.length ? admission.errors
-      : generation ? [generation.detail || generation.failure_class || "no valid candidate"] : ["refused"];
-    const stage = admission.stage === "terraform_validate" ? "terraform validate" :
-      admission.stage === "dail_generator" ? "DAIL's generator (parser and patch validator)" : "DAIL's patch validator";
-    container.append(card, h("div", { class: "refused", role: "status" },
-      h("p", { class: "refused__title", text: "Refused before DAIL" }),
-      h("p", {}, `Stopped by ${stage}. Nothing entered the gate${mode === "live" ? "; the trusted state stays where it was" : ""}.`),
-      ...reasons.map((r) => h("p", { class: "refused__reason", text: r })),
-    ));
-    return card;
-  }
-  container.append(card);
-  return card;
+export function renderProposal(container, trace) {
+  const c = trace.conditions && trace.conditions.C;
+  const changes = (c && c.changed_resources) || [];
+  const code = proposedCode(trace);
+  const ai = trace.ai ? `Written by Gemini (${trace.ai.model}).`
+    : trace.generation ? `Generated by Gemini (${(trace.generation.settings || {}).model}), recorded on ${formatDate(trace.created_at)}.` : null;
+  container.replaceChildren(
+    h("article", { class: "card", id: "candidate-card" },
+      h("p", { class: "card__source", text: sourceLabel(trace) }),
+      changes.length
+        ? h("ul", { class: "changes" }, ...changes.map((change) => {
+          const [words, name] = changeWords(change);
+          return h("li", {}, `${words} `, h("code", { text: name }));
+        }))
+        : h("p", { text: trace.refused_before_dail ? "It could not be read as a change to this system." : "DAIL found no changed resource." }),
+      ai ? h("p", { class: "muted", text: ai }) : null),
+    code ? h("details", { class: "more", id: "code" }, h("summary", { text: "Show the code" }), code) : "");
 }
 
-// ---- the gate ------------------------------------------------------------------------------
-
-function stage(num, title, summary, more) {
-  return h("li", { class: "stage is-done" },
-    h("span", { class: "stage__num", "aria-hidden": "true", text: num }),
-    h("div", {},
-      h("h3", { class: "stage__title" }, h("span", { class: "visually-hidden", text: `Stage ${num}: ` }), title),
-      h("div", { class: "stage__body" },
-        summary,
-        more ? h("div", { class: "stage__more" }, more) : null,
-      ),
-    ),
-  );
+export function renderWaiting(container, text) {
+  container.replaceChildren(h("article", { class: "card", id: "candidate-card" },
+    h("p", { class: "writing" }, h("span", { class: "writing__bars", "aria-hidden": "true" }, h("span"), h("span"), h("span")),
+      h("span", { class: "card__source", text }))));
 }
 
-export function waitingStages(list, reason = "Waiting for a candidate.") {
-  list.replaceChildren(...STAGES.map(([num, title]) =>
-    h("li", { class: "stage is-waiting" },
-      h("span", { class: "stage__num", "aria-hidden": "true", text: num }),
-      h("div", {}, h("h3", { class: "stage__title", text: title }), h("p", { class: "stage__body muted", text: reason })),
-    )));
+// ---- 3. DAIL checks -------------------------------------------------------------------------
+
+export function renderBoxes(list, done = 0) {
+  list.replaceChildren(...STAGES.map(([num], i) =>
+    h("li", { class: i < done ? "box is-done" : "box" },
+      h("span", { class: "box__num", "aria-hidden": "true", text: num }), h("span", { text: PLAIN[i] }),
+      h("span", { class: "visually-hidden box__state", text: i < done ? ": done" : ": waiting" }))));
+  return [...list.children];
 }
 
-// A stage DAIL has just committed; its output is filled in when the trace arrives.
-export function markStage(list, index) {
+export function markBox(list, index) {
   const el = list.children[index];
-  if (!el || !el.classList.contains("is-waiting")) return;
-  el.classList.remove("is-waiting");
+  if (!el || el.classList.contains("is-done")) return;
   el.classList.add("is-done", "anim-fill");
-  el.querySelector(".stage__body").textContent = "Done by DAIL.";
+  el.querySelector(".box__state").textContent = ": done";
 }
 
-const STAGES = [["01", "Admission"], ["02", "Identity and change"], ["03", "Impact"], ["04", "Verify"], ["05", "Decide"]];
+export function refusal(trace) {
+  const a = trace.admission || {};
+  const stage = a.stage === "terraform_validate" ? "Terraform" : a.stage === "dail_parser" ? "DAIL's reply check"
+    : a.stage === "dail_generator" ? "DAIL's reply check or patch check" : "DAIL's patch check";
+  const g = trace.generation;
+  const reasons = a.errors && a.errors.length ? a.errors : [g ? g.detail || g.failure_class || "no valid patch" : "refused"];
+  return { stage, reasons };
+}
+
+function gaveUp() {
+  return h("p", { class: "after", id: "gave-up", text: "All three attempts failed. Nothing was changed: the trusted system is exactly what it was." });
+}
+
+export function renderDecision(container, trace, { live, last = false }) {
+  if (trace.refused_before_dail) {
+    const { stage, reasons } = refusal(trace);
+    container.replaceChildren(
+      h("p", { class: "refused__title", id: "refused", text: "Turned away before DAIL" }),
+      h("p", { class: "reason", text: `${stage} did not let this fix in, so DAIL did not judge it.` }),
+      ...reasons.map((r) => h("p", { class: "refused__reason", text: r })),
+      h("p", { class: "after", text: "The trusted system stays as it was." }),
+      last ? gaveUp() : "");
+    return null;
+  }
+  const d = trace.conditions.C.decision;
+  const [before, word, after] = normalChecker(trace.comparison.A.decision);
+  const stamp = h("p", { class: `stamp stamp--${decisionClass(d.type)}`, id: "stamp", text: d.type });
+  const promoted = trace.session ? trace.session.promoted : d.type === "PROMOTE";
+  const children = [
+    h("div", { class: "verdict" }, stamp, h("div", { class: "verdict__text" },
+      h("p", { class: "reason", id: "reason", text: plainReason(d) }),
+      h("p", { class: "reason__raw", text: [d.reason, ...(d.blocking || []).map((b) => b.target)].join(" · ") }))),
+    h("p", { class: "normal", id: "normal" }, before, h("strong", { text: word }), after),
+  ];
+  if (live) children.push(h("p", { class: "browser-note", text: "Terraform validation is not run in the browser." }));
+  if (live || trace.session) {
+    children.push(h("p", { class: "after", text: promoted ? `This is now the trusted system (v${trace.session.trusted_state.version}).` : "The trusted system stays as it was." }));
+  }
+  if (last) children.push(gaveUp());
+  container.replaceChildren(...children);
+  return stamp;
+}
+
+// ---- DAIL's evidence (hidden by default) ----------------------------------------------------
+
+function stage(index, summary, more) {
+  return h("li", { class: "stage" },
+    h("span", { class: "stage__num", "aria-hidden": "true", text: STAGES[index][0] }),
+    h("div", { class: "stage__body" }, h("h3", { class: "stage__title", text: STAGES[index][1] }),
+      h("p", { class: "stage__summary" }, summary), more));
+}
 
 function admissionStage(trace) {
   const a = trace.admission || {};
   const facts = h("div", { class: "facts" });
-  let summary;
-  if (trace.candidate_source === "FIXED_PATCH") {
-    summary = a.origin ? "DAIL's own fixture patch." : "The scenario's own step.";
-    facts.append(h("p", { class: "fact" }, a.origin ? `Fixed patch: ${a.origin}.` : "Fixed patch: the scenario's own step."));
-    if (a.content_hash_matches_manifest !== undefined) facts.append(h("p", { class: "fact" }, `Content hash matches the manifest: ${a.content_hash_matches_manifest ? "yes" : "no"}.`));
-  } else if (trace.candidate_source === "TYPED") {
-    summary = `DAIL's patch validator: ${a.admitted ? "admitted" : "refused"}.`;
-    for (const [address, op] of a.operations || []) facts.append(h("p", { class: "fact" }, h("span", { class: "pill", text: op }), h("span", { class: "mono", text: address })));
-  } else {
-    summary = "Valid under DAIL's parser and patch validator.";
-    facts.append(h("p", { class: "fact" }, "Rebuilt from the reply by DAIL's patch validator for each condition."));
-  }
-  const tf = a.terraform_validate_run || (trace.candidate_source === "TYPED" && a.terraform_validate_typed_dir);
-  if (tf && typeof tf === "object") {
-    const versions = Object.values(tf.versions || {}).join(", ");
-    facts.append(h("p", { class: "fact" }, "terraform validate ", resultPill(tf.ok ? "PASS" : "FAIL"), versions ? h("span", { class: "muted", text: versions }) : null));
-  } else if (trace.candidate_source === "LLM" && a.terraform_validate) {
-    facts.append(h("p", { class: "fact" }, "terraform validate ", resultPill("PASS"), h("span", { class: "muted", text: Object.values(a.terraform_validate).join(", ") })));
-  }
-  if (trace.browser) facts.append(h("p", { class: "fact" }, h("strong", { text: trace.browser.terraform_validation })));
-  if (a.content_hash) facts.append(h("p", { class: "fact" }, "Content hash ", h("span", { class: "mono", text: short(a.content_hash, 16) })));
-  return stage("01", "Admission", h("p", { class: "stage__summary", text: summary }), facts);
+  const fact = (...parts) => facts.append(h("p", { class: "fact" }, ...parts));
+  if (a.stage) fact("Stage: ", h("span", { class: "mono", text: a.stage }));
+  if (a.origin) fact(`Origin: ${a.origin}.`);
+  if (a.content_hash_matches_manifest !== undefined) fact(`Content hash matches the manifest: ${a.content_hash_matches_manifest ? "yes" : "no"}.`);
+  for (const [address, op] of a.operations || []) fact(h("span", { class: "pill", text: op }), h("span", { class: "mono", text: address }));
+  const tf = a.terraform_validate_run && typeof a.terraform_validate_run === "object" ? a.terraform_validate_run : a.terraform_validate_typed_dir;
+  if (tf && typeof tf === "object") fact("terraform validate ", resultPill(tf.ok ? "PASS" : "FAIL"), h("span", { class: "muted", text: Object.values(tf.versions || {}).join(", ") }));
+  else if (trace.generation && a.terraform_validate) fact("terraform validate ", resultPill("PASS"), h("span", { class: "muted", text: Object.values(a.terraform_validate).join(", ") }));
+  if (trace.browser) fact(h("strong", { text: trace.browser.terraform_validation }));
+  if (a.content_hash) fact("Content hash ", h("span", { class: "mono", text: short(a.content_hash) }));
+  for (const error of a.errors || []) fact(h("span", { class: "mono", text: error }));
+  return stage(0, a.admitted ? "Admitted." : "Refused.", facts);
 }
 
 function changeStage(c) {
   const changed = c.changed_resources || [];
-  const list = h("ul", { class: "facts" }, ...changed.map((r) =>
-    h("li", { class: "fact" }, h("span", { class: "pill", text: r.change_type }), h("span", { class: "mono", text: r.address }))));
-  const summary = h("p", { class: "stage__summary", text: `${changed.length} resource${changed.length === 1 ? "" : "s"} changed.` });
-  return stage("02", "Identity and change", summary, list);
+  return stage(1, `${changed.length} resource${changed.length === 1 ? "" : "s"} changed.`,
+    h("ul", { class: "facts" }, ...changed.map((r) => h("li", { class: "fact" }, h("span", { class: "pill", text: r.change_type }), h("span", { class: "mono", text: r.address })))));
 }
 
 function impactStage(c) {
   const impact = c.impact || {};
   const affected = impact.affected || [];
   const carried = impact.carry_forward_candidates || [];
-  const summary = h("p", { class: "stage__summary", text: `${affected.length} affected, ${carried.length} carried forward.` });
-  const more = h("div", { class: "facts" },
-    h("ul", { class: "pills" }, ...affected.map((a) =>
-      h("li", {}, h("span", { class: "pill pill--affected", text: `${a.invariant_id} · ${a.impact_types.join(", ")}` })))),
-    carried.length ? h("ul", { class: "pills" }, ...carried.map((x) => h("li", {}, h("span", { class: "pill pill--carried", text: `${x.invariant_id} carried forward` })))) : null,
-    h("ul", { class: "facts" }, ...affected.map((a) =>
-      h("li", { class: "fact muted" }, `${a.invariant_id}: ${a.dependency_paths.length} dependency path${a.dependency_paths.length === 1 ? "" : "s"}`)),
-      ...(impact.uncertainty || []).map((u) => h("li", { class: "fact" }, `Uncertain: ${u.invariant_id} (${u.code})`))),
-  );
-  return stage("03", "Impact", summary, more);
+  const paths = (a) => a.dependency_paths.map((p) => h("li", { class: "fact mono" }, [p.changed_ref, ...p.steps.map((s) => ` → ${s.to_node}`)].join("")));
+  return stage(2, `${affected.length} affected, ${carried.length} carried forward.`, h("div", { class: "facts" },
+    h("ul", { class: "pills" }, ...affected.map((a) => h("li", {}, h("span", { class: "pill pill--affected", text: `${a.invariant_id} · ${a.impact_types.join(", ")}` }))),
+      ...carried.map((x) => h("li", {}, h("span", { class: "pill pill--carried", text: `${x.invariant_id} carried forward` })))),
+    ...affected.map((a) => h("details", { class: "more" }, h("summary", { text: `${a.invariant_id}: ${a.dependency_paths.length} dependency path${a.dependency_paths.length === 1 ? "" : "s"}` }), h("ul", { class: "facts" }, ...paths(a)))),
+    ...(impact.uncertainty || []).map((u) => h("p", { class: "fact" }, `Uncertain: ${u.invariant_id} (${u.code})`))));
 }
 
 function verifyStage(c) {
-  const rows = c.verification || [];
-  const failed = rows.filter((v) => String(v.result).toUpperCase() === "FAIL").map((v) => v.target);
-  const summary = h("p", { class: "stage__summary" }, `${c.check_count} checks`,
-    failed.length ? h("span", {}, "; ", resultPill("FAIL"), " ", h("span", { class: "mono", text: failed.join(", ") })) : "; all PASS.");
-  const list = h("ul", { class: "checks" }, ...rows.map((v) =>
-    h("li", { class: "check" },
-      h("span", { class: "check__target", text: v.target }),
-      resultPill(v.result),
-      h("span", { class: "check__meta muted" }, h("span", { class: "mono", text: v.verifier }), v.reason ? ` · ${v.reason}` : ""),
-    )));
-  return stage("04", "Verify", summary, list);
+  return stage(3, `${c.check_count} checks run by DAIL's verifiers.`, h("ul", {}, ...(c.verification || []).map((v) =>
+    h("li", { class: "check" }, h("span", { class: "check__target", text: v.target }), resultPill(v.result),
+      h("span", { class: "check__meta muted" }, h("span", { class: "mono", text: v.verifier }), v.reason ? ` · ${v.reason}` : "")))));
 }
 
 function decideStage(c) {
   const d = c.decision;
-  return stage("05", "Decide", h("p", { class: "stage__summary" }, h("strong", { text: d.type }), ` · ${d.reason}`), null);
+  return stage(4, `${d.type} · ${d.reason}`, h("ul", { class: "blocking" }, ...(d.blocking || []).map((b) => h("li", { text: `${b.code} · ${b.target} · ${b.detail}` }))));
 }
 
-export function renderStages(list, trace) {
-  if (trace.refused_before_dail) {
-    const first = admissionStage(trace);
-    first.classList.remove("is-done");
-    list.replaceChildren(first);
-    const rest = document.createDocumentFragment();
-    for (const [num, title] of STAGES.slice(1)) {
-      rest.append(h("li", { class: "stage is-waiting" },
-        h("span", { class: "stage__num", "aria-hidden": "true", text: num }),
-        h("div", {}, h("h3", { class: "stage__title", text: title }), h("p", { class: "stage__body muted", text: "Not reached: refused before DAIL." }))));
-    }
-    list.append(rest);
-    return [...list.children];
-  }
-  const c = trace.conditions.C;
-  list.replaceChildren(admissionStage(trace), changeStage(c), impactStage(c), verifyStage(c), decideStage(c));
-  return [...list.children];
+function opinionVsFact(trace) {
+  const col = (title, kicker, entry) => h("div", { class: "ovf__col" }, h("p", { class: "label", text: title }), h("p", { class: "kicker", text: kicker }),
+    h("p", { class: `ovf__verdict ovf__verdict--${decisionClass(entry.decision)}`, text: entry.decision || "none" }), h("p", { text: `${entry.check_count ?? "-"} checks · ${entry.reason || ""}` }));
+  return h("section", { class: "ovf", "aria-label": "Opinion versus fact" },
+    h("div", { class: "ovf__head label", text: "Opinion vs. Fact: the same patch, the same parent" }),
+    h("div", { class: "ovf__cols" }, col("Opinion", "Target-only checking", trace.comparison.A), col("Fact", "DAIL", trace.comparison.C)));
 }
 
-export function renderDecision(container, trace, { mode }) {
-  container.replaceChildren();
-  if (trace.refused_before_dail) {
-    container.append(h("p", { class: "kicker", text: "No decision: the candidate was refused before DAIL." }));
-    return null;
+function aiRecord(trace) {
+  const rows = [];
+  const summaryOf = (text) => {
+    try { return JSON.parse(text).summary; } catch { return null; }
+  };
+  if (trace.ai) {
+    const { reply, model, attempt, instruction, tokens, feedback } = trace.ai;
+    rows.push(h("p", {}, h("strong", { text: "Model: " }), `${model}, attempt ${attempt}, tokens ${JSON.stringify(tokens)}`));
+    if (instruction) rows.push(h("p", {}, h("strong", { text: "The request: " }), instruction));
+    if (feedback) rows.push(h("p", {}, h("strong", { text: "DAIL's reason sent back to the AI: " }), h("span", { class: "mono", text: JSON.stringify(feedback) })));
+    if (summaryOf(reply)) rows.push(h("p", { class: "kicker", text: `The model's own summary (untrusted): “${summaryOf(reply)}”` }));
+    rows.push(h("details", { class: "more" }, h("summary", { text: "The model's reply, as received" }), h("pre", { class: "diff", text: reply })));
   }
-  const d = trace.conditions.C.decision;
-  const stamp = h("p", { class: `stamp stamp--${decisionClass(d.type)}`, id: "stamp" },
-    d.type, h("span", { class: "stamp__by", text: "Decided by DAIL" }));
-  const blocking = d.blocking || [];
-  const quote = h("blockquote", { class: "pullquote" },
-    `${words(d.reason)}${blocking.length ? `: ${blocking.map((b) => b.target).join(", ")}` : ""}.`);
-  container.append(stamp, quote);
-  if (blocking.length) {
-    container.append(h("p", { class: "label", style: "margin-top: 16px", text: "Blocking conditions" }),
-      h("ul", { class: "blocking" }, ...blocking.map((b) => h("li", { text: `${b.code} · ${b.target} · ${b.detail}` }))));
+  for (const row of (trace.generation || {}).attempts || []) {
+    const summary = summaryOf(row.response.raw_response || "null");
+    rows.push(h("div", { class: "ai-row" },
+      h("p", { class: "label", text: `Attempt ${row.attempt}: ${row.failure_class || "valid patch"}` }),
+      h("p", {}, h("strong", { text: "DAIL's parser: " }), row.parse_errors.join("; ") || row.parsed_status || "no reply"),
+      h("p", {}, h("strong", { text: "DAIL's patch validator: " }), row.validation_errors.join("; ") || (row.failure_class ? "not reached" : "valid")),
+      summary ? h("p", { class: "kicker", text: `The model's own summary (untrusted): “${summary}”` }) : null));
   }
-  if (mode === "live") container.append(h("p", { class: "browser-note", text: "Terraform validation is not run in the browser." }));
-  if (trace.session && mode === "live") {
-    container.append(h("p", { class: "kicker", style: "margin-top: 16px" },
-      trace.session.promoted ? `Promoted: trusted state v${trace.session.trusted_state.version} is now the parent of the next fix.`
-        : `Not promoted: the trusted state stays at v${trace.session.trusted_state.version}.`));
-  }
-  return stamp;
+  return rows.length ? h("section", { class: "panel", "aria-label": "The AI" }, h("h3", { class: "label", text: "The AI (untrusted)" }), ...rows) : null;
 }
 
-export function renderOvf(container, trace) {
-  container.replaceChildren();
-  if (trace.refused_before_dail || !trace.comparison) return;
-  const col = (title, kicker, entry) => h("div", { class: "ovf__col" },
-    h("p", { class: "label", text: title }),
-    h("p", { class: "kicker", text: kicker }),
-    h("p", { class: `ovf__verdict ovf__verdict--${decisionClass(entry.decision)}`, text: entry.decision || "none" }),
-    h("p", {}, h("span", { class: "ovf__count", text: entry.check_count ?? "-" }), " checks"),
-  );
-  container.append(h("section", { class: "ovf", "aria-label": "Opinion versus fact" },
-    h("div", { class: "ovf__head" }, h("p", { class: "label" }, "Opinion vs. Fact", h("span", { class: "ovf__head-more", text: ": the same patch, the same parent" }))),
-    h("div", { class: "ovf__cols" },
-      col("Opinion", "Target-only checking", trace.comparison.A),
-      col("Fact", "DAIL", trace.comparison.C),
-    )));
+export function renderEvidence(container, trace) {
+  const c = trace.conditions && trace.conditions.C;
+  container.replaceChildren(
+    h("ol", {}, admissionStage(trace), ...(c ? [changeStage(c), impactStage(c), verifyStage(c), decideStage(c)] : [])),
+    ...(c ? [opinionVsFact(trace)] : []),
+    ...[aiRecord(trace)].filter(Boolean),
+    h("p", { class: "mono", style: "overflow-wrap: anywhere" }, `${trace.scenario.scenario_id} · ${trace.run_id} · ${trace.versions.dail_tag} ${short(trace.versions.dail_commit, 12)}`));
 }
 
-// ---- the ledger ----------------------------------------------------------------------------
+// ---- the ledger: a horizontal timeline ------------------------------------------------------
 
 export function ledgerFromTrace(trace) {
   if (trace.session && trace.session.ledger) return trace.session.ledger;
-  if (trace.ledger) return trace.ledger;
   const c = trace.conditions && trace.conditions.C;
   if (!c || !c.baseline || !c.baseline.state_id) return [];
   const base = { ...c.baseline, parent_state_id: null };
   return c.new_state ? [{ ...c.new_state, parent_state_id: base.state_id }, base] : [base];
 }
 
-function carriedIn(trace, clipping) {
-  const c = trace && trace.conditions && trace.conditions.C;
-  if (!c || !c.new_state || c.new_state.state_id !== clipping.state_id) return new Set();
-  return new Set((c.proof_plan || []).filter((p) => p.source === "CARRIED_FORWARD").map((p) => p.invariant_id));
-}
-
-export function renderLedger(container, clippings, { fresh = null, trace = null } = {}) {
-  container.replaceChildren();
-  const byId = new Map(clippings.map((c) => [c.state_id, c]));
-  const items = [];
-  clippings.forEach((clip) => {
-    const carried = carriedIn(trace, clip);
-    const statuses = h("ul", { class: "clipping__statuses", "aria-label": "Invariant statuses" },
-      ...Object.entries(clip.invariants || {}).map(([id, ref]) =>
-        h("li", { class: "clipping__status" }, h("span", { class: "mono", text: id }),
-          h("span", { class: "row", style: "gap: 4px" }, statusPill(ref.status), carried.has(id) ? h("span", { class: "pill pill--carried", text: "carried" }) : null))));
-    const card = h("article", { class: "clipping", "aria-label": `Trusted state version ${clip.version}` },
-      h("p", { class: "clipping__kicker", text: clip.version === 0 ? "Baseline, established by DAIL" : "Trusted state, promoted by DAIL" }),
-      h("p", { class: "clipping__version", text: `v${clip.version}` }),
-      statuses,
-      h("p", { class: "clipping__hash" }, h("span", { class: "label", text: "State hash " }),
-        clip.state_hash),
-    );
-    if (fresh && clip.state_id === fresh) card.classList.add("anim-drop");
-    container.append(card);
-    items.push(card);
-    if (clip.parent_state_id) {
-      const parent = byId.get(clip.parent_state_id);
-      const svg = document.createElementNS(svgNS, "svg");
-      svg.setAttribute("aria-hidden", "true");
-      const line = document.createElementNS(svgNS, "line");
-      line.setAttribute("x1", "12"); line.setAttribute("y1", "0"); line.setAttribute("x2", "12"); line.setAttribute("y2", "64");
-      svg.append(line);
-      const link = h("div", { class: "link" }, svg,
-        h("span", { class: "link__text", text: `parent: ${parent ? short(parent.state_hash, 16) : short(clip.parent_state_id, 8)}` }));
-      if (fresh && clip.state_id === fresh) link.classList.add("anim-draw");
-      container.append(link);
-    }
-  });
-  return items;
+export function renderLedger(list, detail, states, fresh = null) {
+  const oldestFirst = [...states].reverse();
+  const byId = new Map(states.map((s) => [s.state_id, s]));
+  detail.replaceChildren();
+  list.replaceChildren(...oldestFirst.map((state, i) => {
+    const isFresh = fresh === state.state_id;
+    const button = h("button", { type: "button", class: isFresh ? "state anim-drop" : "state", "aria-expanded": "false", "aria-controls": "state-detail" }, `v${state.version}`);
+    button.addEventListener("click", () => {
+      const open = button.getAttribute("aria-expanded") === "true";
+      for (const other of list.querySelectorAll(".state")) other.setAttribute("aria-expanded", "false");
+      if (open) return detail.replaceChildren();
+      button.setAttribute("aria-expanded", "true");
+      const parent = byId.get(state.parent_state_id);
+      return detail.replaceChildren(h("div", { class: "state-detail" },
+        h("p", { class: "kicker", text: state.version === 0 ? "The starting system, checked by DAIL" : "A trusted system, promoted by DAIL" }),
+        h("ul", {}, ...Object.entries(state.invariants || {}).map(([id, ref]) => h("li", {}, h("span", {}, `${NAMES[id] ? NAMES[id].holds : id} `, h("span", { class: "mono muted", text: id })), statusPill(ref.status)))),
+        h("p", { class: "state-detail__hash" }, `State hash ${state.state_hash}`),
+        state.parent_state_id ? h("p", { class: "state-detail__hash" }, `Parent ${parent ? parent.state_hash : state.parent_state_id}`) : null));
+    });
+    if (i === 0) return h("li", {}, button);
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 48 12");
+    svg.setAttribute("aria-hidden", "true");
+    const line = document.createElementNS(svgNS, "line");
+    for (const [k, v] of [["x1", 0], ["y1", 6], ["x2", 48], ["y2", 6]]) line.setAttribute(k, v);
+    svg.append(line);
+    if (isFresh) svg.classList.add("anim-draw");
+    return h("li", {}, svg, button);
+  }));
 }
 
 export function announcement(trace) {
-  if (trace.refused_before_dail) return "Refused before DAIL. Nothing entered the gate.";
-  const c = trace.comparison;
-  return `DAIL decided ${c.C.decision}, ${words(c.C.reason).toLowerCase()}, after ${c.C.check_count} checks. Target-only checking would have decided ${c.A.decision} after ${c.A.check_count} checks.`;
+  if (trace.refused_before_dail) return "Turned away before DAIL. The trusted system stays as it was.";
+  return `DAIL decided ${trace.comparison.C.decision}. ${plainReason(trace.conditions.C.decision)} ${normalChecker(trace.comparison.A.decision).join("")}`;
 }

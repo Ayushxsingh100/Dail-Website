@@ -1028,7 +1028,7 @@
   },
   {
    "path": "dail_live/MANIFEST.sha256",
-   "sha256": "24b88681206c36afa406b9c21cf9061c4d4e38f896427ff22bb15605daa4e4ea",
+   "sha256": "c12a2e012c0bf4b7db2d304595eab4a94b36b81cfc069c054918959060fe64b1",
    "size": 438
   },
   {
@@ -1048,13 +1048,13 @@
   },
   {
    "path": "dail_live/dail_demo/browser.py",
-   "sha256": "c04c5d1d1b2ef0c7c056ffaba16dc7cf46ff9d38e6bab4c2baebd382bea16a20",
-   "size": 12675
+   "sha256": "c46c72ef6f714b14eb766f6228358215c59a2d299e804fb4fcdf39bf74a5497f",
+   "size": 14534
   },
   {
    "path": "dail_live/dail_demo/evaluate_core.py",
-   "sha256": "a6bf911e149d0561df4f9c2b5da837486845f7e2d40d16c775e3f30de019d21d",
-   "size": 41414
+   "sha256": "913725608b37593e22c2cf4d6ba587ff4e32ab5996df6d753901d12d2e9f2621",
+   "size": 43411
   },
   {
    "path": "scenarios/ATTRIBUTION.md",
@@ -1427,5 +1427,5 @@
    "size": 2008
   }
  ],
- "size": 2285837
+ "size": 2289693
 }

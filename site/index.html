@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DAIL Live: Demo, not part of the DAIL evaluation</title>
-<meta name="description" content="DAIL Live: a person or an AI proposes a Terraform fix, and the released DAIL decides whether to promote it. Demo, not part of the DAIL evaluation.">
+<meta name="description" content="DAIL Live: ask an AI to fix a small cloud system, and watch the released DAIL decide whether its fix is safe. Demo, not part of the DAIL evaluation.">
 <link rel="preload" href="assets/fonts/archivo-latin-wdth-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/dail.css">
@@ -18,109 +18,125 @@
 </script>
 </head>
 <body>
-<a class="visually-hidden" href="#zones">Skip to the gate</a>
+<a class="visually-hidden" href="#step-ask">Skip to the first step</a>
 
-<div class="band" role="banner">
+<header class="band">
   <div class="wrap band__inner">
-    <span class="band__name" aria-hidden="true">DAIL LIVE</span>
+    <h1 class="band__name">DAIL LIVE</h1>
     <span class="demo-label" id="demo-label">Demo, not part of the DAIL evaluation</span>
-    <div class="band__tools">
-      <div class="toggle-group" role="group" aria-label="Mode">
-        <button type="button" class="btn btn--small" id="mode-live" aria-pressed="false">Live</button>
-        <button type="button" class="btn btn--small" id="mode-replays" aria-pressed="true">Replays</button>
-      </div>
-      <button type="button" class="btn btn--small" id="presenter" aria-pressed="false">Presenter mode</button>
-    </div>
+    <button type="button" class="btn btn--small band__presenter" id="presenter" aria-pressed="false">Presenter mode</button>
   </div>
-</div>
-
-<header class="masthead wrap">
-  <div class="masthead__rules-top"></div>
-  <div class="masthead__row">
-    <p class="kicker">The gate that promotes only what it can prove</p>
-    <p class="label">Untrusted fixes, real decisions</p>
-  </div>
-  <h1 class="masthead__title">DAIL LIVE</h1>
-  <div class="masthead__row">
-    <p class="issue" id="issue">Replay · Candidate 01 · Trusted state v0</p>
-    <p class="label">Demo, not part of the DAIL evaluation</p>
-  </div>
-  <div class="masthead__rules-bottom"></div>
 </header>
 
-<main class="wrap">
-  <div class="zones" id="zones">
+<main class="wrap page">
+  <p class="kicker page__lead">An AI proposes a fix. DAIL decides whether it is safe.</p>
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button type="button" class="tab" role="tab" id="tab-ask" aria-selected="true" aria-controls="main-panel">Ask the AI</button>
+    <button type="button" class="tab" role="tab" id="tab-write" aria-selected="false" aria-controls="main-panel">Write your own fix</button>
+    <button type="button" class="tab" role="tab" id="tab-replays" aria-selected="false" aria-controls="main-panel">Replays</button>
+  </div>
 
-    <section class="zone zone--untrusted hatch" aria-labelledby="untrusted-title">
-      <div class="boundary" aria-hidden="true"><span class="boundary__label">Trust boundary</span></div>
-      <div class="zone__head">
-        <h2 class="zone__title" id="untrusted-title">Untrusted</h2>
-        <p class="zone__sub kicker">The proposal. Nothing here is trusted until DAIL says so.</p>
+  <div id="main-panel" role="tabpanel" aria-labelledby="tab-ask">
+    <section class="step step--system" aria-labelledby="system-title">
+      <span class="step__num" aria-hidden="true">0</span>
+      <div class="step__body">
+        <h2 class="step__title" id="system-title">The system</h2>
+        <div class="system">
+          <ol class="picture" aria-label="Internet, then app server, then database">
+            <li>Internet</li><li>App server</li><li>Database</li>
+          </ol>
+          <ul class="health" id="health" aria-label="What DAIL says about the trusted system"></ul>
+        </div>
       </div>
+    </section>
 
-      <div class="panel">
-        <div class="field">
-          <label class="label" for="scenario">Scenario</label>
-          <select id="scenario"></select>
-        </div>
-        <div class="field" id="replay-field">
-          <label class="label" for="replay">Recorded run</label>
-          <select id="replay"></select>
-        </div>
-        <p id="scenario-why" class="muted"></p>
-      </div>
+    <section class="step step--untrusted hatch" id="step-ask" aria-labelledby="ask-title">
+      <span class="step__num" aria-hidden="true">1</span>
+      <div class="step__body">
+        <h2 class="step__title" id="ask-title">Ask</h2>
 
-      <div id="candidate"></div>
+        <form class="panel" id="ask-form">
+          <label class="ask__label" for="instruction">Ask the AI to fix this infrastructure</label>
+          <textarea class="ask__input" id="instruction" rows="2" maxlength="280" autocomplete="off"></textarea>
+          <div class="chips" id="chips" role="group" aria-label="Suggestions"></div>
+          <div class="field" id="passcode-field" hidden>
+            <label class="label" for="passcode">Passcode</label>
+            <input id="passcode" type="password" autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn--ink btn--big" id="ask" disabled>Ask Gemini</button>
+          <p class="note">Your request and the configuration are sent to Google's Gemini (free tier; Google may use them to improve its products). Don't type personal data.</p>
+        </form>
 
-      <div id="live-panel" hidden>
-        <div class="loading" id="loading" role="status" aria-live="polite">
-          <p class="loading__title" id="loading-title">Loading DAIL into your browser</p>
-          <p id="loading-detail" class="muted">The released DAIL v1.0 runs here, unmodified, through Pyodide. Replays work meanwhile.</p>
-          <div class="meter" aria-hidden="true"><div class="meter__fill" id="meter"></div></div>
-          <p class="loading__error" id="loading-error" hidden></p>
-        </div>
-        <div id="editor-panel" class="panel" hidden>
-          <p class="panel__title">Write your own patch</p>
-          <p class="muted">Edit the trusted configuration and submit it. Quick fill:</p>
-          <div class="row" id="quick-fill" style="margin: 8px 0 16px"></div>
-          <div class="files" id="files" role="tablist" aria-label="Configuration files"></div>
+        <form class="panel" id="write-form" hidden>
+          <p class="ask__label" id="write-label">Edit the system and submit your own fix</p>
+          <div class="chips" id="quick-fill" role="group" aria-label="Ready-made edits"></div>
+          <div class="chips" id="files" role="group" aria-label="Configuration files"></div>
           <div class="editor">
             <pre class="editor__lines" id="lines" aria-hidden="true">1</pre>
             <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Configuration file"></textarea>
           </div>
-          <div class="row" style="margin-top: 16px">
-            <button type="button" class="btn btn--ink" id="submit">Submit to the gate</button>
-            <button type="button" class="btn" id="reset">Reset</button>
+          <button type="submit" class="btn btn--ink btn--big" id="submit" disabled>Submit to DAIL</button>
+        </form>
+
+        <div class="panel" id="replay-form" hidden>
+          <div class="field">
+            <label class="ask__label" for="replay">Watch a recorded run</label>
+            <select id="replay"></select>
           </div>
+          <p class="note">Recorded on the authors' laptop with the same DAIL, with Terraform validation.</p>
         </div>
-      </div>
 
+        <div class="panel loading" id="loading" role="status">
+          <p class="loading__title" id="loading-title">Loading DAIL into your browser</p>
+          <p id="loading-detail" class="muted">The released DAIL runs here, unmodified. Replays work meanwhile.</p>
+          <div class="meter" aria-hidden="true"><div class="meter__fill" id="meter"></div></div>
+        </div>
+        <p class="notice" id="notice" role="alert" hidden></p>
+
+        <details class="more" id="system-picker">
+          <summary>Use another system, or start over</summary>
+          <div class="field"><label class="label" for="scenario">System</label><select id="scenario"></select></div>
+          <button type="button" class="btn btn--small" id="reset" disabled>Start over</button>
+        </details>
+      </div>
     </section>
 
-    <section class="zone zone--gate" aria-labelledby="gate-title">
-      <div class="zone__head">
-        <h2 class="zone__title" id="gate-title">The gate</h2>
-        <p class="zone__sub kicker">DAIL's five stages, as DAIL ran them.</p>
-      </div>
-      <div class="gate-cols">
-        <ol class="stages" id="stages"></ol>
-        <div>
-          <div class="decision" id="decision"></div>
-          <div id="ovf"></div>
-        </div>
-      </div>
-    </section>
+    <div class="attempts" id="attempts" role="tablist" aria-label="Attempts" hidden></div>
+    <p class="attempt-note" id="attempt-note" role="status" hidden></p>
 
-    <section class="zone zone--ledger" aria-labelledby="ledger-title">
-      <div class="zone__head">
-        <h2 class="zone__title" id="ledger-title">The ledger</h2>
-        <p class="zone__sub kicker">Trusted states, newest on top, each linked to its parent.</p>
+    <div id="result" hidden>
+      <section class="step step--untrusted hatch" aria-labelledby="propose-title">
+        <span class="step__num" aria-hidden="true">2</span>
+        <div class="step__body">
+          <h2 class="step__title" id="propose-title">AI proposes</h2>
+          <div id="proposal"></div>
+        </div>
+      </section>
+
+      <div class="boundary" aria-hidden="true"><span class="boundary__label">Trust boundary</span></div>
+
+      <section class="step" id="step-check" aria-labelledby="check-title">
+        <span class="step__num" aria-hidden="true">3</span>
+        <div class="step__body">
+          <h2 class="step__title" id="check-title">DAIL checks</h2>
+          <ol class="boxes" id="boxes"></ol>
+          <div id="decision"></div>
+          <details class="more" id="evidence" hidden>
+            <summary>Show DAIL's evidence</summary>
+            <div id="evidence-body"></div>
+          </details>
+        </div>
+      </section>
+    </div>
+
+    <section class="timeline" aria-labelledby="ledger-title">
+      <div class="timeline__head">
+        <h2 class="label" id="ledger-title">The ledger</h2>
+        <button type="button" class="btn btn--small" id="verify" hidden>Verify chain</button>
       </div>
-      <div class="clippings" id="ledger" tabindex="0" role="region" aria-label="Trusted states"></div>
-      <div class="row" style="margin-top: 24px" id="ledger-tools" hidden>
-        <button type="button" class="btn" id="verify">Verify chain</button>
-      </div>
-      <div id="verify-result" role="status" aria-live="polite"></div>
+      <ol class="states" id="ledger"></ol>
+      <div id="state-detail"></div>
+      <div id="verify-result" role="status"></div>
     </section>
   </div>
 
@@ -128,8 +144,7 @@
 </main>
 
 <footer class="footer wrap">
-  <p><strong>DAIL Live is a demonstration, not part of the DAIL evaluation.</strong> The research results are in DAIL's repository and paper.</p>
-  <p>Every decision on this page comes from the released DAIL v1.0: in live mode it runs in your browser; replays were recorded with DAIL on the authors' laptop. <a href="credits.html">Credits and licences</a>.</p>
+  <p><strong>DAIL Live is a demonstration, not part of the DAIL evaluation.</strong> The research results are in DAIL's repository and paper. Every decision here comes from the released DAIL v1.0. <a href="credits.html">Credits and licences</a>.</p>
 </footer>
 
 <script type="module" src="assets/js/app.js"></script>

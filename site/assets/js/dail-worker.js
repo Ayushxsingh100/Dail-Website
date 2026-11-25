@@ -12,6 +12,20 @@ function hex(buffer) {
   return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// A dropped connection is retried twice; every file is still checked against its SHA-256.
+async function download(url, name) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      const answer = await fetch(url, { cache: "no-cache" });
+      if (!answer.ok) throw new Error(`${name}: HTTP ${answer.status}`);
+      return await answer.arrayBuffer();
+    } catch (error) {
+      if (attempt === 3) throw new Error(`${name}: ${error.message}`);
+      await new Promise((r) => setTimeout(r, 300 * attempt));
+    }
+  }
+}
+
 async function load(vendor) {
   const response = await fetch(`${vendor}files.json`, { cache: "no-cache" });
   if (!response.ok) throw new Error(`vendor/files.json: HTTP ${response.status}`);
@@ -30,9 +44,7 @@ async function load(vendor) {
   async function fetchFiles() {
     while (queue.length) {
       const file = queue.shift();
-      const answer = await fetch(`${vendor}${file.path}`, { cache: "no-cache" });
-      if (!answer.ok) throw new Error(`${file.path}: HTTP ${answer.status}`);
-      const data = await answer.arrayBuffer();
+      const data = await download(`${vendor}${file.path}`, file.path);
       const digest = hex(await crypto.subtle.digest("SHA-256", data));
       if (digest !== file.sha256) throw new Error(`${file.path}: SHA-256 ${digest} is not the bundled ${file.sha256}`);
       const target = `/vendor/${file.path}`;
