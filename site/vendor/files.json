@@ -7,6 +7,21 @@
  },
  "files": [
   {
+   "path": "dail/LICENSE",
+   "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+   "size": 11358
+  },
+  {
+   "path": "dail/MANIFEST.sha256",
+   "sha256": "e15c4f7fc1166cb56618d9f2f69d080fff0c75c2080345591aba4f91f6379bd8",
+   "size": 19031
+  },
+  {
+   "path": "dail/VERSION.json",
+   "sha256": "2bd1c8e22a3b5915b94b6dc13dfaa67acda311bf30913f3401fc154f30d8c9c5",
+   "size": 91
+  },
+  {
    "path": "dail/config/base/application.toml",
    "sha256": "1a53f7cf69e7dc7a5fe7ce15ddd4579f990008d160b34ad93cc745f10e08cabf",
    "size": 188
@@ -932,11 +947,6 @@
    "size": 13886
   },
   {
-   "path": "dail/LICENSE",
-   "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-   "size": 11358
-  },
-  {
    "path": "dail/llm/__init__.py",
    "sha256": "28591d925e84a05e200fb14892a49eb2235cf452d29a87761f48782dac7207fd",
    "size": 417
@@ -1017,14 +1027,9 @@
    "size": 27965
   },
   {
-   "path": "dail/MANIFEST.sha256",
-   "sha256": "ee41e4e7e582e27e45e7e74d92b85e2789d60748e7af1452e3b7537111cc5076",
-   "size": 19031
-  },
-  {
-   "path": "dail/VERSION.json",
-   "sha256": "2bd1c8e22a3b5915b94b6dc13dfaa67acda311bf30913f3401fc154f30d8c9c5",
-   "size": 91
+   "path": "dail_live/MANIFEST.sha256",
+   "sha256": "65a3628ce1a92688733d27ed03f6a808a35f94975b148a5d0039f5159c0419f9",
+   "size": 438
   },
   {
    "path": "dail_live/config/llm.toml",
@@ -1052,14 +1057,29 @@
    "size": 40282
   },
   {
-   "path": "dail_live/MANIFEST.sha256",
-   "sha256": "65a3628ce1a92688733d27ed03f6a808a35f94975b148a5d0039f5159c0419f9",
-   "size": 438
-  },
-  {
    "path": "scenarios/ATTRIBUTION.md",
    "sha256": "3daa3ff4e69339ccefd6e2dcf67529677d2658d2726f546028f4d114ab4a0f5d",
    "size": 764
+  },
+  {
+   "path": "scenarios/CC-BY-4.0.txt",
+   "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411",
+   "size": 18657
+  },
+  {
+   "path": "scenarios/MANIFEST.sha256",
+   "sha256": "20bab0a01a55a77a768f8b0b887f731870a60577145f5458a7741b49e89306c4",
+   "size": 7207
+  },
+  {
+   "path": "scenarios/TerraGoat-LICENSE.txt",
+   "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+   "size": 11357
+  },
+  {
+   "path": "scenarios/TerraGoat-NOTICE.txt",
+   "sha256": "dbb8466b33a5f31c7b72326d893a3bb96b3d2f1ffc369461b23f16694ae25266",
+   "size": 751
   },
   {
    "path": "scenarios/canonical/patches/regression/main.tf",
@@ -1097,29 +1117,9 @@
    "size": 1339
   },
   {
-   "path": "scenarios/CC-BY-4.0.txt",
-   "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411",
-   "size": 18657
-  },
-  {
    "path": "scenarios/index.json",
    "sha256": "6dde7a5cb107fd4eafccdbfb11221730ce8aafa161d688d0c1b863ed25ebb9a3",
    "size": 3238
-  },
-  {
-   "path": "scenarios/MANIFEST.sha256",
-   "sha256": "38f76e2395de6cf15dd168b0bb6c73e6f5a0af6584f5f6d6e6befa2784b13c3b",
-   "size": 7207
-  },
-  {
-   "path": "scenarios/TerraGoat-LICENSE.txt",
-   "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-   "size": 11357
-  },
-  {
-   "path": "scenarios/TerraGoat-NOTICE.txt",
-   "sha256": "dbb8466b33a5f31c7b72326d893a3bb96b3d2f1ffc369461b23f16694ae25266",
-   "size": 751
   },
   {
    "path": "scenarios/tp-v1-F2-0027/patches/step-1/main.tf",

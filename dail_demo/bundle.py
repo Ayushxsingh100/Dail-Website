@@ -72,7 +72,7 @@ def write_manifest(root: Path) -> Path:
     """``MANIFEST.sha256`` of every other file under ``root`` (sorted, POSIX paths)."""
     lines = [
         f"{sha256_file(p)}  {p.relative_to(root).as_posix()}"
-        for p in sorted(root.rglob("*"))
+        for p in sorted(root.rglob("*"), key=lambda p: p.relative_to(root).as_posix())
         if p.is_file() and p.name != "MANIFEST.sha256"
     ]
     path = root / "MANIFEST.sha256"
@@ -320,7 +320,7 @@ def bundle(environ: Mapping[str, str], *, pyodide: Path | None = None, out: Path
             shutil.copytree(staging / part, out / part)
     files = []
     for part in ("dail", "dail_live", "scenarios"):
-        for path in sorted((out / part).rglob("*")):
+        for path in sorted((out / part).rglob("*"), key=lambda p: p.relative_to(out).as_posix()):
             if path.is_file():
                 files.append(
                     {"path": path.relative_to(out).as_posix(), "sha256": sha256_file(path), "size": path.stat().st_size}
