@@ -1,0 +1,2634 @@
+{
+ "schema": "dail-live-trace/1",
+ "label": "Demo, not part of the DAIL evaluation",
+ "created_at": "2026-11-25T20:18:58.789948+00:00",
+ "run_id": "20261125T201836Z-session-5a761cac-1",
+ "versions": {
+  "dail_tag": "dail-v1.0",
+  "dail_commit": "4f38b1c49640e5a4ab8ebbbc04d8fb07023f829c",
+  "demo_version": "0.1.0",
+  "terrapreserve_tag": "terrapreserve-v1.0-public-r3",
+  "terrapreserve_commit": "53b094c64429e8c928b19a35bb677c5ee7e821c8",
+  "registry": {
+   "stored_invariant_registry_version": 2,
+   "means": "registry-v1.1"
+  }
+ },
+ "scenario": {
+  "scenario_id": "tp-v1-F8-0196",
+  "family": "F8",
+  "split": "dev",
+  "template_id": "tpl-09",
+  "source_lineage_id": "tpl-09",
+  "target_kind": "repair",
+  "target_invariant_id": "INV-SEC-001",
+  "protected_invariants": [
+   [
+    "INV-FUNC-001",
+    "1.0"
+   ],
+   [
+    "INV-SEC-001",
+    "1.0"
+   ],
+   [
+    "INV-SEC-002",
+    "1.0"
+   ],
+   [
+    "INV-SEC-003",
+    "1.0"
+   ]
+  ],
+  "endpoints": {
+   "S": "aws_instance.web_instance",
+   "D": "aws_db_instance.data_instance"
+  },
+  "variable_values": {
+   "db_password": "tp-secret-primary"
+  },
+  "step_hashes": [
+   "3406b38558062d5e3de2f9639ab6543c8fa4561f7d208f1dcea05fc03880110c",
+   "6bf3c5c85cd4b2f749f0a96ec61a7f6eb2f41a57ddb3b1c057d7cd2034f573b5",
+   "7c602003983ea9c52703959d09d8dd250fb557217cac82f2f98bc2f81556927f"
+  ]
+ },
+ "candidate_source": "FIXED_PATCH",
+ "candidate": {
+  "label": "tp-v1-F8-0196 step 1",
+  "request_id": null,
+  "built_tree_hash": null
+ },
+ "diff": "--- a/main.tf\n+++ b/main.tf\n@@ -97,7 +97,7 @@\n \n resource \"aws_instance\" \"web_instance\" {\n   ami                    = \"ami-0c55b159cbfafe1f0\"\n-  instance_type          = \"t3.small\"\n+  instance_type          = \"t3.medium\"\n   subnet_id              = aws_subnet.web_tier.id\n   vpc_security_group_ids = [aws_security_group.web_secgroup.id]\n }\n",
+ "admission": {
+  "stage": "fixed_patch",
+  "admitted": true,
+  "content_hash": "6bf3c5c85cd4b2f749f0a96ec61a7f6eb2f41a57ddb3b1c057d7cd2034f573b5",
+  "content_hash_matches_manifest": true,
+  "terraform_validate": "terraform validate PASS at TerraPreserve D6 gate 2 (docs/D6_GATES.md: Terraform 1.15.8, hashicorp/aws 6.53.0, every step of every target); not run by DAIL (C-201)",
+  "terraform_validate_run": {
+   "ok": true,
+   "error": "",
+   "versions": {
+    "terraform": "1.15.8",
+    "registry.terraform.io/hashicorp/aws": "6.53.0"
+   }
+  }
+ },
+ "conditions": {
+  "C": {
+   "condition": "C",
+   "name": "DAIL",
+   "versions": {
+    "policy_version": "p8a-C-dail",
+    "policy_rules": "dail",
+    "scope_policy": "dail-scope-2",
+    "identity": "dail-identity-1"
+   },
+   "registry": {
+    "stored_invariant_registry_version": 2,
+    "means": "registry-v1.1"
+   },
+   "baseline": {
+    "outcome": "SESSION_STATE",
+    "state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+    "state_hash": "c1a0cb11e27462a05b191bd20d8bba7bce8efc1c04c714b59960be9105172f6e",
+    "resource_set_hash": "fccb95c8908aedaf2ddfe294f963d8af709c444aed318a2831cfb00875776c77",
+    "version": 0,
+    "invariant_registry_version": 2,
+    "invariants": {
+     "INV-FUNC-001": {
+      "version": 1,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-001": {
+      "version": 2,
+      "status": "VIOLATED"
+     },
+     "INV-SEC-002": {
+      "version": 2,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-003": {
+      "version": 1,
+      "status": "PROTECTED"
+     }
+    }
+   },
+   "decision": {
+    "type": "PROMOTE",
+    "reason": "ALL_REQUIRED_PROVEN",
+    "decision_id": "6ddfea47-b3c9-5492-bdb6-3ffff6f735c6",
+    "blocking": [],
+    "note": null
+   },
+   "check_count": 4,
+   "rebuild_failure": null,
+   "result_kind": "PROMOTED",
+   "identity": {
+    "algorithm_version": "dail-identity-1",
+    "content_hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc",
+    "pairs": [
+     {
+      "trusted_ref": "aws_db_instance.data_instance",
+      "candidate_ref": "aws_db_instance.data_instance",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_db_subnet_group.data_subnets",
+      "candidate_ref": "aws_db_subnet_group.data_subnets",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_instance.web_instance",
+      "candidate_ref": "aws_instance.web_instance",
+      "change_type": "MODIFIED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_internet_gateway.gateway",
+      "candidate_ref": "aws_internet_gateway.gateway",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table.data_route",
+      "candidate_ref": "aws_route_table.data_route",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table.public_route",
+      "candidate_ref": "aws_route_table.public_route",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table_association.assoc_app",
+      "candidate_ref": "aws_route_table_association.assoc_app",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table_association.assoc_db[0]",
+      "candidate_ref": "aws_route_table_association.assoc_db[0]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table_association.assoc_db[1]",
+      "candidate_ref": "aws_route_table_association.assoc_db[1]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group.data_secgroup",
+      "candidate_ref": "aws_security_group.data_secgroup",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group.web_secgroup",
+      "candidate_ref": "aws_security_group.web_secgroup",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.data_secgroup_egress",
+      "candidate_ref": "aws_security_group_rule.data_secgroup_egress",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+      "candidate_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.web_secgroup_egress",
+      "candidate_ref": "aws_security_group_rule.web_secgroup_egress",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+      "candidate_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_subnet.data_tier[0]",
+      "candidate_ref": "aws_subnet.data_tier[0]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_subnet.data_tier[1]",
+      "candidate_ref": "aws_subnet.data_tier[1]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_subnet.web_tier",
+      "candidate_ref": "aws_subnet.web_tier",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_vpc.network",
+      "candidate_ref": "aws_vpc.network",
+      "change_type": "UNCHANGED",
+      "moved": false
+     }
+    ]
+   },
+   "changed_resources": [
+    {
+     "address": "aws_instance.web_instance",
+     "trusted_ref": "aws_instance.web_instance",
+     "candidate_ref": "aws_instance.web_instance",
+     "resource_type": "aws_instance",
+     "change_type": "MODIFIED",
+     "flags": []
+    }
+   ],
+   "impact": {
+    "affected": [
+     {
+      "invariant_id": "INV-FUNC-001",
+      "invariant_version": 1,
+      "status": "AFFECTED",
+      "impact_types": [
+       "DIRECT"
+      ],
+      "changed_resource_refs": [
+       "aws_instance.web_instance"
+      ],
+      "dependency_paths": [
+       {
+        "changed_ref": "aws_instance.web_instance",
+        "steps": []
+       }
+      ],
+      "reasons": [
+       {
+        "code": "SCOPE_RESOURCE_CHANGED",
+        "changed_ref": "aws_instance.web_instance",
+        "scope_element": "binding:SOURCE, resources:aws_instance.web_instance",
+        "detail": "MODIFIED aws_instance.web_instance is a scope element of INV-FUNC-001"
+       }
+      ],
+      "prior_evidence_ids": [
+       "0899601a-241d-538f-acc8-9c3ebb493ff5"
+      ],
+      "evidence_validity": "INVALID"
+     }
+    ],
+    "unaffected": [
+     {
+      "invariant_id": "INV-SEC-001",
+      "invariant_version": 2,
+      "prior_evidence_ids": [
+       "9954e02c-c8bb-547a-9eec-94363fc20562"
+      ],
+      "carry_forward_eligible": true,
+      "reason": "NO_CHANGE_IN_FOOTPRINT"
+     },
+     {
+      "invariant_id": "INV-SEC-002",
+      "invariant_version": 2,
+      "prior_evidence_ids": [
+       "8f31fee9-2846-588a-bc9f-375414348488"
+      ],
+      "carry_forward_eligible": true,
+      "reason": "NO_CHANGE_IN_FOOTPRINT"
+     },
+     {
+      "invariant_id": "INV-SEC-003",
+      "invariant_version": 1,
+      "prior_evidence_ids": [
+       "cf740ea4-3078-5e28-aaa9-386c16115ae4"
+      ],
+      "carry_forward_eligible": true,
+      "reason": "NO_CHANGE_IN_FOOTPRINT"
+     }
+    ],
+    "carry_forward_candidates": [
+     {
+      "invariant_id": "INV-SEC-001",
+      "invariant_version": 2,
+      "evidence_ids": [
+       "9954e02c-c8bb-547a-9eec-94363fc20562"
+      ]
+     },
+     {
+      "invariant_id": "INV-SEC-002",
+      "invariant_version": 2,
+      "evidence_ids": [
+       "8f31fee9-2846-588a-bc9f-375414348488"
+      ]
+     },
+     {
+      "invariant_id": "INV-SEC-003",
+      "invariant_version": 1,
+      "evidence_ids": [
+       "cf740ea4-3078-5e28-aaa9-386c16115ae4"
+      ]
+     }
+    ],
+    "uncertainty": [],
+    "verification_work": [
+     {
+      "target_id": "INVARIANT:INV-FUNC-001:1",
+      "target_type": "INVARIANT",
+      "reason": "SCOPE_RESOURCE_CHANGED",
+      "scope": [
+       "aws_db_instance.data_instance",
+       "aws_instance.web_instance"
+      ],
+      "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
+      "priority": "BLOCKING"
+     }
+    ]
+   },
+   "verification": [
+    {
+     "target": "CONSISTENCY",
+     "target_type": "STRUCTURAL",
+     "verifier": "dail.verify.consistency",
+     "verifier_version": "1",
+     "result": "PASS",
+     "reason": null,
+     "class": "CONSISTENCY",
+     "origin": "gate"
+    },
+    {
+     "target": "INVARIANT:INV-FUNC-001:1",
+     "target_type": "INVARIANT",
+     "verifier": "dail.verify.reachability_cfg",
+     "verifier_version": "1",
+     "result": "PASS",
+     "reason": null,
+     "class": "FUNCTIONAL",
+     "origin": "impact"
+    },
+    {
+     "target": "INVARIANT:INV-SEC-001:2",
+     "target_type": "INVARIANT",
+     "verifier": "dail.verify.public_ingress",
+     "verifier_version": "1",
+     "result": "FAIL",
+     "reason": "predicate.violated",
+     "class": "SECURITY",
+     "origin": "condition"
+    },
+    {
+     "target": "STRUCTURAL",
+     "target_type": "STRUCTURAL",
+     "verifier": "dail.verify.structural",
+     "verifier_version": "1",
+     "result": "PASS",
+     "reason": null,
+     "class": "STRUCTURAL",
+     "origin": "gate"
+    }
+   ],
+   "required": [
+    {
+     "target_id": "CONSISTENCY",
+     "kind": "GATE",
+     "source": "VERIFIED",
+     "verification_id": "905df397-ccdd-56e1-a782-a99d3b007381",
+     "blocking": []
+    },
+    {
+     "target_id": "INVARIANT:INV-FUNC-001:1",
+     "kind": "INVARIANT",
+     "source": "VERIFIED",
+     "verification_id": "513d20b7-605f-52bb-92bf-31f5f945a283",
+     "blocking": []
+    },
+    {
+     "target_id": "INVARIANT:INV-SEC-001:2",
+     "kind": "INVARIANT",
+     "source": "VERIFIED",
+     "verification_id": "9affb383-ffc0-5f05-a412-21ef194a1442",
+     "blocking": []
+    },
+    {
+     "target_id": "INVARIANT:INV-SEC-002:2",
+     "kind": "INVARIANT",
+     "source": "CARRIED_FORWARD",
+     "verification_id": null,
+     "blocking": []
+    },
+    {
+     "target_id": "INVARIANT:INV-SEC-003:1",
+     "kind": "INVARIANT",
+     "source": "CARRIED_FORWARD",
+     "verification_id": null,
+     "blocking": []
+    },
+    {
+     "target_id": "STRUCTURAL",
+     "kind": "GATE",
+     "source": "VERIFIED",
+     "verification_id": "0a7301b8-3688-5223-a9b9-cfe56eaa0d9d",
+     "blocking": []
+    }
+   ],
+   "proof_plan": [
+    {
+     "invariant_id": "INV-FUNC-001",
+     "invariant_version": 1,
+     "source": "VERIFIED",
+     "verification_id": "513d20b7-605f-52bb-92bf-31f5f945a283",
+     "source_state_id": null,
+     "evidence_ids": []
+    },
+    {
+     "invariant_id": "INV-SEC-001",
+     "invariant_version": 2,
+     "source": "VERIFIED",
+     "verification_id": "9affb383-ffc0-5f05-a412-21ef194a1442",
+     "source_state_id": null,
+     "evidence_ids": []
+    },
+    {
+     "invariant_id": "INV-SEC-002",
+     "invariant_version": 2,
+     "source": "CARRIED_FORWARD",
+     "verification_id": null,
+     "source_state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+     "evidence_ids": [
+      "8f31fee9-2846-588a-bc9f-375414348488"
+     ]
+    },
+    {
+     "invariant_id": "INV-SEC-003",
+     "invariant_version": 1,
+     "source": "CARRIED_FORWARD",
+     "verification_id": null,
+     "source_state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+     "evidence_ids": [
+      "cf740ea4-3078-5e28-aaa9-386c16115ae4"
+     ]
+    }
+   ],
+   "work_counts": {
+    "gate": 2,
+    "invariant": 2,
+    "baseline_applicable": 0,
+    "baseline_not_applicable": 0,
+    "not_protected_in_parent": 1
+   },
+   "new_state": {
+    "state_id": "93ff432e-3532-5402-9b98-47076867cf50",
+    "state_hash": "711da9a2e76ecca39aa0f1b89e0e5c070687d1453d2f10a9099a0e3826e895d8",
+    "resource_set_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+    "version": 1,
+    "invariant_registry_version": 2,
+    "invariants": {
+     "INV-FUNC-001": {
+      "version": 1,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-001": {
+      "version": 2,
+      "status": "VIOLATED"
+     },
+     "INV-SEC-002": {
+      "version": 2,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-003": {
+      "version": 1,
+      "status": "PROTECTED"
+     }
+    }
+   },
+   "dail": {
+    "transition": {
+     "condition": "C",
+     "scenario_id": "tp-v1-F8-0196",
+     "record": "transition",
+     "step_index": 1,
+     "status": "EVALUATED",
+     "admission": {
+      "stage": "fixed_patch",
+      "admitted": true,
+      "content_hash": "6bf3c5c85cd4b2f749f0a96ec61a7f6eb2f41a57ddb3b1c057d7cd2034f573b5",
+      "content_hash_matches_manifest": true,
+      "terraform_validate": "terraform validate PASS at TerraPreserve D6 gate 2 (docs/D6_GATES.md: Terraform 1.15.8, hashicorp/aws 6.53.0, every step of every target); not run by DAIL (C-201)",
+      "terraform_validate_run": {
+       "ok": true,
+       "error": "",
+       "versions": {
+        "terraform": "1.15.8",
+        "registry.terraform.io/hashicorp/aws": "6.53.0"
+       }
+      }
+     },
+     "parent_state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+     "parent_state_hash": "c1a0cb11e27462a05b191bd20d8bba7bce8efc1c04c714b59960be9105172f6e",
+     "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+     "candidate_state_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+     "open_targets": [
+      "INV-SEC-001"
+     ],
+     "outcome_class": "DAIL_OUTCOME",
+     "result_kind": "PROMOTED",
+     "decision": {
+      "type": "PROMOTE",
+      "reason": "ALL_REQUIRED_PROVEN",
+      "decision_id": "6ddfea47-b3c9-5492-bdb6-3ffff6f735c6",
+      "blocking": [],
+      "note": null
+     },
+     "required": [
+      {
+       "target_id": "CONSISTENCY",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "905df397-ccdd-56e1-a782-a99d3b007381",
+       "blocking": []
+      },
+      {
+       "target_id": "INVARIANT:INV-FUNC-001:1",
+       "kind": "INVARIANT",
+       "source": "VERIFIED",
+       "verification_id": "513d20b7-605f-52bb-92bf-31f5f945a283",
+       "blocking": []
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "kind": "INVARIANT",
+       "source": "VERIFIED",
+       "verification_id": "9affb383-ffc0-5f05-a412-21ef194a1442",
+       "blocking": []
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-002:2",
+       "kind": "INVARIANT",
+       "source": "CARRIED_FORWARD",
+       "verification_id": null,
+       "blocking": []
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-003:1",
+       "kind": "INVARIANT",
+       "source": "CARRIED_FORWARD",
+       "verification_id": null,
+       "blocking": []
+      },
+      {
+       "target_id": "STRUCTURAL",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "0a7301b8-3688-5223-a9b9-cfe56eaa0d9d",
+       "blocking": []
+      }
+     ],
+     "work": [
+      {
+       "target_id": "CONSISTENCY",
+       "target_type": "STRUCTURAL",
+       "class": "CONSISTENCY",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "verifier_id": "dail.verify.consistency",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "origin": "gate",
+       "selected_reason": null
+      },
+      {
+       "target_id": "INVARIANT:INV-FUNC-001:1",
+       "target_type": "INVARIANT",
+       "class": "FUNCTIONAL",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "verifier_id": "dail.verify.reachability_cfg",
+       "verifier_version": "1",
+       "evidence_level": "L1",
+       "origin": "impact",
+       "selected_reason": "SCOPE_RESOURCE_CHANGED"
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "target_type": "INVARIANT",
+       "class": "SECURITY",
+       "result": "FAIL",
+       "reason": "predicate.violated",
+       "applicable": true,
+       "verifier_id": "dail.verify.public_ingress",
+       "verifier_version": "1",
+       "evidence_level": "L1",
+       "origin": "condition",
+       "selected_reason": "NOT_PROTECTED_IN_PARENT"
+      },
+      {
+       "target_id": "STRUCTURAL",
+       "target_type": "STRUCTURAL",
+       "class": "STRUCTURAL",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "verifier_id": "dail.verify.structural",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "origin": "gate",
+       "selected_reason": null
+      }
+     ],
+     "work_counts": {
+      "gate": 2,
+      "invariant": 2,
+      "baseline_applicable": 0,
+      "baseline_not_applicable": 0,
+      "not_protected_in_parent": 1
+     },
+     "identity": {
+      "algorithm_version": "dail-identity-1",
+      "content_hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc",
+      "pairs": [
+       {
+        "trusted_ref": "aws_db_instance.data_instance",
+        "candidate_ref": "aws_db_instance.data_instance",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_db_subnet_group.data_subnets",
+        "candidate_ref": "aws_db_subnet_group.data_subnets",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_instance.web_instance",
+        "candidate_ref": "aws_instance.web_instance",
+        "change_type": "MODIFIED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_internet_gateway.gateway",
+        "candidate_ref": "aws_internet_gateway.gateway",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table.data_route",
+        "candidate_ref": "aws_route_table.data_route",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table.public_route",
+        "candidate_ref": "aws_route_table.public_route",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table_association.assoc_app",
+        "candidate_ref": "aws_route_table_association.assoc_app",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table_association.assoc_db[0]",
+        "candidate_ref": "aws_route_table_association.assoc_db[0]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table_association.assoc_db[1]",
+        "candidate_ref": "aws_route_table_association.assoc_db[1]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group.data_secgroup",
+        "candidate_ref": "aws_security_group.data_secgroup",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group.web_secgroup",
+        "candidate_ref": "aws_security_group.web_secgroup",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.data_secgroup_egress",
+        "candidate_ref": "aws_security_group_rule.data_secgroup_egress",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+        "candidate_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.web_secgroup_egress",
+        "candidate_ref": "aws_security_group_rule.web_secgroup_egress",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+        "candidate_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_subnet.data_tier[0]",
+        "candidate_ref": "aws_subnet.data_tier[0]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_subnet.data_tier[1]",
+        "candidate_ref": "aws_subnet.data_tier[1]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_subnet.web_tier",
+        "candidate_ref": "aws_subnet.web_tier",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_vpc.network",
+        "candidate_ref": "aws_vpc.network",
+        "change_type": "UNCHANGED",
+        "moved": false
+       }
+      ]
+     },
+     "impact": {
+      "algorithm_version": "dail-impact-1",
+      "content_hash": "02cf628839bf069682f1e3cf8c64c4fa1f57192facb19cbce7e9d3a830ed9130",
+      "affected": [
+       {
+        "invariant_id": "INV-FUNC-001",
+        "invariant_version": 1,
+        "status": "AFFECTED",
+        "impact_types": [
+         "DIRECT"
+        ]
+       }
+      ]
+     },
+     "new_state": {
+      "state_id": "93ff432e-3532-5402-9b98-47076867cf50",
+      "state_hash": "711da9a2e76ecca39aa0f1b89e0e5c070687d1453d2f10a9099a0e3826e895d8",
+      "resource_set_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+      "version": 1,
+      "invariant_registry_version": 2,
+      "invariants": {
+       "INV-FUNC-001": {
+        "version": 1,
+        "status": "PROTECTED"
+       },
+       "INV-SEC-001": {
+        "version": 2,
+        "status": "VIOLATED"
+       },
+       "INV-SEC-002": {
+        "version": 2,
+        "status": "PROTECTED"
+       },
+       "INV-SEC-003": {
+        "version": 1,
+        "status": "PROTECTED"
+       }
+      }
+     },
+     "registry": {
+      "stored_invariant_registry_version": 2,
+      "means": "registry-v1.1"
+     }
+    },
+    "impact": {
+     "parent_state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+     "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+     "changed_resources": [
+      {
+       "address": "aws_instance.web_instance",
+       "trusted_ref": "aws_instance.web_instance",
+       "candidate_ref": "aws_instance.web_instance",
+       "resource_type": "aws_instance",
+       "change_type": "MODIFIED",
+       "flags": []
+      }
+     ],
+     "affected_invariants": [
+      {
+       "invariant_id": "INV-FUNC-001",
+       "invariant_version": 1,
+       "status": "AFFECTED",
+       "impact_types": [
+        "DIRECT"
+       ],
+       "changed_resource_refs": [
+        "aws_instance.web_instance"
+       ],
+       "dependency_paths": [
+        {
+         "changed_ref": "aws_instance.web_instance",
+         "steps": []
+        }
+       ],
+       "reasons": [
+        {
+         "code": "SCOPE_RESOURCE_CHANGED",
+         "changed_ref": "aws_instance.web_instance",
+         "scope_element": "binding:SOURCE, resources:aws_instance.web_instance",
+         "detail": "MODIFIED aws_instance.web_instance is a scope element of INV-FUNC-001"
+        }
+       ],
+       "prior_evidence_ids": [
+        "0899601a-241d-538f-acc8-9c3ebb493ff5"
+       ],
+       "evidence_validity": "INVALID"
+      }
+     ],
+     "verification_work": [
+      {
+       "target_id": "INVARIANT:INV-FUNC-001:1",
+       "target_type": "INVARIANT",
+       "reason": "SCOPE_RESOURCE_CHANGED",
+       "scope": [
+        "aws_db_instance.data_instance",
+        "aws_instance.web_instance"
+       ],
+       "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
+       "priority": "BLOCKING"
+      }
+     ],
+     "uncertainty": [],
+     "unaffected": [
+      {
+       "invariant_id": "INV-SEC-001",
+       "invariant_version": 2,
+       "prior_evidence_ids": [
+        "9954e02c-c8bb-547a-9eec-94363fc20562"
+       ],
+       "carry_forward_eligible": true,
+       "reason": "NO_CHANGE_IN_FOOTPRINT"
+      },
+      {
+       "invariant_id": "INV-SEC-002",
+       "invariant_version": 2,
+       "prior_evidence_ids": [
+        "8f31fee9-2846-588a-bc9f-375414348488"
+       ],
+       "carry_forward_eligible": true,
+       "reason": "NO_CHANGE_IN_FOOTPRINT"
+      },
+      {
+       "invariant_id": "INV-SEC-003",
+       "invariant_version": 1,
+       "prior_evidence_ids": [
+        "cf740ea4-3078-5e28-aaa9-386c16115ae4"
+       ],
+       "carry_forward_eligible": true,
+       "reason": "NO_CHANGE_IN_FOOTPRINT"
+      }
+     ],
+     "carry_forward_candidates": [
+      {
+       "invariant_id": "INV-SEC-001",
+       "invariant_version": 2,
+       "evidence_ids": [
+        "9954e02c-c8bb-547a-9eec-94363fc20562"
+       ]
+      },
+      {
+       "invariant_id": "INV-SEC-002",
+       "invariant_version": 2,
+       "evidence_ids": [
+        "8f31fee9-2846-588a-bc9f-375414348488"
+       ]
+      },
+      {
+       "invariant_id": "INV-SEC-003",
+       "invariant_version": 1,
+       "evidence_ids": [
+        "cf740ea4-3078-5e28-aaa9-386c16115ae4"
+       ]
+      }
+     ],
+     "reasons": [
+      "NO_CHANGE_IN_FOOTPRINT",
+      "SCOPE_RESOURCE_CHANGED"
+     ],
+     "algorithm_version": "dail-impact-1",
+     "graph_version": "dail-graph-2",
+     "trusted_graph_hash": "672d5b01c362e8d84dc4be446120fdb1ba0f0011fd924f5ba681f98ee7ab64dd",
+     "candidate_graph_hash": "672d5b01c362e8d84dc4be446120fdb1ba0f0011fd924f5ba681f98ee7ab64dd",
+     "identity_report_hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc",
+     "created_at": "2026-01-01T00:00:03+00:00",
+     "content_hash": "02cf628839bf069682f1e3cf8c64c4fa1f57192facb19cbce7e9d3a830ed9130"
+    },
+    "verification": {
+     "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+     "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+     "results": [
+      {
+       "verification_id": "513d20b7-605f-52bb-92bf-31f5f945a283",
+       "request_id": "14ee5f91-6da0-55c1-b029-c5b60fc31a78",
+       "target_type": "INVARIANT",
+       "target_id": "INVARIANT:INV-FUNC-001:1",
+       "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": "INV-FUNC-001",
+       "invariant_version": 1,
+       "verifier_id": "dail.verify.reachability_cfg",
+       "verifier_version": "1",
+       "evidence_level": "L1",
+       "verification_class": "FUNCTIONAL",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "clauses": null,
+       "observations": {
+        "row": 6,
+        "reason": null,
+        "detail": null,
+        "unresolved": [],
+        "endpoints": {
+         "S": {
+          "trusted": "aws_instance.web_instance",
+          "candidate": "aws_instance.web_instance",
+          "match": "MODIFIED"
+         },
+         "D": {
+          "trusted": "aws_db_instance.data_instance",
+          "candidate": "aws_db_instance.data_instance",
+          "match": "UNCHANGED"
+         }
+        },
+        "port": 5432,
+        "path": {
+         "S": "aws_instance.web_instance",
+         "subnet": "aws_subnet.web_tier",
+         "vpc_s": "aws_vpc.network",
+         "sg_s": [
+          "aws_security_group.web_secgroup"
+         ],
+         "egress_rule": "aws_security_group_rule.web_secgroup_egress",
+         "sg_d": [
+          "aws_security_group.data_secgroup"
+         ],
+         "ingress_rule": "aws_security_group_rule.data_secgroup_from_app_5432",
+         "vpc_d": "aws_vpc.network"
+        },
+        "row2_causes": [],
+        "failing_conditions": [],
+        "indeterminate_rules": [],
+        "partial_coverage": [],
+        "relevant_unsupported": []
+       },
+       "assumptions": [
+        "IPv4 only",
+        "M1: RDS security groups and subnet group share one VPC (C-15, C-77, uncited)",
+        "M4: default network ACL assumed (no NACL type present)",
+        "tolerated type: aws_db_subnet_group (C-15)"
+       ],
+       "evidence": {
+        "verification_id": "513d20b7-605f-52bb-92bf-31f5f945a283",
+        "invariant_id": "INV-FUNC-001",
+        "invariant_version": 1,
+        "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "INVARIANT:INV-FUNC-001:1",
+        "verifier_id": "dail.verify.reachability_cfg",
+        "verifier_version": "1",
+        "evidence_level": "L1",
+        "predicate": "registry-v1.0 §6 {\"D\":\"aws_db_instance.data_instance\",\"S\":\"aws_instance.web_instance\",\"port\":5432}",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "312f7511-9653-52c9-8cd4-1870469748dd"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "02cf628839bf069682f1e3cf8c64c4fa1f57192facb19cbce7e9d3a830ed9130"
+         },
+         {
+          "kind": "invariant_definition",
+          "id": "INV-FUNC-001",
+          "version": 1,
+          "hash": "44d037002d6cb8de16957cb10d3c6db956a68b6482b1bccb771fbb001ce021a5"
+         }
+        ],
+        "observations": {
+         "row": 6,
+         "reason": null,
+         "detail": null,
+         "unresolved": [],
+         "endpoints": {
+          "S": {
+           "trusted": "aws_instance.web_instance",
+           "candidate": "aws_instance.web_instance",
+           "match": "MODIFIED"
+          },
+          "D": {
+           "trusted": "aws_db_instance.data_instance",
+           "candidate": "aws_db_instance.data_instance",
+           "match": "UNCHANGED"
+          }
+         },
+         "port": 5432,
+         "path": {
+          "S": "aws_instance.web_instance",
+          "subnet": "aws_subnet.web_tier",
+          "vpc_s": "aws_vpc.network",
+          "sg_s": [
+           "aws_security_group.web_secgroup"
+          ],
+          "egress_rule": "aws_security_group_rule.web_secgroup_egress",
+          "sg_d": [
+           "aws_security_group.data_secgroup"
+          ],
+          "ingress_rule": "aws_security_group_rule.data_secgroup_from_app_5432",
+          "vpc_d": "aws_vpc.network"
+         },
+         "row2_causes": [],
+         "failing_conditions": [],
+         "indeterminate_rules": [],
+         "partial_coverage": [],
+         "relevant_unsupported": []
+        },
+        "result": "PASS",
+        "reason": null,
+        "applicable": true,
+        "clauses": null,
+        "assumptions": [
+         "IPv4 only",
+         "M1: RDS security groups and subnet group share one VPC (C-15, C-77, uncited)",
+         "M4: default network ACL assumed (no NACL type present)",
+         "tolerated type: aws_db_subnet_group (C-15)"
+        ],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      },
+      {
+       "verification_id": "9affb383-ffc0-5f05-a412-21ef194a1442",
+       "request_id": "12780cdd-c5ae-55fc-ade5-3283e14d2640",
+       "target_type": "INVARIANT",
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": "INV-SEC-001",
+       "invariant_version": 2,
+       "verifier_id": "dail.verify.public_ingress",
+       "verifier_version": "1",
+       "evidence_level": "L1",
+       "verification_class": "SECURITY",
+       "result": "FAIL",
+       "reason": "predicate.violated",
+       "applicable": true,
+       "clauses": {
+        "IPV4": "FAIL",
+        "IPV6": "PASS"
+       },
+       "observations": {
+        "port": 22,
+        "groups_evaluated": 2,
+        "violations": [
+         {
+          "group": "aws_security_group.web_secgroup",
+          "family": "IPV4",
+          "rules": [
+           "aws_security_group_rule.web_secgroup_ssh_public"
+          ],
+          "cidrs": [
+           "0.0.0.0/0"
+          ],
+          "port_ranges": [
+           "22-22"
+          ]
+         }
+        ],
+        "mixed_groups": [],
+        "retained_inline": [],
+        "unresolved_forms": [],
+        "identity_missing": [],
+        "indeterminate_rules": [],
+        "unsupported_rules": [],
+        "unresolved_type_rules": [],
+        "relevant_unsupported": [],
+        "placeholders": []
+       },
+       "assumptions": [
+        "egress contents are not read",
+        "scope: every group, attached or not (C-64)",
+        "tolerated type: aws_db_subnet_group (C-15)",
+        "v1: coverage split across groups is not detected (S6)"
+       ],
+       "evidence": {
+        "verification_id": "9affb383-ffc0-5f05-a412-21ef194a1442",
+        "invariant_id": "INV-SEC-001",
+        "invariant_version": 2,
+        "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "INVARIANT:INV-SEC-001:2",
+        "verifier_id": "dail.verify.public_ingress",
+        "verifier_version": "1",
+        "evidence_level": "L1",
+        "predicate": "registry-v1.1 §3 {\"p\":22}",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "312f7511-9653-52c9-8cd4-1870469748dd"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "02cf628839bf069682f1e3cf8c64c4fa1f57192facb19cbce7e9d3a830ed9130"
+         },
+         {
+          "kind": "invariant_definition",
+          "id": "INV-SEC-001",
+          "version": 2,
+          "hash": "68cfd9ee4e11b4e12713c644708a033415a43b9cb6e04419c926012ef6df0032"
+         }
+        ],
+        "observations": {
+         "port": 22,
+         "groups_evaluated": 2,
+         "violations": [
+          {
+           "group": "aws_security_group.web_secgroup",
+           "family": "IPV4",
+           "rules": [
+            "aws_security_group_rule.web_secgroup_ssh_public"
+           ],
+           "cidrs": [
+            "0.0.0.0/0"
+           ],
+           "port_ranges": [
+            "22-22"
+           ]
+          }
+         ],
+         "mixed_groups": [],
+         "retained_inline": [],
+         "unresolved_forms": [],
+         "identity_missing": [],
+         "indeterminate_rules": [],
+         "unsupported_rules": [],
+         "unresolved_type_rules": [],
+         "relevant_unsupported": [],
+         "placeholders": []
+        },
+        "result": "FAIL",
+        "reason": "predicate.violated",
+        "applicable": true,
+        "clauses": {
+         "IPV4": "FAIL",
+         "IPV6": "PASS"
+        },
+        "assumptions": [
+         "egress contents are not read",
+         "scope: every group, attached or not (C-64)",
+         "tolerated type: aws_db_subnet_group (C-15)",
+         "v1: coverage split across groups is not detected (S6)"
+        ],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      },
+      {
+       "verification_id": "905df397-ccdd-56e1-a782-a99d3b007381",
+       "request_id": "fc67c3e7-087e-519f-8652-8f02190dc968",
+       "target_type": "STRUCTURAL",
+       "target_id": "CONSISTENCY",
+       "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": null,
+       "invariant_version": null,
+       "verifier_id": "dail.verify.consistency",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "verification_class": "CONSISTENCY",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "clauses": null,
+       "observations": {
+        "findings": [],
+        "resources": 19,
+        "work_reason": "MANDATORY_GATE",
+        "priority": "BLOCKING"
+       },
+       "assumptions": [],
+       "evidence": {
+        "verification_id": "905df397-ccdd-56e1-a782-a99d3b007381",
+        "invariant_id": null,
+        "invariant_version": null,
+        "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "CONSISTENCY",
+        "verifier_id": "dail.verify.consistency",
+        "verifier_version": "1",
+        "evidence_level": "L0",
+        "predicate": "CONSISTENCY",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "312f7511-9653-52c9-8cd4-1870469748dd"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "02cf628839bf069682f1e3cf8c64c4fa1f57192facb19cbce7e9d3a830ed9130"
+         }
+        ],
+        "observations": {
+         "findings": [],
+         "resources": 19,
+         "work_reason": "MANDATORY_GATE",
+         "priority": "BLOCKING"
+        },
+        "result": "PASS",
+        "reason": null,
+        "applicable": true,
+        "clauses": null,
+        "assumptions": [],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      },
+      {
+       "verification_id": "0a7301b8-3688-5223-a9b9-cfe56eaa0d9d",
+       "request_id": "e7e630c3-00ee-58f7-9e46-acd4f40c6254",
+       "target_type": "STRUCTURAL",
+       "target_id": "STRUCTURAL",
+       "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": null,
+       "invariant_version": null,
+       "verifier_id": "dail.verify.structural",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "verification_class": "STRUCTURAL",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "clauses": null,
+       "observations": {
+        "findings": [],
+        "resources": 19,
+        "work_reason": "MANDATORY_GATE",
+        "priority": "BLOCKING"
+       },
+       "assumptions": [],
+       "evidence": {
+        "verification_id": "0a7301b8-3688-5223-a9b9-cfe56eaa0d9d",
+        "invariant_id": null,
+        "invariant_version": null,
+        "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "STRUCTURAL",
+        "verifier_id": "dail.verify.structural",
+        "verifier_version": "1",
+        "evidence_level": "L0",
+        "predicate": "STRUCTURAL",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "312f7511-9653-52c9-8cd4-1870469748dd"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "44d4ed13285d4fc133f8ac9d896917c3213451968213cd5f49eea3714095c9fc"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "02cf628839bf069682f1e3cf8c64c4fa1f57192facb19cbce7e9d3a830ed9130"
+         }
+        ],
+        "observations": {
+         "findings": [],
+         "resources": 19,
+         "work_reason": "MANDATORY_GATE",
+         "priority": "BLOCKING"
+        },
+        "result": "PASS",
+        "reason": null,
+        "applicable": true,
+        "clauses": null,
+        "assumptions": [],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      }
+     ],
+     "verifier_invocations": 4,
+     "verifier_set_version": "dail-verify-1",
+     "summary": {
+      "results": 4,
+      "verifier_invocations": 4,
+      "by_class": {
+       "CONSISTENCY": {
+        "PASS": 1
+       },
+       "FUNCTIONAL": {
+        "PASS": 1
+       },
+       "SECURITY": {
+        "FAIL": 1
+       },
+       "STRUCTURAL": {
+        "PASS": 1
+       }
+      }
+     },
+     "content_hash": "3ddb7872e68711c4d5a3025a457d00948b4f8ae51749cf4812a345aa7d5a3d20"
+    },
+    "decision": {
+     "decision_id": "6ddfea47-b3c9-5492-bdb6-3ffff6f735c6",
+     "candidate_id": "baa4accf-3803-5347-a010-b8f16641bb13",
+     "parent_state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+     "decision": "PROMOTE",
+     "reason": "ALL_REQUIRED_PROVEN",
+     "policy_version": "p8a-C-dail",
+     "attempt_number": 1,
+     "required_checks": [
+      {
+       "target_id": "CONSISTENCY",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "905df397-ccdd-56e1-a782-a99d3b007381"
+      },
+      {
+       "target_id": "INVARIANT:INV-FUNC-001:1",
+       "kind": "INVARIANT",
+       "source": "VERIFIED",
+       "verification_id": "513d20b7-605f-52bb-92bf-31f5f945a283"
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "kind": "INVARIANT",
+       "source": "VERIFIED",
+       "verification_id": "9affb383-ffc0-5f05-a412-21ef194a1442"
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-002:2",
+       "kind": "INVARIANT",
+       "source": "CARRIED_FORWARD",
+       "verification_id": null
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-003:1",
+       "kind": "INVARIANT",
+       "source": "CARRIED_FORWARD",
+       "verification_id": null
+      },
+      {
+       "target_id": "STRUCTURAL",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "0a7301b8-3688-5223-a9b9-cfe56eaa0d9d"
+      }
+     ],
+     "blocking_conditions": [],
+     "supporting_results": [
+      "0a7301b8-3688-5223-a9b9-cfe56eaa0d9d",
+      "513d20b7-605f-52bb-92bf-31f5f945a283",
+      "905df397-ccdd-56e1-a782-a99d3b007381",
+      "9affb383-ffc0-5f05-a412-21ef194a1442"
+     ],
+     "created_at": "2026-01-01T00:00:03+00:00",
+     "committed_state_id": "93ff432e-3532-5402-9b98-47076867cf50",
+     "content_hash": "8dc02d66c790e45ace5a5a0fe0e7268bb93d9d947ad7669276a21b1d08c16c39"
+    }
+   },
+   "store": "session/C/store/dail.sqlite",
+   "wall_seconds": 0.7297662000055425
+  },
+  "A": {
+   "condition": "A",
+   "name": "target-only",
+   "versions": {
+    "policy_version": "p8a-A-dail-stateless-1",
+    "policy_rules": "dail-stateless-1",
+    "scope_policy": "stateless-scope-2",
+    "identity": "dail-identity-1"
+   },
+   "registry": {
+    "stored_invariant_registry_version": 2,
+    "means": "registry-v1.1"
+   },
+   "baseline": {
+    "outcome": "ESTABLISHED",
+    "state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb",
+    "state_hash": "1f0c3cebd5417d4ff75e649c2676fe30ea64dfa21dc350fcb211271838775e53",
+    "resource_set_hash": "fccb95c8908aedaf2ddfe294f963d8af709c444aed318a2831cfb00875776c77",
+    "version": 0,
+    "invariant_registry_version": 2,
+    "invariants": {
+     "INV-SEC-001": {
+      "version": 2,
+      "status": "VIOLATED"
+     }
+    }
+   },
+   "decision": {
+    "type": "PROMOTE",
+    "reason": "ALL_REQUIRED_PROVEN",
+    "decision_id": "0baa168f-2d34-5720-98ae-c913020f0519",
+    "blocking": [],
+    "note": null
+   },
+   "check_count": 3,
+   "rebuild_failure": null,
+   "result_kind": "PROMOTED",
+   "identity": {
+    "algorithm_version": "dail-identity-1",
+    "content_hash": "42e03f0f89ad96ac33b5cd4d54d8c768b70d3f4d2161448978f3f49e7b7853cb",
+    "pairs": [
+     {
+      "trusted_ref": "aws_db_instance.data_instance",
+      "candidate_ref": "aws_db_instance.data_instance",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_db_subnet_group.data_subnets",
+      "candidate_ref": "aws_db_subnet_group.data_subnets",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_instance.web_instance",
+      "candidate_ref": "aws_instance.web_instance",
+      "change_type": "MODIFIED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_internet_gateway.gateway",
+      "candidate_ref": "aws_internet_gateway.gateway",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table.data_route",
+      "candidate_ref": "aws_route_table.data_route",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table.public_route",
+      "candidate_ref": "aws_route_table.public_route",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table_association.assoc_app",
+      "candidate_ref": "aws_route_table_association.assoc_app",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table_association.assoc_db[0]",
+      "candidate_ref": "aws_route_table_association.assoc_db[0]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_route_table_association.assoc_db[1]",
+      "candidate_ref": "aws_route_table_association.assoc_db[1]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group.data_secgroup",
+      "candidate_ref": "aws_security_group.data_secgroup",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group.web_secgroup",
+      "candidate_ref": "aws_security_group.web_secgroup",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.data_secgroup_egress",
+      "candidate_ref": "aws_security_group_rule.data_secgroup_egress",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+      "candidate_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.web_secgroup_egress",
+      "candidate_ref": "aws_security_group_rule.web_secgroup_egress",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+      "candidate_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_subnet.data_tier[0]",
+      "candidate_ref": "aws_subnet.data_tier[0]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_subnet.data_tier[1]",
+      "candidate_ref": "aws_subnet.data_tier[1]",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_subnet.web_tier",
+      "candidate_ref": "aws_subnet.web_tier",
+      "change_type": "UNCHANGED",
+      "moved": false
+     },
+     {
+      "trusted_ref": "aws_vpc.network",
+      "candidate_ref": "aws_vpc.network",
+      "change_type": "UNCHANGED",
+      "moved": false
+     }
+    ]
+   },
+   "changed_resources": [
+    {
+     "address": "aws_instance.web_instance",
+     "trusted_ref": "aws_instance.web_instance",
+     "candidate_ref": "aws_instance.web_instance",
+     "resource_type": "aws_instance",
+     "change_type": "MODIFIED",
+     "flags": []
+    }
+   ],
+   "impact": {
+    "affected": [
+     {
+      "invariant_id": "INV-FUNC-001",
+      "invariant_version": 1,
+      "status": "AFFECTED",
+      "impact_types": [
+       "DIRECT"
+      ],
+      "changed_resource_refs": [
+       "aws_instance.web_instance"
+      ],
+      "dependency_paths": [
+       {
+        "changed_ref": "aws_instance.web_instance",
+        "steps": []
+       }
+      ],
+      "reasons": [
+       {
+        "code": "SCOPE_RESOURCE_CHANGED",
+        "changed_ref": "aws_instance.web_instance",
+        "scope_element": "binding:SOURCE, resources:aws_instance.web_instance",
+        "detail": "MODIFIED aws_instance.web_instance is a scope element of INV-FUNC-001"
+       }
+      ],
+      "prior_evidence_ids": [],
+      "evidence_validity": "INVALID"
+     }
+    ],
+    "unaffected": [
+     {
+      "invariant_id": "INV-SEC-001",
+      "invariant_version": 2,
+      "prior_evidence_ids": [
+       "1dfecb1a-5878-59b3-80a3-8769ff2f28c1"
+      ],
+      "carry_forward_eligible": true,
+      "reason": "NO_CHANGE_IN_FOOTPRINT"
+     },
+     {
+      "invariant_id": "INV-SEC-002",
+      "invariant_version": 2,
+      "prior_evidence_ids": [],
+      "carry_forward_eligible": false,
+      "reason": "NO_PRIOR_EVIDENCE"
+     },
+     {
+      "invariant_id": "INV-SEC-003",
+      "invariant_version": 1,
+      "prior_evidence_ids": [],
+      "carry_forward_eligible": false,
+      "reason": "NO_PRIOR_EVIDENCE"
+     }
+    ],
+    "carry_forward_candidates": [
+     {
+      "invariant_id": "INV-SEC-001",
+      "invariant_version": 2,
+      "evidence_ids": [
+       "1dfecb1a-5878-59b3-80a3-8769ff2f28c1"
+      ]
+     }
+    ],
+    "uncertainty": [],
+    "verification_work": [
+     {
+      "target_id": "INVARIANT:INV-FUNC-001:1",
+      "target_type": "INVARIANT",
+      "reason": "SCOPE_RESOURCE_CHANGED",
+      "scope": [
+       "aws_db_instance.data_instance",
+       "aws_instance.web_instance"
+      ],
+      "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
+      "priority": "BLOCKING"
+     }
+    ]
+   },
+   "verification": [
+    {
+     "target": "CONSISTENCY",
+     "target_type": "STRUCTURAL",
+     "verifier": "dail.verify.consistency",
+     "verifier_version": "1",
+     "result": "PASS",
+     "reason": null,
+     "class": "CONSISTENCY",
+     "origin": "gate"
+    },
+    {
+     "target": "INVARIANT:INV-SEC-001:2",
+     "target_type": "INVARIANT",
+     "verifier": "dail.verify.public_ingress",
+     "verifier_version": "1",
+     "result": "FAIL",
+     "reason": "predicate.violated",
+     "class": "SECURITY",
+     "origin": "condition"
+    },
+    {
+     "target": "STRUCTURAL",
+     "target_type": "STRUCTURAL",
+     "verifier": "dail.verify.structural",
+     "verifier_version": "1",
+     "result": "PASS",
+     "reason": null,
+     "class": "STRUCTURAL",
+     "origin": "gate"
+    }
+   ],
+   "required": [
+    {
+     "target_id": "CONSISTENCY",
+     "kind": "GATE",
+     "source": "VERIFIED",
+     "verification_id": "3685a6af-ec51-575e-871b-262d9967f42c",
+     "blocking": []
+    },
+    {
+     "target_id": "INVARIANT:INV-SEC-001:2",
+     "kind": "INVARIANT",
+     "source": "VERIFIED",
+     "verification_id": "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8",
+     "blocking": []
+    },
+    {
+     "target_id": "STRUCTURAL",
+     "kind": "GATE",
+     "source": "VERIFIED",
+     "verification_id": "28f874fa-8f5d-5cab-8943-1ef0846ee5b0",
+     "blocking": []
+    }
+   ],
+   "proof_plan": [
+    {
+     "invariant_id": "INV-SEC-001",
+     "invariant_version": 2,
+     "source": "VERIFIED",
+     "verification_id": "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8",
+     "source_state_id": null,
+     "evidence_ids": []
+    }
+   ],
+   "work_counts": {
+    "gate": 2,
+    "invariant": 1,
+    "baseline_applicable": 0,
+    "baseline_not_applicable": 0,
+    "not_protected_in_parent": 0
+   },
+   "new_state": {
+    "state_id": "06fb5485-c891-5c8a-a04e-be9915adbaef",
+    "state_hash": "71b31253ff142821a64dd25ab9e72cc24f6f4a1f585cde7db7b9dca1dee6abe7",
+    "resource_set_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+    "version": 1,
+    "invariant_registry_version": 2,
+    "invariants": {
+     "INV-SEC-001": {
+      "version": 2,
+      "status": "VIOLATED"
+     }
+    }
+   },
+   "dail": {
+    "transition": {
+     "condition": "A",
+     "scenario_id": "tp-v1-F8-0196",
+     "record": "transition",
+     "step_index": 1,
+     "status": "EVALUATED",
+     "admission": {
+      "stage": "fixed_patch",
+      "admitted": true,
+      "content_hash": "6bf3c5c85cd4b2f749f0a96ec61a7f6eb2f41a57ddb3b1c057d7cd2034f573b5",
+      "content_hash_matches_manifest": true,
+      "terraform_validate": "terraform validate PASS at TerraPreserve D6 gate 2 (docs/D6_GATES.md: Terraform 1.15.8, hashicorp/aws 6.53.0, every step of every target); not run by DAIL (C-201)",
+      "terraform_validate_run": {
+       "ok": true,
+       "error": "",
+       "versions": {
+        "terraform": "1.15.8",
+        "registry.terraform.io/hashicorp/aws": "6.53.0"
+       }
+      }
+     },
+     "parent_state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb",
+     "parent_state_hash": "1f0c3cebd5417d4ff75e649c2676fe30ea64dfa21dc350fcb211271838775e53",
+     "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+     "candidate_state_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+     "open_targets": [
+      "INV-SEC-001"
+     ],
+     "outcome_class": "DAIL_OUTCOME",
+     "result_kind": "PROMOTED",
+     "decision": {
+      "type": "PROMOTE",
+      "reason": "ALL_REQUIRED_PROVEN",
+      "decision_id": "0baa168f-2d34-5720-98ae-c913020f0519",
+      "blocking": [],
+      "note": null
+     },
+     "required": [
+      {
+       "target_id": "CONSISTENCY",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "3685a6af-ec51-575e-871b-262d9967f42c",
+       "blocking": []
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "kind": "INVARIANT",
+       "source": "VERIFIED",
+       "verification_id": "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8",
+       "blocking": []
+      },
+      {
+       "target_id": "STRUCTURAL",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "28f874fa-8f5d-5cab-8943-1ef0846ee5b0",
+       "blocking": []
+      }
+     ],
+     "work": [
+      {
+       "target_id": "CONSISTENCY",
+       "target_type": "STRUCTURAL",
+       "class": "CONSISTENCY",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "verifier_id": "dail.verify.consistency",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "origin": "gate",
+       "selected_reason": null
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "target_type": "INVARIANT",
+       "class": "SECURITY",
+       "result": "FAIL",
+       "reason": "predicate.violated",
+       "applicable": true,
+       "verifier_id": "dail.verify.public_ingress",
+       "verifier_version": "1",
+       "evidence_level": "L1",
+       "origin": "condition",
+       "selected_reason": "CONDITION_SCOPE"
+      },
+      {
+       "target_id": "STRUCTURAL",
+       "target_type": "STRUCTURAL",
+       "class": "STRUCTURAL",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "verifier_id": "dail.verify.structural",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "origin": "gate",
+       "selected_reason": null
+      }
+     ],
+     "work_counts": {
+      "gate": 2,
+      "invariant": 1,
+      "baseline_applicable": 0,
+      "baseline_not_applicable": 0,
+      "not_protected_in_parent": 0
+     },
+     "identity": {
+      "algorithm_version": "dail-identity-1",
+      "content_hash": "42e03f0f89ad96ac33b5cd4d54d8c768b70d3f4d2161448978f3f49e7b7853cb",
+      "pairs": [
+       {
+        "trusted_ref": "aws_db_instance.data_instance",
+        "candidate_ref": "aws_db_instance.data_instance",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_db_subnet_group.data_subnets",
+        "candidate_ref": "aws_db_subnet_group.data_subnets",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_instance.web_instance",
+        "candidate_ref": "aws_instance.web_instance",
+        "change_type": "MODIFIED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_internet_gateway.gateway",
+        "candidate_ref": "aws_internet_gateway.gateway",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table.data_route",
+        "candidate_ref": "aws_route_table.data_route",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table.public_route",
+        "candidate_ref": "aws_route_table.public_route",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table_association.assoc_app",
+        "candidate_ref": "aws_route_table_association.assoc_app",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table_association.assoc_db[0]",
+        "candidate_ref": "aws_route_table_association.assoc_db[0]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_route_table_association.assoc_db[1]",
+        "candidate_ref": "aws_route_table_association.assoc_db[1]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group.data_secgroup",
+        "candidate_ref": "aws_security_group.data_secgroup",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group.web_secgroup",
+        "candidate_ref": "aws_security_group.web_secgroup",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.data_secgroup_egress",
+        "candidate_ref": "aws_security_group_rule.data_secgroup_egress",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+        "candidate_ref": "aws_security_group_rule.data_secgroup_from_app_5432",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.web_secgroup_egress",
+        "candidate_ref": "aws_security_group_rule.web_secgroup_egress",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+        "candidate_ref": "aws_security_group_rule.web_secgroup_ssh_public",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_subnet.data_tier[0]",
+        "candidate_ref": "aws_subnet.data_tier[0]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_subnet.data_tier[1]",
+        "candidate_ref": "aws_subnet.data_tier[1]",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_subnet.web_tier",
+        "candidate_ref": "aws_subnet.web_tier",
+        "change_type": "UNCHANGED",
+        "moved": false
+       },
+       {
+        "trusted_ref": "aws_vpc.network",
+        "candidate_ref": "aws_vpc.network",
+        "change_type": "UNCHANGED",
+        "moved": false
+       }
+      ]
+     },
+     "impact": {
+      "algorithm_version": "dail-impact-1",
+      "content_hash": "4c9b98938dd6a41d510bbf3a2dc60c046700ab52fd93a33235f7ada187fa3f73",
+      "affected": [
+       {
+        "invariant_id": "INV-FUNC-001",
+        "invariant_version": 1,
+        "status": "AFFECTED",
+        "impact_types": [
+         "DIRECT"
+        ]
+       }
+      ]
+     },
+     "new_state": {
+      "state_id": "06fb5485-c891-5c8a-a04e-be9915adbaef",
+      "state_hash": "71b31253ff142821a64dd25ab9e72cc24f6f4a1f585cde7db7b9dca1dee6abe7",
+      "resource_set_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+      "version": 1,
+      "invariant_registry_version": 2,
+      "invariants": {
+       "INV-SEC-001": {
+        "version": 2,
+        "status": "VIOLATED"
+       }
+      }
+     },
+     "registry": {
+      "stored_invariant_registry_version": 2,
+      "means": "registry-v1.1"
+     }
+    },
+    "impact": {
+     "parent_state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb",
+     "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+     "changed_resources": [
+      {
+       "address": "aws_instance.web_instance",
+       "trusted_ref": "aws_instance.web_instance",
+       "candidate_ref": "aws_instance.web_instance",
+       "resource_type": "aws_instance",
+       "change_type": "MODIFIED",
+       "flags": []
+      }
+     ],
+     "affected_invariants": [
+      {
+       "invariant_id": "INV-FUNC-001",
+       "invariant_version": 1,
+       "status": "AFFECTED",
+       "impact_types": [
+        "DIRECT"
+       ],
+       "changed_resource_refs": [
+        "aws_instance.web_instance"
+       ],
+       "dependency_paths": [
+        {
+         "changed_ref": "aws_instance.web_instance",
+         "steps": []
+        }
+       ],
+       "reasons": [
+        {
+         "code": "SCOPE_RESOURCE_CHANGED",
+         "changed_ref": "aws_instance.web_instance",
+         "scope_element": "binding:SOURCE, resources:aws_instance.web_instance",
+         "detail": "MODIFIED aws_instance.web_instance is a scope element of INV-FUNC-001"
+        }
+       ],
+       "prior_evidence_ids": [],
+       "evidence_validity": "INVALID"
+      }
+     ],
+     "verification_work": [
+      {
+       "target_id": "INVARIANT:INV-FUNC-001:1",
+       "target_type": "INVARIANT",
+       "reason": "SCOPE_RESOURCE_CHANGED",
+       "scope": [
+        "aws_db_instance.data_instance",
+        "aws_instance.web_instance"
+       ],
+       "required_evidence": "L1 dail.verify.reachability_cfg 1 (registry-v1.0)",
+       "priority": "BLOCKING"
+      }
+     ],
+     "uncertainty": [],
+     "unaffected": [
+      {
+       "invariant_id": "INV-SEC-001",
+       "invariant_version": 2,
+       "prior_evidence_ids": [
+        "1dfecb1a-5878-59b3-80a3-8769ff2f28c1"
+       ],
+       "carry_forward_eligible": true,
+       "reason": "NO_CHANGE_IN_FOOTPRINT"
+      },
+      {
+       "invariant_id": "INV-SEC-002",
+       "invariant_version": 2,
+       "prior_evidence_ids": [],
+       "carry_forward_eligible": false,
+       "reason": "NO_PRIOR_EVIDENCE"
+      },
+      {
+       "invariant_id": "INV-SEC-003",
+       "invariant_version": 1,
+       "prior_evidence_ids": [],
+       "carry_forward_eligible": false,
+       "reason": "NO_PRIOR_EVIDENCE"
+      }
+     ],
+     "carry_forward_candidates": [
+      {
+       "invariant_id": "INV-SEC-001",
+       "invariant_version": 2,
+       "evidence_ids": [
+        "1dfecb1a-5878-59b3-80a3-8769ff2f28c1"
+       ]
+      }
+     ],
+     "reasons": [
+      "NO_CHANGE_IN_FOOTPRINT",
+      "NO_PRIOR_EVIDENCE",
+      "SCOPE_RESOURCE_CHANGED"
+     ],
+     "algorithm_version": "dail-impact-1",
+     "graph_version": "dail-graph-2",
+     "trusted_graph_hash": "672d5b01c362e8d84dc4be446120fdb1ba0f0011fd924f5ba681f98ee7ab64dd",
+     "candidate_graph_hash": "672d5b01c362e8d84dc4be446120fdb1ba0f0011fd924f5ba681f98ee7ab64dd",
+     "identity_report_hash": "42e03f0f89ad96ac33b5cd4d54d8c768b70d3f4d2161448978f3f49e7b7853cb",
+     "created_at": "2026-01-01T00:00:03+00:00",
+     "content_hash": "4c9b98938dd6a41d510bbf3a2dc60c046700ab52fd93a33235f7ada187fa3f73"
+    },
+    "verification": {
+     "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+     "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+     "results": [
+      {
+       "verification_id": "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8",
+       "request_id": "d8762bf0-f318-5027-a558-33e3d2f422f4",
+       "target_type": "INVARIANT",
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": "INV-SEC-001",
+       "invariant_version": 2,
+       "verifier_id": "dail.verify.public_ingress",
+       "verifier_version": "1",
+       "evidence_level": "L1",
+       "verification_class": "SECURITY",
+       "result": "FAIL",
+       "reason": "predicate.violated",
+       "applicable": true,
+       "clauses": {
+        "IPV4": "FAIL",
+        "IPV6": "PASS"
+       },
+       "observations": {
+        "port": 22,
+        "groups_evaluated": 2,
+        "violations": [
+         {
+          "group": "aws_security_group.web_secgroup",
+          "family": "IPV4",
+          "rules": [
+           "aws_security_group_rule.web_secgroup_ssh_public"
+          ],
+          "cidrs": [
+           "0.0.0.0/0"
+          ],
+          "port_ranges": [
+           "22-22"
+          ]
+         }
+        ],
+        "mixed_groups": [],
+        "retained_inline": [],
+        "unresolved_forms": [],
+        "identity_missing": [],
+        "indeterminate_rules": [],
+        "unsupported_rules": [],
+        "unresolved_type_rules": [],
+        "relevant_unsupported": [],
+        "placeholders": []
+       },
+       "assumptions": [
+        "egress contents are not read",
+        "scope: every group, attached or not (C-64)",
+        "tolerated type: aws_db_subnet_group (C-15)",
+        "v1: coverage split across groups is not detected (S6)"
+       ],
+       "evidence": {
+        "verification_id": "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8",
+        "invariant_id": "INV-SEC-001",
+        "invariant_version": 2,
+        "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "INVARIANT:INV-SEC-001:2",
+        "verifier_id": "dail.verify.public_ingress",
+        "verifier_version": "1",
+        "evidence_level": "L1",
+        "predicate": "registry-v1.1 §3 {\"p\":22}",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "42e03f0f89ad96ac33b5cd4d54d8c768b70d3f4d2161448978f3f49e7b7853cb"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "4c9b98938dd6a41d510bbf3a2dc60c046700ab52fd93a33235f7ada187fa3f73"
+         },
+         {
+          "kind": "invariant_definition",
+          "id": "INV-SEC-001",
+          "version": 2,
+          "hash": "68cfd9ee4e11b4e12713c644708a033415a43b9cb6e04419c926012ef6df0032"
+         }
+        ],
+        "observations": {
+         "port": 22,
+         "groups_evaluated": 2,
+         "violations": [
+          {
+           "group": "aws_security_group.web_secgroup",
+           "family": "IPV4",
+           "rules": [
+            "aws_security_group_rule.web_secgroup_ssh_public"
+           ],
+           "cidrs": [
+            "0.0.0.0/0"
+           ],
+           "port_ranges": [
+            "22-22"
+           ]
+          }
+         ],
+         "mixed_groups": [],
+         "retained_inline": [],
+         "unresolved_forms": [],
+         "identity_missing": [],
+         "indeterminate_rules": [],
+         "unsupported_rules": [],
+         "unresolved_type_rules": [],
+         "relevant_unsupported": [],
+         "placeholders": []
+        },
+        "result": "FAIL",
+        "reason": "predicate.violated",
+        "applicable": true,
+        "clauses": {
+         "IPV4": "FAIL",
+         "IPV6": "PASS"
+        },
+        "assumptions": [
+         "egress contents are not read",
+         "scope: every group, attached or not (C-64)",
+         "tolerated type: aws_db_subnet_group (C-15)",
+         "v1: coverage split across groups is not detected (S6)"
+        ],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      },
+      {
+       "verification_id": "3685a6af-ec51-575e-871b-262d9967f42c",
+       "request_id": "45015afa-9621-5d1a-bcd9-fbf34bc4e706",
+       "target_type": "STRUCTURAL",
+       "target_id": "CONSISTENCY",
+       "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": null,
+       "invariant_version": null,
+       "verifier_id": "dail.verify.consistency",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "verification_class": "CONSISTENCY",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "clauses": null,
+       "observations": {
+        "findings": [],
+        "resources": 19,
+        "work_reason": "MANDATORY_GATE",
+        "priority": "BLOCKING"
+       },
+       "assumptions": [],
+       "evidence": {
+        "verification_id": "3685a6af-ec51-575e-871b-262d9967f42c",
+        "invariant_id": null,
+        "invariant_version": null,
+        "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "CONSISTENCY",
+        "verifier_id": "dail.verify.consistency",
+        "verifier_version": "1",
+        "evidence_level": "L0",
+        "predicate": "CONSISTENCY",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "42e03f0f89ad96ac33b5cd4d54d8c768b70d3f4d2161448978f3f49e7b7853cb"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "4c9b98938dd6a41d510bbf3a2dc60c046700ab52fd93a33235f7ada187fa3f73"
+         }
+        ],
+        "observations": {
+         "findings": [],
+         "resources": 19,
+         "work_reason": "MANDATORY_GATE",
+         "priority": "BLOCKING"
+        },
+        "result": "PASS",
+        "reason": null,
+        "applicable": true,
+        "clauses": null,
+        "assumptions": [],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      },
+      {
+       "verification_id": "28f874fa-8f5d-5cab-8943-1ef0846ee5b0",
+       "request_id": "a123628a-8fda-5b48-858c-b54b669f6039",
+       "target_type": "STRUCTURAL",
+       "target_id": "STRUCTURAL",
+       "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+       "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+       "invariant_id": null,
+       "invariant_version": null,
+       "verifier_id": "dail.verify.structural",
+       "verifier_version": "1",
+       "evidence_level": "L0",
+       "verification_class": "STRUCTURAL",
+       "result": "PASS",
+       "reason": null,
+       "applicable": true,
+       "clauses": null,
+       "observations": {
+        "findings": [],
+        "resources": 19,
+        "work_reason": "MANDATORY_GATE",
+        "priority": "BLOCKING"
+       },
+       "assumptions": [],
+       "evidence": {
+        "verification_id": "28f874fa-8f5d-5cab-8943-1ef0846ee5b0",
+        "invariant_id": null,
+        "invariant_version": null,
+        "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+        "candidate_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+        "target_id": "STRUCTURAL",
+        "verifier_id": "dail.verify.structural",
+        "verifier_version": "1",
+        "evidence_level": "L0",
+        "predicate": "STRUCTURAL",
+        "inputs": [
+         {
+          "kind": "candidate_state",
+          "hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+          "resources": 19
+         },
+         {
+          "kind": "parent_state",
+          "state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb"
+         },
+         {
+          "kind": "identity_report",
+          "hash": "42e03f0f89ad96ac33b5cd4d54d8c768b70d3f4d2161448978f3f49e7b7853cb"
+         },
+         {
+          "kind": "impact_report",
+          "hash": "4c9b98938dd6a41d510bbf3a2dc60c046700ab52fd93a33235f7ada187fa3f73"
+         }
+        ],
+        "observations": {
+         "findings": [],
+         "resources": 19,
+         "work_reason": "MANDATORY_GATE",
+         "priority": "BLOCKING"
+        },
+        "result": "PASS",
+        "reason": null,
+        "applicable": true,
+        "clauses": null,
+        "assumptions": [],
+        "evidence_refs": [],
+        "error": null,
+        "started_at": "2026-01-01T00:00:03+00:00",
+        "completed_at": "2026-01-01T00:00:03+00:00"
+       },
+       "error": null,
+       "started_at": "2026-01-01T00:00:03+00:00",
+       "completed_at": "2026-01-01T00:00:03+00:00"
+      }
+     ],
+     "verifier_invocations": 3,
+     "verifier_set_version": "dail-verify-1",
+     "summary": {
+      "results": 3,
+      "verifier_invocations": 3,
+      "by_class": {
+       "CONSISTENCY": {
+        "PASS": 1
+       },
+       "SECURITY": {
+        "FAIL": 1
+       },
+       "STRUCTURAL": {
+        "PASS": 1
+       }
+      }
+     },
+     "content_hash": "b09391ded6f28a7dcc343a6356ca367a400bd18a7f2e3d35ce5a2526fac8afed"
+    },
+    "decision": {
+     "decision_id": "0baa168f-2d34-5720-98ae-c913020f0519",
+     "candidate_id": "8d28a0d5-8f33-5cc5-b67d-df7efbfa6469",
+     "parent_state_id": "f151a402-fd93-5fc4-ae85-6a680cf82beb",
+     "decision": "PROMOTE",
+     "reason": "ALL_REQUIRED_PROVEN",
+     "policy_version": "p8a-A-dail-stateless-1",
+     "attempt_number": 1,
+     "required_checks": [
+      {
+       "target_id": "CONSISTENCY",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "3685a6af-ec51-575e-871b-262d9967f42c"
+      },
+      {
+       "target_id": "INVARIANT:INV-SEC-001:2",
+       "kind": "INVARIANT",
+       "source": "VERIFIED",
+       "verification_id": "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8"
+      },
+      {
+       "target_id": "STRUCTURAL",
+       "kind": "GATE",
+       "source": "VERIFIED",
+       "verification_id": "28f874fa-8f5d-5cab-8943-1ef0846ee5b0"
+      }
+     ],
+     "blocking_conditions": [],
+     "supporting_results": [
+      "28f874fa-8f5d-5cab-8943-1ef0846ee5b0",
+      "3685a6af-ec51-575e-871b-262d9967f42c",
+      "b9a74353-b6aa-54fc-8b8e-a8a33fe8dfb8"
+     ],
+     "created_at": "2026-01-01T00:00:03+00:00",
+     "committed_state_id": "06fb5485-c891-5c8a-a04e-be9915adbaef",
+     "content_hash": "8601745c97e5d8b62d97efb7844f66afcb6aef73be587ca08a0568631793fedd"
+    }
+   },
+   "store": null,
+   "wall_seconds": 0.7875600000261329
+  }
+ },
+ "comparison": {
+  "C": {
+   "name": "DAIL",
+   "decision": "PROMOTE",
+   "reason": "ALL_REQUIRED_PROVEN",
+   "check_count": 4
+  },
+  "A": {
+   "name": "target-only",
+   "decision": "PROMOTE",
+   "reason": "ALL_REQUIRED_PROVEN",
+   "check_count": 3
+  }
+ },
+ "session": {
+  "session_id": "20261125T201836Z-session-5a761cac",
+  "sequence": 1,
+  "step": 1,
+  "parent_state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+  "promoted": true,
+  "trusted_state": {
+   "state_id": "93ff432e-3532-5402-9b98-47076867cf50",
+   "state_hash": "711da9a2e76ecca39aa0f1b89e0e5c070687d1453d2f10a9099a0e3826e895d8",
+   "resource_set_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+   "version": 1,
+   "invariant_registry_version": 2,
+   "invariants": {
+    "INV-FUNC-001": {
+     "version": 1,
+     "status": "PROTECTED"
+    },
+    "INV-SEC-001": {
+     "version": 2,
+     "status": "VIOLATED"
+    },
+    "INV-SEC-002": {
+     "version": 2,
+     "status": "PROTECTED"
+    },
+    "INV-SEC-003": {
+     "version": 1,
+     "status": "PROTECTED"
+    }
+   },
+   "parent_state_id": "312f7511-9653-52c9-8cd4-1870469748dd"
+  },
+  "ledger": [
+   {
+    "state_id": "93ff432e-3532-5402-9b98-47076867cf50",
+    "state_hash": "711da9a2e76ecca39aa0f1b89e0e5c070687d1453d2f10a9099a0e3826e895d8",
+    "resource_set_hash": "1e4ba8cd4afb78ed1f081e2fcf2b7bc0a309d468d54f3dea1b187943a1182188",
+    "version": 1,
+    "invariant_registry_version": 2,
+    "invariants": {
+     "INV-FUNC-001": {
+      "version": 1,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-001": {
+      "version": 2,
+      "status": "VIOLATED"
+     },
+     "INV-SEC-002": {
+      "version": 2,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-003": {
+      "version": 1,
+      "status": "PROTECTED"
+     }
+    },
+    "parent_state_id": "312f7511-9653-52c9-8cd4-1870469748dd"
+   },
+   {
+    "state_id": "312f7511-9653-52c9-8cd4-1870469748dd",
+    "state_hash": "c1a0cb11e27462a05b191bd20d8bba7bce8efc1c04c714b59960be9105172f6e",
+    "resource_set_hash": "fccb95c8908aedaf2ddfe294f963d8af709c444aed318a2831cfb00875776c77",
+    "version": 0,
+    "invariant_registry_version": 2,
+    "invariants": {
+     "INV-FUNC-001": {
+      "version": 1,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-001": {
+      "version": 2,
+      "status": "VIOLATED"
+     },
+     "INV-SEC-002": {
+      "version": 2,
+      "status": "PROTECTED"
+     },
+     "INV-SEC-003": {
+      "version": 1,
+      "status": "PROTECTED"
+     }
+    },
+    "parent_state_id": null
+   }
+  ],
+  "chain_check": {
+   "ok": true,
+   "states": 2,
+   "candidates": 2,
+   "lineage": [
+    "93ff432e-3532-5402-9b98-47076867cf50",
+    "312f7511-9653-52c9-8cd4-1870469748dd"
+   ],
+   "problems": []
+  }
+ },
+ "refused_before_dail": false
+}
