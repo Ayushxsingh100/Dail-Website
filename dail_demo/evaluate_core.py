@@ -801,8 +801,8 @@ class Session:
 
     A PROMOTE makes the candidate the session's trusted state; any other decision leaves it where it
     was. Every candidate is also run under target-only (A) against the same parent configuration, in
-    a throwaway store of its own, so A never touches the session's lineage (PLAN §3.6). Only
-    ``FIXED_PATCH`` and ``TYPED`` candidates are taken (LLM runs are recorded locally, PLAN §3.8).
+    a throwaway store of its own, so A never touches the session's lineage (PLAN §3.6). An AI reply is
+    admitted by ``admit_reply`` and then submitted as an ``LLM`` candidate (PLAN §3.9).
     """
 
     def __init__(
@@ -821,6 +821,7 @@ class Session:
         self.parent_dir = self.s0_dir
         self.sequence = 0
         self.candidates: list[str] = []
+        self.replies = 0
         self.states: list[TrustedState] = [parent]
 
     def ledger(self) -> list[dict[str, Any]]:
@@ -845,6 +846,38 @@ class Session:
         finally:
             shutil.rmtree(work, ignore_errors=True)
 
+    def admit_reply(self, response: LLMRepairResponse, label: str) -> tuple[dict[str, Any], Candidate | None]:
+        """DAIL's patch validator on a parsed AI reply, against the trusted state: (the admission
+        record, the candidate to ``submit`` or None). As in DAIL's generation, without Terraform."""
+        self.replies += 1
+        n = self.replies
+        work = self.root / "admission" / f"reply-{n}"
+        record: dict[str, Any] = {"stage": "dail_patch_validator", "admitted": False, "failure_class": None,
+                                  "errors": [], "operations": [], "terraform_validate_run": False}  # fmt: skip
+        try:
+            request_id = self.run.id("llm-request", n)
+            outcome = PatchValidator(
+                parent_dir=self.parent_dir, trusted=self.parent, scope=change_scope(self.parent.resources),
+                work_root=work, variables=dict(self.scenario.variable_values), now=DAIL_CLOCK_BASE,
+            ).validate(response, request_id=request_id)  # fmt: skip
+            record["operations"] = [[a, op.value] for a, op in outcome.operations]
+            if outcome.build is None:
+                record["failure_class"] = None if outcome.failure_class is None else outcome.failure_class.value
+                record["errors"] = list(outcome.errors)
+                return record, None
+            kept = self.root / "replies" / str(n)
+            kept.mkdir(parents=True)
+            for path in config_files(outcome.build.candidate_dir):
+                shutil.copyfile(path, kept / path.name)
+            record["admitted"] = True
+            record["patch_changed_addresses"] = list(response.changed_addresses)
+            return record, Candidate(
+                source=LLM, label=label, directory=kept, response=response, request_id=request_id,
+                built_tree_hash=outcome.build.tree_hash, admission=record,
+            )  # fmt: skip
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+
     def submit(
         self,
         candidate: Candidate,
@@ -858,8 +891,8 @@ class Session:
 
         ``step`` is the scenario step a fixed patch is (its open targets follow DAIL's C-196 rule
         for that step); a typed candidate has none."""
-        if candidate.source == LLM or candidate.directory is None:
-            raise CoreError("a session takes FIXED_PATCH and TYPED candidates only")
+        if candidate.directory is None:
+            raise CoreError("a session needs the candidate's directory (an AI reply: admit_reply's)")
         candidate = dataclasses.replace(candidate, directory=_inside(candidate.directory, self.root))
         self.sequence += 1
         n = self.sequence

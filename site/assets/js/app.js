@@ -1,390 +1,587 @@
-// DAIL Live: the page controller. Two modes (PLAN §3.8):
-//   Replays: recorded traces from runs/, no Pyodide needed;
-//   Live:    "Beat the gate": the visitor's edit goes to the real DAIL running in this tab.
+// DAIL Live: the page controller (PLAN §3.9; design §3.7 Mint and tomato). Three tabs, one thread each:
+//   Ask the AI:         Gemini proposes (through /api/propose), DAIL judges in this tab, Gemini retries (3 attempts);
+//   Write your own fix: the visitor's edit goes to the same DAIL, no retry loop;
+//   Replays:            recorded traces from runs/, rendered as the same thread, no Pyodide needed.
+// Every decision shown comes from DAIL; this file only moves DAIL's answers onto the page.
 import { bundleInfo, loadDail } from "./dail-bridge.js";
+import { failedNames, scenarioName } from "./names.js";
 import {
-  announcement, formatDate, h, ledgerFromTrace, markStage, pad, renderCandidate, renderDecision, renderLedger,
-  renderOvf, renderStages, waitingStages,
+  banner, collapsed, dailCard, drawerStates, finalMessage, formatDate, h, healthDots, healthPills, ledgerFromTrace,
+  markCell, proposalCard, sentenceOf, verifyText, you,
 } from "./render.js";
 
 const $ = (id) => document.getElementById(id);
 const root = document.documentElement;
 const reduced = () => root.classList.contains("reduce-motion");
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const MAX_ATTEMPTS = 3;
+const PROPOSE = "/api/propose";
+const CHIPS = [
+  { text: "Close the public SSH port" },
+  { text: "Make the database private" },
+  { text: "Close SSH and tidy up the database rules", risky: true },
+];
+const FILL = { safe: "Fill: the safe repair", regression: "Fill: the repair that breaks the database path", fixed: "Fill: the recorded repair" };
+const ALL_FAILED = "None of the 3 fixes passed DAIL. The infrastructure was not changed.";
 
 const state = {
-  mode: "replays",
-  runs: [],
-  scenarios: [],
-  dail: null,
-  loading: null,
-  live: { sessions: 0, scenario: null, files: {}, current: null, sequence: 0, version: 0, ledger: [] },
+  tab: "ask", runs: [], scenarios: [], ai: null, dail: null, loading: null, busy: false, startFailed: null,
+  filter: "all", replay: null, stop: null,
+  live: { scenario: "canonical", started: false, trusted: {}, files: {}, current: null, ledger: [], carried: {}, attempts: {}, fresh: null },
+  threads: { ask: [], write: [], replay: [] },
 };
 
-// ---- motion: the one signature sequence (PLAN §3.7) ----------------------------------------
+// ---- small helpers ------------------------------------------------------------------------------
 
-// The candidate card crosses the trust boundary: a copy travels from the untrusted zone to the gate.
-function crossBoundary(card) {
-  const from = card.getBoundingClientRect();
-  const to = $("stages").getBoundingClientRect();
-  const ghost = h("div", { class: "card card--crossing", "aria-hidden": "true" },
-    h("span", { class: "card__source", text: card.querySelector(".card__source").textContent }),
-    h("p", { class: "card__label", text: card.querySelector(".card__label").textContent }));
-  Object.assign(ghost.style, { left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px` });
-  document.body.append(ghost);
-  ghost.animate(
-    [{ transform: "none" }, { transform: `translate(${to.left - from.left}px, ${to.top - from.top}px)` }],
-    { duration: 280, easing: "steps(6, jump-none)" },
-  ).finished.finally(() => ghost.remove());
+const version = () => (state.live.ledger[0] ? state.live.ledger[0].version : 0);
+const target = () => (state.scenarios.find((s) => s.id === state.live.scenario) || {}).target || "INV-SEC-001";
+const announce = (text) => { $("announce").textContent = ""; setTimeout(() => { $("announce").textContent = text; }, 30); };
+
+function notice(id, text) {
+  $(id).hidden = !text;
+  $(id).textContent = text || "";
 }
 
-function play({ card, stages, stamp, fresh }) {
-  if (reduced()) return;
-  const step = 140;
-  const start = card ? 280 : 0;
-  if (card) crossBoundary(card);
-  stages.forEach((el, i) => {
-    el.style.animationDelay = `${start + step * i}ms`;
-    el.classList.add("anim-fill");
-  });
-  if (stamp) {
-    stamp.style.animationDelay = `${start + step * stages.length}ms`;
-    stamp.classList.add("anim-slam");
-  }
-  if (fresh) {
-    const delay = `${start + step * (stages.length + 1)}ms`;
-    for (const el of document.querySelectorAll(".anim-drop, .anim-draw line")) el.style.animationDelay = delay;
-  }
+function append(owner, ...nodes) {
+  state.threads[owner].push(...nodes);
+  if (showing(owner)) $("thread").append(...nodes);
+  return nodes[0];
 }
 
-function show(trace, { mode, freshState = null, issue, live = false }) {
-  const card = renderCandidate($("candidate"), trace, { mode });
-  const stages = renderStages($("stages"), trace);
-  const stamp = renderDecision($("decision"), trace, { mode });
-  renderOvf($("ovf"), trace);
-  renderLedger($("ledger"), ledgerFromTrace(trace), { fresh: freshState, trace });
-  $("issue").textContent = issue;
-  $("announce").textContent = announcement(trace);
-  // after a live run the card has crossed and the stages have filled while DAIL worked
-  const filled = live || trace.refused_before_dail;
-  play({ card: filled ? null : card, stages: filled ? [] : stages, stamp, fresh: freshState });
+function replaceNode(owner, old, fresh) {
+  const list = state.threads[owner];
+  const i = list.indexOf(old);
+  if (i >= 0) list[i] = fresh;
+  if (old.isConnected) old.replaceWith(fresh);
+  return fresh;
 }
 
-// ---- replays --------------------------------------------------------------------------------
+const showing = (owner) => (owner === "replay" ? state.tab === "replays" && state.replay : state.tab === owner);
 
-function replayScenarios() {
-  const seen = new Map();
-  for (const run of state.runs) if (!seen.has(run.scenario_id)) seen.set(run.scenario_id, run.family);
-  return [...seen.keys()];
+function scrollTo(node) {
+  if (node && node.isConnected) node.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" });
 }
 
-function runLabel(run) {
-  const source = run.source === "LLM" ? `Gemini (${run.model})` : run.source === "TYPED" ? "typed" : run.session_step ? `session step ${run.session_step}` : "fixed patch";
-  const decided = run.refused_before_dail ? "refused before DAIL" : `DAIL ${run.decisions.C} · target-only ${run.decisions.A}`;
-  return `${source}: ${decided}`;
-}
+// ---- loading DAIL -------------------------------------------------------------------------------
 
-function fillReplayPickers(selectedScenario) {
-  const scenarios = replayScenarios();
-  const scenario = scenarios.includes(selectedScenario) ? selectedScenario : scenarios[0];
-  $("scenario").replaceChildren(...scenarios.map((id) => h("option", { value: id, selected: id === scenario }, id)));
-  const runs = state.runs.filter((r) => r.scenario_id === scenario);
-  $("replay").replaceChildren(...runs.map((r) => h("option", { value: r.file }, runLabel(r))));
-  const info = state.scenarios.find((s) => s.id === scenario);
-  $("scenario-why").textContent = info ? info.why : "";
-  return runs;
-}
+const megabytes = (bytes) => (bytes / 1e6).toFixed(1);
 
-async function showReplay(file) {
-  $("replay").value = file;
-  const run = state.runs.find((r) => r.file === file);
-  if (!run) return;
-  const response = await fetch(`runs/${file}`);
-  if (!response.ok) throw new Error(`runs/${file}: HTTP ${response.status}`);
-  const trace = await response.json();
-  if (state.mode !== "replays") return;
-  const index = state.runs.indexOf(run) + 1;
-  const ledger = ledgerFromTrace(trace);
-  const newest = ledger[0];
-  const promoted = trace.conditions && trace.conditions.C && trace.conditions.C.new_state;
-  show(trace, {
-    mode: "replays",
-    freshState: promoted ? promoted.state_id : null,
-    issue: `Replay ${pad(index)} of ${pad(state.runs.length)} · Candidate ${pad((trace.session && trace.session.sequence) || 1)} · Trusted state v${newest ? newest.version : 0} · recorded ${formatDate(trace.created_at)}`,
-  });
-}
-
-// ---- live mode ------------------------------------------------------------------------------
-
-function liveScenarioPicker() {
-  $("scenario").replaceChildren(...state.scenarios.map((s) =>
-    h("option", { value: s.id, selected: s.id === state.live.scenario }, `${s.id}${s.family !== "canonical" ? ` (${s.family})` : ""}`)));
-  const info = state.scenarios.find((s) => s.id === state.live.scenario);
-  $("scenario-why").textContent = info ? info.why : "";
-}
-
-function megabytes(bytes) {
-  return (bytes / 1e6).toFixed(1);
-}
-
-async function ensureDail() {
-  if (state.dail) return state.dail;
+function ensureDail() {
+  if (state.dail) return Promise.resolve(state.dail);
   if (state.loading) return state.loading;
-  $("loading").hidden = false;
   state.loading = (async () => {
-    try {
-      const { bytes } = await bundleInfo("vendor");
-      $("loading-title").textContent = `Loading DAIL into your browser (~${megabytes(bytes)} MB)`;
-      const dail = await loadDail({
-        vendor: "vendor",
-        onEvent: stageEvent,
-        onProgress: ({ done, total, stage }) => {
-          $("meter").style.width = `${Math.min(100, Math.round((100 * done) / total))}%`;
-          $("loading-detail").textContent = stage === "ready" ? "DAIL is ready." :
-            `${megabytes(done)} of ${megabytes(total)} MB: ${stage === "files" ? "DAIL's source, each file checked by its SHA-256" : stage === "sqlite3" ? "SQLite for the in-tab ledger" : "the Python runtime (Pyodide 0.27.7)"}.`;
-        },
-      });
-      state.dail = dail;
-      $("loading").hidden = true;
-      return dail;
-    } catch (error) {
-      $("loading-error").hidden = false;
-      $("loading-error").textContent = `Live mode could not start: ${error.message}. Replays still work.`;
-      state.loading = null;
-      throw error;
-    }
-  })();
+    const { bytes } = await bundleInfo("vendor");
+    $("loading-title").textContent = `Loading DAIL into your browser (~${megabytes(bytes)} MB)`;
+    state.dail = await loadDail({
+      vendor: "vendor", onEvent: stageEvent,
+      onProgress: ({ done, total }) => {
+        $("meter").style.width = `${Math.min(100, Math.round((100 * done) / total))}%`;
+        $("loading-title").textContent = `Loading DAIL into your browser: ${megabytes(done)} of ${megabytes(total)} MB`;
+      },
+    });
+    return state.dail;
+  })().catch((error) => {
+    state.loading = null;
+    throw error;
+  });
   return state.loading;
 }
 
-function renderFiles() {
-  const names = Object.keys(state.live.files);
-  if (!names.includes(state.live.current)) state.live.current = names.includes("main.tf") ? "main.tf" : names[0];
-  $("files").replaceChildren(...names.map((name) => {
-    const tab = h("button", { type: "button", class: "btn btn--small", role: "tab", "aria-selected": name === state.live.current ? "true" : "false", "aria-pressed": name === state.live.current ? "true" : "false" }, name);
-    tab.addEventListener("click", () => { saveEditor(); state.live.current = name; renderFiles(); });
-    return tab;
-  }));
-  $("editor").value = state.live.files[state.live.current] || "";
-  $("editor").setAttribute("aria-label", `Configuration file ${state.live.current}`);
-  updateLines();
-}
-
-function saveEditor() {
-  if (state.live.current) state.live.files[state.live.current] = $("editor").value;
-}
-
-function updateLines() {
-  const count = $("editor").value.split("\n").length;
-  $("lines").textContent = Array.from({ length: count }, (_, i) => i + 1).join("\n");
-  $("lines").scrollTop = $("editor").scrollTop;
-}
-
-function liveIssue() {
-  const l = state.live;
-  return `Session ${pad(l.sessions)} · Candidate ${pad(l.sequence)} · Trusted state v${l.version} · ${formatDate()}`;
-}
-
-function quickFill(scenario) {
-  const buttons = (scenario.quick_fill || []).map((name) => {
-    const label = name === "safe" ? "Fill: the safe repair" : name === "regression" ? "Fill: the repair that breaks INV-FUNC-001" : "Fill: the scenario's own fix";
-    const button = h("button", { type: "button", class: "btn btn--small", "data-fill": name }, label);
-    button.addEventListener("click", async () => {
-      const answer = await state.dail.call("patch_files", name);
-      if (!answer.ok) return;
-      state.live.files = answer.value;
-      renderFiles();
-      $("editor").focus();
-    });
-    return button;
-  });
-  $("quick-fill").replaceChildren(...buttons);
-}
-
-async function startLive(scenarioId) {
-  const dail = await ensureDail();
-  if (state.mode !== "live") return; // the visitor went back to the replays while DAIL was loading
-  setBusy(true);
-  const answer = await dail.call("start", scenarioId);
-  setBusy(false);
-  if (!answer.ok) throw new Error(answer.error);
-  const s = answer.value;
-  Object.assign(state.live, { scenario: scenarioId, files: s.files, current: null, sequence: 0, ledger: s.ledger, version: 0, last: null });
-  state.live.sessions += 1;
-  if (state.mode !== "live") return;
-  liveScenarioPicker();
-  quickFill(state.scenarios.find((x) => x.id === scenarioId) || {});
-  renderFiles();
-  $("editor-panel").hidden = false;
-  $("ledger-tools").hidden = false;
-  $("verify-result").replaceChildren();
-  $("candidate").replaceChildren();
-  $("decision").replaceChildren();
-  $("ovf").replaceChildren();
-  waitingStages($("stages"), "Waiting for your patch.");
-  renderLedger($("ledger"), s.ledger);
-  $("issue").textContent = liveIssue();
-  $("announce").textContent = `New session on ${scenarioId}: the trusted state is DAIL's baseline, v0.`;
-}
-
-// Back from the replays: the tab's session is still there (nothing is re-evaluated).
-function resumeLive() {
-  liveScenarioPicker();
-  if (state.live.last) {
-    show(state.live.last, { mode: "live", live: true, issue: liveIssue() });
-    return;
-  }
-  $("candidate").replaceChildren();
-  $("decision").replaceChildren();
-  $("ovf").replaceChildren();
-  waitingStages($("stages"), "Waiting for your patch.");
-  renderLedger($("ledger"), state.live.ledger);
-  $("issue").textContent = liveIssue();
-}
-
-// Which stage each event DAIL commits completes (01 is the admission, before the orchestrator).
+// The DAIL card waiting for DAIL's events: each event DAIL commits fills one cell, 150 ms apart.
 const STAGE_OF = { ADMITTED: 0, IDENTITY_COMPLETED: 1, IMPACT_COMPLETED: 2, VERIFICATION_COMPLETED: 3, PROMOTION_DECIDED: 4 };
+let pending = null;
 
 function stageEvent(name) {
-  if (state.mode !== "live" || !(name in STAGE_OF)) return;
-  if (name === "ADMITTED" && !reduced()) crossBoundary($("candidate-card"));
-  markStage($("stages"), STAGE_OF[name]);
+  if (!pending || !(name in STAGE_OF)) return;
+  const card = pending.card;
+  pending.chain = pending.chain.then(() => { markCell(card, STAGE_OF[name]); return sleep(reduced() ? 0 : 150); });
+}
+
+// ---- the tab's session ----------------------------------------------------------------------------
+
+async function startSession(scenario) {
+  setBusy(true);
+  try {
+    const dail = await ensureDail();
+    const answer = await dail.call("start", scenario);
+    if (!answer.ok) throw new Error(answer.error);
+    Object.assign(state.live, {
+      scenario, started: true, trusted: answer.value.files, files: { ...answer.value.files }, current: null,
+      ledger: answer.value.ledger, carried: {}, attempts: {}, fresh: null,
+    });
+    state.threads.ask = [];
+    state.threads.write = [];
+    editorCard = null;
+    state.startFailed = null;
+    announce("DAIL is ready. The trusted system is at version 0.");
+  } catch (error) {
+    state.startFailed = error.message;
+  } finally {
+    setBusy(false);
+    render();
+  }
 }
 
 function setBusy(on) {
   state.busy = on;
-  for (const el of [$("submit"), $("reset"), $("verify"), $("scenario"), $("editor"), ...document.querySelectorAll("[data-fill]")]) {
-    el.disabled = on;
+  updateControls();
+}
+
+function updateControls() {
+  const ready = state.live.started && !state.busy;
+  const running = Boolean(state.stop);
+  $("ask").disabled = !ready || state.ai !== "available";
+  $("dock-ask").disabled = !ready || state.ai !== "available" || running;
+  $("next").disabled = running;
+  $("stop").hidden = !running;
+  $("scenario").disabled = !ready;
+  $("verify").disabled = !state.live.started;
+  for (const el of document.querySelectorAll("#chips .chip, .editor-card button, .editor")) el.disabled = state.busy;
+  $("loading").hidden = state.live.started || Boolean(state.startFailed);
+  $("next").placeholder = `Ask for another fix. It starts from trusted state v${version()}.`;
+}
+
+// After a decision: what the session now trusts (package C's session logic, in the worker).
+function takeTrace(trace, attempt) {
+  const session = trace.session || {};
+  state.live.ledger = trace.ledger || state.live.ledger;
+  if (!session.promoted) return null;
+  const fresh = session.trusted_state.state_id;
+  state.live.trusted = trace.files;
+  state.live.files = { ...trace.files };
+  state.live.current = null;
+  state.live.fresh = fresh;
+  state.live.carried[fresh] = (trace.conditions.C.proof_plan || []).filter((p) => p.source === "CARRIED_FORWARD").map((p) => p.invariant_id);
+  if (attempt) state.live.attempts[fresh] = attempt;
+  return fresh;
+}
+
+async function verifyInto(slot) {
+  slot.replaceChildren(h("p", { class: "verify-result", text: "DAIL is checking the chain…" }));
+  const answer = await state.dail.call("verify_chain");
+  slot.replaceChildren(verifyText(answer));
+}
+
+// ---- one attempt: the waiting DAIL card, then DAIL's decision --------------------------------------
+
+async function judge(owner, n, call) {
+  const waiting = append(owner, dailCard({ n, trace: null, live: true }));
+  pending = { card: waiting.querySelector(".dail"), chain: Promise.resolve() };
+  if (showing(owner)) waiting.scrollIntoView({ block: "nearest" });
+  let answer;
+  try {
+    answer = await call();
+  } finally {
+    const chain = pending.chain;
+    pending = null;
+    await chain;
+  }
+  if (!answer.ok) {
+    throw new Error(`The check stopped with an error; this is not a DAIL decision. ${answer.error}`);
+  }
+  const trace = answer.value;
+  const fresh = takeTrace(trace, owner === "ask" ? n : null);
+  const card = dailCard({
+    n, trace, live: true, states: fresh ? state.live.ledger : null, fresh,
+    onVerify: (slot) => verifyInto(slot),
+  });
+  replaceNode(owner, waiting, card);
+  land(card);
+  render({ keepThread: true });
+  if (showing(owner)) card.scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" });
+  return { trace, card, fresh };
+}
+
+function land(card) {
+  if (reduced()) return;
+  const stamp = card.querySelector(".stamp");
+  if (stamp) stamp.classList.add("anim-land");
+}
+
+function decisionWords(trace) {
+  if (trace.refused_before_dail) return `DAIL: refused. ${sentenceOf(trace)}`;
+  const type = trace.conditions.C.decision.type;
+  return `DAIL: ${type === "PROMOTE" ? "promoted" : type === "REJECT" ? "rejected" : type.toLowerCase()}. ${sentenceOf(trace)}`;
+}
+
+// ---- Ask the AI -------------------------------------------------------------------------------------
+
+async function propose(body, signal) {
+  const headers = { "Content-Type": "application/json" };
+  if ($("passcode").value) headers["X-Demo-Passcode"] = $("passcode").value;
+  let response;
+  try {
+    response = await fetch(PROPOSE, { method: "POST", headers, body: JSON.stringify(body), signal });
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new Error("The AI cannot be reached. Check the connection, or write your own fix.");
+  }
+  const data = await response.json().catch(() => null);
+  if (response.status === 401) $("passcode-field").hidden = false;
+  if (!response.ok || !data || typeof data.reply !== "string") {
+    throw new Error((data && data.error && data.error.message) || "The AI is not available here. Write your own fix, or watch the replays.");
+  }
+  return data;
+}
+
+function feedbackFrom(trace) {
+  const cut = (text, n) => Array.from(String(text)).slice(0, n).join("");
+  if (trace.refused_before_dail) {
+    const a = trace.admission || {};
+    const reason = (a.errors && a.errors.length ? a.errors : [(trace.generation && trace.generation.detail) || "no valid patch"]).join("; ");
+    return { decision: "REFUSED", reason: cut(reason, 400), blocking: [], failed: [] };
+  }
+  const d = trace.conditions.C.decision;
+  return { decision: d.type, reason: d.reason, blocking: (d.blocking || []).slice(0, 8).map((b) => cut(b.target, 80)), failed: failedNames(d) };
+}
+
+function geminiTitle(n) {
+  return { title: `Gemini · attempt ${n}`, note: "a proposal, untrusted until DAIL says so", label: `Gemini, attempt ${n}` };
+}
+
+async function ask(instruction) {
+  instruction = instruction.trim();
+  if (!instruction) return;
+  notice("thread-notice", "");
+  state.tab = "ask";
+  const stop = new AbortController();
+  state.stop = stop;
+  setBusy(true);
+  render({ keepThread: false });
+  scrollTo(append("ask", you(instruction)));
+  let feedback = null;
+  let previous = null;
+  try {
+    for (let n = 1; n <= MAX_ATTEMPTS; n += 1) {
+      if (n > 1) {
+        collapse(previous);
+        announce(`Attempt ${n} of ${MAX_ATTEMPTS}`);
+      }
+      const writing = append("ask", proposalCard({ ...geminiTitle(n), writing: true }));
+      if (showing("ask")) writing.scrollIntoView({ block: "nearest" });
+      const body = { scenario_id: state.live.scenario, files: state.live.trusted, attempt: n, instruction };
+      if (feedback) body.feedback = feedback;
+      const data = await propose(body, stop.signal);
+      announce("Gemini proposed a fix");
+      const meta = { model: data.model, tokens: data.tokens, attempt: n, instruction, feedback };
+      const { trace, card, fresh } = await judge("ask", n, () => state.dail.call("submit_reply", data.reply, JSON.stringify(meta)));
+      const gemini = replaceNode("ask", writing, proposalCard({ ...geminiTitle(n), trace }));
+      previous = { n, trace, nodes: [gemini, card] };
+      announce(decisionWords(trace));
+      if (fresh) break;
+      if (n === MAX_ATTEMPTS) { append("ask", finalMessage(ALL_FAILED)); break; }
+      feedback = feedbackFrom(trace);
+      append("ask", banner(n + 1)); // shown under the rejection; the attempt folds when the next one starts
+      await sleep(1600); // time to read the rejection (reading time, not motion: the same with reduced motion)
+      if (stop.signal.aborted) throw new DOMException("stopped", "AbortError");
+    }
+  } catch (error) {
+    dropWaiting("ask");
+    if (error.name === "AbortError") append("ask", finalMessage(`Stopped. The trusted state is still v${version()}.`));
+    else notice("thread-notice", error.message);
+  } finally {
+    state.stop = null;
+    setBusy(false);
+    render({ keepThread: true });
   }
 }
 
-async function submitLive() {
+// An attempt that is over folds into one row when the next one starts; "Open ↓" unfolds it again.
+function collapse(attempt) {
+  if (!attempt) return;
+  const [gemini, card] = attempt.nodes;
+  const row = collapsed(attempt.n, attempt.trace, () => {
+    replaceNode("ask", row, gemini);
+    const list = state.threads.ask;
+    list.splice(list.indexOf(gemini) + 1, 0, card);
+    if (gemini.isConnected) gemini.after(card);
+  });
+  replaceNode("ask", gemini, row);
+  const list = state.threads.ask;
+  list.splice(list.indexOf(card), 1);
+  card.remove();
+}
+
+function dropWaiting(owner) {
+  const list = state.threads[owner];
+  for (const node of [...list]) {
+    if (node.querySelector(".writing") || (node.querySelector(".dail") && !node.querySelector(".dail__foot"))) {
+      list.splice(list.indexOf(node), 1);
+      node.remove();
+    }
+  }
+}
+
+// ---- Write your own fix ------------------------------------------------------------------------------
+
+let editorCard = null;
+
+function saveEditor() {
+  const editor = editorCard && editorCard.querySelector(".editor");
+  if (editor && state.live.current) state.live.files[state.live.current] = editor.value;
+}
+
+function buildEditor() {
+  const names = Object.keys(state.live.files);
+  if (!names.includes(state.live.current)) state.live.current = names.includes("main.tf") ? "main.tf" : names[0] || null;
+  const scenario = state.scenarios.find((s) => s.id === state.live.scenario) || {};
+  const editor = h("textarea", { class: "editor", id: "editor", spellcheck: "false", "aria-label": `Edit ${state.live.current || "the configuration"}` });
+  editor.value = state.live.files[state.live.current] || "";
+  editor.addEventListener("input", saveEditor);
+  const files = h("div", { class: "files", role: "group", "aria-label": "Files" }, ...names.map((name) =>
+    h("button", { type: "button", class: "file-pill", "aria-pressed": String(name === state.live.current), onclick: () => { saveEditor(); state.live.current = name; refreshEditor(); } }, name)));
+  const fills = h("div", { class: "fills", role: "group", "aria-label": "Quick fill" }, ...(scenario.quick_fill || []).map((name) =>
+    h("button", {
+      type: "button", class: "sbtn", "data-fill": name,
+      onclick: async () => {
+        const answer = await state.dail.call("patch_files", name);
+        if (!answer.ok) return;
+        state.live.files = answer.value;
+        refreshEditor();
+        editorCard.querySelector(".editor").focus();
+      },
+    }, FILL[name] || name)));
+  const card = h("article", { class: "editor-card", "aria-label": "Your fix" },
+    h("div", { class: "editor-card__bar" }, files, fills), editor,
+    h("div", { class: "editor-card__foot" },
+      h("p", { text: `Starts from trusted state v${version()}. DAIL checks it in your browser.` }),
+      h("button", { type: "button", class: "btn btn--primary", id: "submit", onclick: submitOwn }, "Submit to DAIL →")));
+  return h("li", {}, card);
+}
+
+function refreshEditor() {
+  const fresh = buildEditor();
+  if (editorCard) replaceNode("write", editorCard, fresh);
+  editorCard = fresh;
+  updateControls();
+}
+
+async function submitOwn() {
+  if (state.busy || !state.live.started) return;
   saveEditor();
-  const button = $("submit");
+  notice("thread-notice", "");
+  const n = state.threads.write.filter((node) => node.querySelector(".dail")).length + 1;
   setBusy(true);
-  button.textContent = "DAIL is checking…";
-  $("announce").textContent = "DAIL is checking the patch.";
-  $("decision").replaceChildren();
-  $("ovf").replaceChildren();
-  $("candidate").replaceChildren(h("article", { class: "card", id: "candidate-card" },
-    h("span", { class: "card__source", text: "Typed patch" }),
-    h("p", { class: "card__label", text: `${state.live.scenario} typed in the browser` })));
-  waitingStages($("stages"), "DAIL is checking…");
+  announce("DAIL is checking your fix.");
   try {
-    const answer = await state.dail.call("submit_files", JSON.stringify(state.live.files));
-    if (!answer.ok) {
-      if (state.mode !== "live") return;
-      $("candidate").replaceChildren(h("div", { class: "refused", role: "status" },
-        h("p", { class: "refused__title", text: "Not evaluated" }),
-        h("p", { text: "The run stopped with an error. This is not a DAIL decision; the trusted state stays where it was." }),
-        h("p", { class: "refused__reason", text: answer.error })));
-      $("decision").replaceChildren();
-      $("ovf").replaceChildren();
-      waitingStages($("stages"), "Not evaluated.");
-      $("announce").textContent = "Not evaluated: the run stopped with an error.";
-      return;
-    }
-    const trace = answer.value;
-    const session = trace.session || {};
-    state.live.last = trace;
-    state.live.sequence = session.sequence || state.live.sequence;
-    state.live.ledger = trace.ledger || state.live.ledger;
-    state.live.version = (session.trusted_state || {}).version ?? state.live.version;
-    if (session.promoted) {
-      state.live.files = trace.files;
-      renderFiles();
-    }
-    if (state.mode !== "live") return; // shown when the visitor comes back (resumeLive)
-    show(trace, { mode: "live", live: true, freshState: session.promoted ? session.trusted_state.state_id : null, issue: liveIssue() });
-    $("verify-result").replaceChildren();
+    const { trace } = await judge("write", n, () => state.dail.call("submit_files", JSON.stringify(state.live.files)));
+    announce(decisionWords(trace));
+    refreshEditor();
+  } catch (error) {
+    dropWaiting("write");
+    notice("thread-notice", error.message);
   } finally {
     setBusy(false);
-    button.textContent = "Submit to the gate";
   }
 }
 
-async function verifyChain() {
-  const answer = await state.dail.call("verify_chain");
-  const box = $("verify-result");
-  if (!answer.ok) {
-    box.replaceChildren(h("p", { class: "verify-result verify-result--bad", text: `Chain check failed to run: ${answer.error}` }));
-    return;
-  }
-  const v = answer.value;
-  box.replaceChildren(h("div", { class: `verify-result verify-result--${v.ok ? "ok" : "bad"}` },
-    h("p", { text: v.ok ? `Chain verified by DAIL: ${v.states} trusted state${v.states === 1 ? "" : "s"}, ${v.candidates} candidate${v.candidates === 1 ? "" : "s"}, no problem.` : "DAIL found problems in the chain:" }),
-    ...(v.problems || []).map((p) => h("p", { class: "mono", text: p }))));
+// ---- Replays -----------------------------------------------------------------------------------------
+
+function sourceOf(run) {
+  if (run.source === "LLM") return `Gemini, recorded ${formatDate(run.recorded_at)}`;
+  if (run.source === "TYPED") return "Typed";
+  return "Reference patch";
 }
 
-// ---- modes ----------------------------------------------------------------------------------
+function outcomeOf(run) {
+  if (run.refused_before_dail) return ["Refused", "fail"];
+  return [run.decisions.C, run.decisions.C === "PROMOTE" ? "pass" : "fail"];
+}
 
-async function setMode(mode) {
-  state.mode = mode;
-  $("scenario").disabled = mode === "live" && Boolean(state.busy);
-  $("mode-live").setAttribute("aria-pressed", String(mode === "live"));
-  $("mode-replays").setAttribute("aria-pressed", String(mode === "replays"));
-  $("live-panel").hidden = mode !== "live";
-  $("replay-field").hidden = mode !== "replays";
-  $("ledger-tools").hidden = mode !== "live" || !state.dail;
-  $("verify-result").replaceChildren();
-  if (mode === "replays") {
-    const runs = fillReplayPickers($("scenario").value);
-    if (runs.length) await showReplay(runs.find((r) => r.decisions.C === "REJECT")?.file || runs[0].file);
-    return;
+const FILTERS = {
+  all: () => true,
+  gemini: (r) => r.source === "LLM",
+  reference: (r) => r.source !== "LLM" && r.source !== "TYPED",
+  rejected: (r) => r.refused_before_dail || r.decisions.C !== "PROMOTE",
+};
+
+function renderRuns() {
+  const runs = state.runs.filter(FILTERS[state.filter]);
+  for (const b of document.querySelectorAll("[data-filter]")) b.setAttribute("aria-pressed", String(b.dataset.filter === state.filter));
+  $("runs").replaceChildren(...runs.map((run) => {
+    const scenario = state.scenarios.find((s) => s.id === run.scenario_id) || { id: run.scenario_id, family: run.family };
+    const [word, kind] = outcomeOf(run);
+    const step = /session-step-(\d+)/.exec(run.file);
+    return h("li", {}, h("button", { type: "button", class: "run", onclick: () => openReplay(run.file) },
+      h("span", { class: "run__source", text: sourceOf(run) }),
+      h("span", { class: "run__title", text: scenarioName(scenario) + (step ? ` · step ${step[1]}` : "") }),
+      h("span", { class: `outline-pill outline-pill--${kind}`, text: word }),
+      h("span", { class: "run__meta", text: run.refused_before_dail ? "turned away before DAIL's checks" : `DAIL: ${run.check_counts.C} checks · normal checker: ${run.decisions.A}` }),
+      h("span", { class: "run__open", text: "Open" })));
+  }));
+  $("runs-count").textContent = `${runs.length} of ${state.runs.length} recorded runs. Demo, not part of the DAIL evaluation.`;
+}
+
+const modelName = (gen) => {
+  const model = gen && gen.model;
+  return String((model && (model.name || model)) || "Gemini").replace(/^models\//, "");
+};
+
+async function openReplay(file) {
+  const response = await fetch(`runs/${file}`);
+  if (!response.ok) return notice("thread-notice", `The recorded run could not be loaded (HTTP ${response.status}).`);
+  const trace = await response.json();
+  state.replay = file;
+  const c = trace.conditions && trace.conditions.C;
+  const states = ledgerFromTrace(trace);
+  const gen = trace.generation;
+  const source = trace.candidate_source === "LLM"
+    ? { title: `Gemini · ${modelName(gen)} · recorded`, note: "a proposal, untrusted until DAIL says so", label: "Gemini, recorded" }
+    : { title: trace.candidate_source === "TYPED" ? "A typed fix" : "Reference patch", note: "untrusted until DAIL says so", label: "The recorded patch" };
+  const recordedAt = formatDate(trace.created_at);
+  state.threads.replay = [
+    h("li", {}, h("p", { class: "recorded", text: `Recorded run · ${recordedAt} · ${trace.scenario.scenario_id} · with the full Terraform check` })),
+    trace.ai && trace.ai.instruction ? you(trace.ai.instruction) : null,
+    proposalCard({ ...source, trace }),
+    dailCard({ n: 1, trace, live: false, states: c && c.new_state ? states : null, fresh: c && c.new_state ? c.new_state.state_id : null }),
+  ].filter(Boolean);
+  render();
+  const card = state.threads.replay.at(-1);
+  land(card);
+  announce(decisionWords(trace));
+  window.scrollTo({ top: 0 });
+  return undefined;
+}
+
+// ---- the ledger drawer --------------------------------------------------------------------------------
+
+function openDrawer(open) {
+  $("drawer").hidden = !open;
+  $("ledger-open").setAttribute("aria-expanded", String(open));
+  if (open) {
+    renderDrawer();
+    $("ledger-close").focus();
+  } else {
+    $("ledger-open").focus();
   }
-  if (state.dail && state.live.sessions > 0) {
-    resumeLive();
-    return;
+}
+
+function renderDrawer() {
+  drawerStates($("states"), state.live.ledger, { target: target(), carried: state.live.carried, attempts: state.live.attempts, fresh: state.live.fresh });
+}
+
+// ---- the page as a whole -------------------------------------------------------------------------------
+
+function render({ keepThread = false } = {}) {
+  const tab = state.tab;
+  for (const name of ["ask", "write", "replays"]) $(`tab-${name}`).setAttribute("aria-selected", String(tab === name));
+  const owner = tab === "replays" ? (state.replay ? "replay" : null) : tab;
+  const thread = owner && (owner !== "ask" || state.threads.ask.length > 0);
+  $("ask-screen").hidden = tab !== "ask" || state.threads.ask.length > 0;
+  $("thread-screen").hidden = !thread;
+  $("replays-screen").hidden = tab !== "replays" || Boolean(state.replay);
+  $("write-head").hidden = tab !== "write";
+  $("replay-back").hidden = owner !== "replay";
+  $("dock").hidden = !(tab === "ask" && state.threads.ask.length > 0);
+  $("hdr").classList.toggle("is-thread", Boolean(thread));
+  document.body.classList.toggle("has-dock", !$("dock").hidden);
+
+  const current = state.live.ledger[0] || null;
+  healthPills($("health"), current);
+  $("status").hidden = !thread || owner === "replay";
+  healthPills($("status-pills"), current, { compact: true });
+  healthDots($("status-dots"), current);
+  $("status-version").textContent = `Trusted state v${version()}`;
+  if (!$("drawer").hidden) renderDrawer();
+
+  if (tab === "write" && state.live.started && !editorCard) {
+    editorCard = buildEditor();
+    state.threads.write.unshift(editorCard);
   }
-  $("candidate").replaceChildren();
-  $("decision").replaceChildren();
-  $("ovf").replaceChildren();
-  renderLedger($("ledger"), []);
-  liveScenarioPicker();
-  waitingStages($("stages"), "Loading DAIL into your browser…");
-  try {
-    await startLive(state.live.scenario || "canonical");
-  } catch {
-    /* the loading panel shows the reason; replays keep working */
+  if (owner && !(keepThread && $("thread").childNodes.length && showing(owner))) $("thread").replaceChildren(...state.threads[owner]);
+  if (tab === "replays" && !state.replay) renderRuns();
+  if (state.startFailed && tab !== "replays") notice("ask-notice", `DAIL could not start here: ${state.startFailed}. The replays still work.`);
+  else if (state.ai === "unavailable" && tab === "ask") notice("ask-notice", "The AI is not set up on this site. Write your own fix, or watch the replays.");
+  else notice("ask-notice", "");
+  updateControls();
+}
+
+function setTab(tab) {
+  if (state.tab === "write") saveEditor();
+  if (tab === "replays" && state.tab === "replays") state.replay = null;
+  state.tab = tab;
+  notice("thread-notice", "");
+  $("nav").classList.remove("is-open");
+  $("menu").setAttribute("aria-expanded", "false");
+  render();
+  window.scrollTo({ top: 0 });
+  // DAIL loads when a tab needs it: Replays alone never downloads it (about 17 MB)
+  if (tab !== "replays" && !state.live.started && !state.starting) {
+    state.starting = true;
+    startSession(state.live.scenario).finally(() => { state.starting = false; });
   }
+}
+
+// The prompt boxes: Enter submits, Shift+Enter adds a line; the box grows from 2 (or 1) to 6 rows.
+function promptBox(textarea, submit, minRows) {
+  const grow = () => {
+    textarea.rows = minRows;
+    const line = parseFloat(getComputedStyle(textarea).lineHeight) || 24;
+    const pad = textarea.scrollHeight - textarea.clientHeight;
+    textarea.rows = Math.max(minRows, Math.min(6, Math.round((textarea.scrollHeight - Math.max(0, pad)) / line)));
+  };
+  textarea.addEventListener("input", grow);
+  textarea.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+      event.preventDefault();
+      submit();
+    }
+  });
+  return grow;
 }
 
 async function init() {
-  const [runs, scenarios] = await Promise.all([
-    fetch("runs/index.json").then((r) => (r.ok ? r.json() : { runs: [] })).catch(() => ({ runs: [] })),
-    fetch("vendor/scenarios/index.json").then((r) => (r.ok ? r.json() : { scenarios: [] })).catch(() => ({ scenarios: [] })),
-  ]);
+  const get = (url, empty) => fetch(url).then((r) => (r.ok ? r.json() : empty)).catch(() => empty);
+  const [runs, scenarios, ai] = await Promise.all([
+    get("runs/index.json", { runs: [] }), get("vendor/scenarios/index.json", { scenarios: [] }), get(PROPOSE, null)]);
   state.runs = runs.runs || [];
   state.scenarios = scenarios.scenarios || [];
-  state.live.scenario = "canonical";
+  state.ai = ai && ai.available ? "available" : "unavailable";
+  $("passcode-field").hidden = !(ai && ai.passcode_required);
+  $("model-meta").textContent = `${(ai && ai.model) || "Gemini"} · judged by DAIL v1.0`;
+  $("scenario").replaceChildren(...state.scenarios.map((s) => h("option", { value: s.id }, scenarioName(s))));
+  $("chips").replaceChildren(...CHIPS.map(({ text, risky }) => h("button", {
+    type: "button", class: `chip${risky ? " chip--risky" : ""}`,
+    onclick: () => { $("instruction").value = text; growAsk(); $("instruction").focus(); },
+  }, risky ? `${text} · risky` : text)));
 
-  $("mode-live").addEventListener("click", () => setMode("live"));
-  $("mode-replays").addEventListener("click", () => setMode("replays"));
+  const askNow = () => { if (!$("ask").disabled && $("instruction").value.trim()) ask($("instruction").value); };
+  const askNext = () => {
+    if ($("dock-ask").disabled || !$("next").value.trim()) return;
+    const text = $("next").value;
+    $("next").value = "";
+    growNext();
+    ask(text);
+  };
+  const growAsk = promptBox($("instruction"), askNow, 2);
+  const growNext = promptBox($("next"), askNext, 1);
+  $("ask-form").addEventListener("submit", (event) => { event.preventDefault(); askNow(); });
+  $("dock-form").addEventListener("submit", (event) => { event.preventDefault(); askNext(); });
+  $("stop").addEventListener("click", () => { if (state.stop) state.stop.abort(); });
+
+  for (const name of ["ask", "write", "replays"]) $(`tab-${name}`).addEventListener("click", () => setTab(name));
+  for (const b of document.querySelectorAll("[data-filter]")) b.addEventListener("click", () => { state.filter = b.dataset.filter; renderRuns(); });
+  $("back-to-runs").addEventListener("click", () => { state.replay = null; render(); });
+  $("scenario").addEventListener("change", (event) => { editorCard = null; startSession(event.target.value); });
+  $("verify").addEventListener("click", () => verifyInto($("verify-result")));
+  $("ledger-open").addEventListener("click", () => openDrawer($("drawer").hidden));
+  $("ledger-close").addEventListener("click", () => openDrawer(false));
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !$("drawer").hidden) openDrawer(false); });
+  $("menu").addEventListener("click", () => {
+    const open = $("nav").classList.toggle("is-open");
+    $("menu").setAttribute("aria-expanded", String(open));
+  });
+  $("presenter").setAttribute("aria-pressed", String(root.classList.contains("presenter")));
   $("presenter").addEventListener("click", () => {
     const on = root.classList.toggle("presenter");
     $("presenter").setAttribute("aria-pressed", String(on));
-    if (on) $("zones").scrollIntoView(); // the decision, the stages and the ledger on one screen
+    const last = [...document.querySelectorAll("#thread .dail")].at(-1);
+    if (on && last) last.scrollIntoView({ block: "start" });
   });
-  $("presenter").setAttribute("aria-pressed", String(root.classList.contains("presenter")));
-  $("scenario").addEventListener("change", async (event) => {
-    if (state.busy) return;
-    if (state.mode === "replays") {
-      const list = fillReplayPickers(event.target.value);
-      if (list.length) await showReplay(list[0].file);
-    } else {
-      await startLive(event.target.value);
-    }
-  });
-  $("replay").addEventListener("change", (event) => showReplay(event.target.value));
-  $("editor").addEventListener("input", () => { saveEditor(); updateLines(); });
-  $("editor").addEventListener("scroll", () => { $("lines").scrollTop = $("editor").scrollTop; });
-  $("submit").addEventListener("click", submitLive);
-  $("reset").addEventListener("click", () => startLive(state.live.scenario));
-  $("verify").addEventListener("click", verifyChain);
   window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => root.classList.toggle("reduce-motion", e.matches));
 
-  const wanted = new URLSearchParams(location.search).get("mode") === "live" ? "live" : "replays";
-  if (wanted === "replays") fillReplayPickers("canonical");
-  await setMode(wanted);
+  const wanted = new URLSearchParams(location.search).get("tab");
+  setTab(["ask", "write", "replays"].includes(wanted) ? wanted : "ask");
 }
 
 init();

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DAIL Live: the ledger</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#DDF2E6}
+a{color:#0D1B2A;text-decoration-thickness:2px}a:hover{text-decoration-thickness:3px}
+.mono{font-family:'IBM Plex Mono',Consolas,monospace}
+.page{background:#DDF2E6;color:#0D1B2A;font-family:'Poppins',Arial,sans-serif;position:relative;overflow:hidden}
+.btn{font-family:'Poppins',Arial,sans-serif;font-weight:700;font-size:15px;border:3px solid #0D1B2A;border-radius:14px;padding:10px 18px;box-shadow:5px 5px 0 #0D1B2A;background:#FFFFFF;color:#0D1B2A;cursor:pointer}
+.state{background:#FFFFFF;border:2px solid #0D1B2A;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.ok{background:#0E8A5F}.bad{background:#C0262D}.carry{background:#2340E0}
+</style>
+</helmet>
+<div class="page" style="width: 1440px; height: 900px">
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: #0D1B2A; opacity: 0.35"></div>
+  <div aria-hidden="true" style="position: absolute; left: 300px; top: 120px; width: 640px; height: 520px; background: #FFFFFF; border: 2px solid #0D1B2A; border-radius: 22px; opacity: 0.5"></div>
+
+  <aside aria-label="The ledger" style="position: absolute; top: 0; right: 0; bottom: 0; width: 480px; background: #FFFFFF; border-left: 3px solid #0D1B2A; box-sizing: border-box; padding: 28px 28px; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <h2 style="margin: 0; font-size: 28px; font-weight: 800">The ledger</h2>
+      <button type="button" aria-label="Close the ledger" style="font-family: 'Poppins', Arial, sans-serif; font-size: 14px; font-weight: 600; border: 2px solid #0D1B2A; border-radius: 12px; padding: 6px 12px; background: #FFFFFF; color: #0D1B2A; cursor: pointer">Close</button>
+    </div>
+    <p style="margin: 0; font-size: 15px; color: #48566A">Every trusted state of this tab, newest first. Each is linked to its parent by a hash. Only DAIL's promotion can add one.</p>
+    <div style="display: flex; align-items: center; gap: 14px">
+      <button type="button" class="btn">Verify chain</button>
+      <span style="font-size: 14px; font-weight: 500; border: 2px solid #0E8A5F; border-radius: 999px; padding: 4px 12px; background: #CFEFDD">✓ Verified by DAIL: 2 states, no problem</span>
+    </div>
+
+    <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0">
+      <li class="state" style="box-shadow: 6px 6px 0 #0E8A5F">
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 26px; font-weight: 800">v1</span><span style="font-size: 13px; font-weight: 600; color: #48566A">promoted by DAIL · attempt 2</span></div>
+        <div class="row"><span><span class="dot ok"></span>SSH closed to the internet</span></div>
+        <div class="row"><span><span class="dot ok"></span>Database port closed</span></div>
+        <div class="row"><span><span class="dot carry"></span>Database not public · carried forward</span></div>
+        <div class="row"><span><span class="dot ok"></span>App reaches database</span></div>
+        <span class="mono" style="font-size: 12px">state e2aabc2aa8e85ae8b41162b627c8cdbf…</span>
+      </li>
+      <li aria-hidden="true" style="display: flex; align-items: center; gap: 10px; padding: 6px 0 6px 40px"><span style="width: 2px; height: 30px; background: #0D1B2A"></span><span class="mono" style="font-size: 12px; color: #48566A">parent 1864e83fac29d12a…</span></li>
+      <li class="state">
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 26px; font-weight: 800">v0</span><span style="font-size: 13px; font-weight: 600; color: #48566A">baseline, established by DAIL</span></div>
+        <div class="row"><span><span class="dot bad"></span>SSH open to the internet · the repair target</span></div>
+        <div class="row"><span><span class="dot ok"></span>Database port closed</span></div>
+        <div class="row"><span><span class="dot ok"></span>Database not public</span></div>
+        <div class="row"><span><span class="dot ok"></span>App reaches database</span></div>
+        <span class="mono" style="font-size: 12px">state 1864e83fac29d12a36b7505ea0ee7e3d…</span>
+      </li>
+    </ol>
+    <p style="margin: 0; font-size: 13px; color: #48566A">Rejected fixes never enter the ledger. Reloading the page starts over at v0.</p>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

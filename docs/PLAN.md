@@ -45,8 +45,8 @@
 - Risk scoring, findings dashboards, multi-account or user-account features, logins.
 - CloudShield AI name or branding anywhere.
 - Paid APIs, paid models or paid cloud.
-- Any server-side code, serverless function, database, API key or secret in the website. The site is static files only.
-- Gemini, or any other paid or keyed service, called from the website. AI runs are recorded locally and shown as replays.
+- Server-side code on the website other than the single Gemini proxy function of §3.9.
+- Any key or secret in the repository, in the browser, in a response, or in a log. The Gemini key exists only as the Vercel environment variable `GEMINI_API_KEY`, read only by the proxy function.
 - New safety logic. The demo may not decide anything itself; it only calls DAIL and displays what DAIL returns.
 - Committing any secret, including the Gemini API key.
 
@@ -127,88 +127,216 @@ Only DAIL's lineage advances. Condition A never becomes the session's trusted st
 
 **If the browser check fails** (package C's first step), live mode is dropped and the site ships with replays only. The decision is recorded in `docs/DECISIONS.md`.
 
-### 3.7 Visual design (binding for L3; chosen by the authors on 26 Nov 2026)
+### 3.9 The AI loop on the website (authors' decisions, 26 Nov 2026; package D)
 
-**Direction: Neo-Brutalism + Swiss grid + retro editorial.** The page reads like the front page of a printed technical gazette, laid out on a strict Swiss grid, built from heavy brutalist blocks. Its structure is DAIL's own architecture, so the style serves the subject instead of decorating it.
+This section amends §2 and §3.8. The design of the website is §3.7 (Mint and tomato).
 
-**Structure (12-column grid, 8 px baseline, flush-left text, asymmetric):**
-- **Masthead** across the full width:
-  - "DAIL LIVE" set very large;
-  - an issue line in the retro-editorial manner, built from real session data: `Session 01 · Candidate 03 · Trusted state v2 · 26 Nov 2026`;
-  - heavy and thin rules above and below, as on a newspaper;
-  - the label "Demo, not part of the DAIL evaluation" sits in the masthead and is always visible.
-- **Three zones** below the masthead, split by a thick black dashed vertical rule labelled **TRUST BOUNDARY** (set vertically):
+- **AI-first.** A visitor asks for a fix in plain words, Gemini proposes a patch, DAIL judges it in the browser, and when DAIL rejects it Gemini retries with DAIL's reason, up to 3 attempts in total. It stops at the first PROMOTE; after 3 failures the trusted state is unchanged.
+- **The proxy.** One Vercel Python function, `api/propose.py`, reads the authors' key from the Vercel environment variable `GEMINI_API_KEY`, builds DAIL's own repair prompt (`dail-repair-prompt-3`) with the bundled DAIL, adds a clearly separated demo addendum (the visitor's text as untrusted text; on a retry, DAIL's reason), calls Gemini, and returns only the reply text, the model name and the token counts. It accepts only a fixed request, checks the origin and an optional passcode, and never puts the key in a response, an error or a log. `python -m dail_demo serve` runs the same proxy and the site on `127.0.0.1` only.
+- **DAIL judges in the browser.** Each reply goes through DAIL's response parser, DAIL's patch validator and the orchestrator in the tab (C, and target-only A on the same patch). A reply refused before DAIL is a failed attempt. Terraform validation is not run in the browser, and the page says so.
+- **Plain language.** Fixed texts describe what DAIL returned (four health pills, decision sentences, change verbs); they never decide anything. Every technical detail stays available under "DAIL's evidence".
+- **Tabs.** Ask the AI, Write your own fix (typed patches, no retry loop), Replays.
 
-  | Zone | Columns | Content |
-  |---|---|---|
-  | Untrusted | 1–4 | The AI's or the person's patch: the diff, the editor, the AI attempts. A diagonal hatch background says "not trusted" |
-  | The gate | 5–8 | DAIL's five stages as numbered blocks 01–05, with very large numerals (a real sequence, so numbering is meaningful) |
-  | The ledger | 9–12 | Trusted states stacked as newspaper "clippings", newest on top. Each shows its version, its invariant statuses and its hash in mono, joined to the one below by a drawn link |
+### 3.7 Visual design: Mint and tomato (authors' decision, 26 Nov 2026; replaces the Neo-Brutalist design)
 
-- **The decision** is a large stamp block, rotated about −3°, with a thick border and a hard shadow: PROMOTE or REJECT, with DAIL's reason beneath it as an editorial pull-quote.
-- **The comparison with target-only checking** is set as a two-column "Opinion vs. Fact" box under the gate: what target-only decided against what DAIL decided, with both check counts.
-- At phone width the zones stack in the order untrusted, gate, ledger. The trust boundary becomes a horizontal rule.
+#### 4.1 Principles
+- A **friendly, confident, modern** look: Poppins, a mint background, white cards with ink borders and **hard (unblurred) offset shadows**, rounded corners, and tomato for actions.
+- **Like a chat app:** the first screen is almost empty, with one big prompt box. After asking, the page becomes a **conversation thread**.
+- **No background animation, no gradients, no glass or blur, no emoji, no stock illustrations, no dark theme.** No CloudShield name.
+- **Every colour has exactly one meaning** (4.2). Never use colour alone: every status also carries a word or ✓ / ✕ / ?.
 
-**Brutalist rules:**
-- borders 3 px solid ink;
-- hard offset shadows (`6px 6px 0` ink), never blurred;
-- flat colour blocks;
-- no gradients, no glass, no blur, no rounded cards (radius 0; pills only for status tags);
-- buttons that press physically: on `:active` they move by the shadow offset and the shadow drops to 0.
+#### 4.2 Colour tokens (CSS custom properties in `site/assets/css/dail.css`; no other colours)
 
-**Palette** (single light theme, chosen for projectors; every colour has exactly one meaning):
-
-| Token | Value | Meaning |
+| Token | Value | Meaning, and the only places it is used |
 |---|---|---|
-| `--paper` | `#EEECE5` (newsprint) | Background |
-| `--ink` | `#111111` | Text, borders, shadows, rules |
-| `--signal-red` | `#E4321B` (Swiss red) | FAIL and REJECT only |
-| `--signal-green` | `#0E8A5F` | PASS and PROMOTE only |
-| `--marker` | `#FFD60A` | What this change affects (highlighter blocks) |
-| `--cobalt` | `#2340E0` | Carried forward, links and focus |
-| `--muted` | `#55524A` | Secondary text; never for anything that matters |
+| `--mint` | `#DDF2E6` | Page background |
+| `--mint-soft` | `#F1FAF5` | Card footers, quiet surfaces, code backgrounds |
+| `--mint-hover` | `#C6EAD6` | Hover on chips and secondary buttons |
+| `--white` | `#FFFFFF` | Cards, the prompt box, pills |
+| `--ink` | `#0D1B2A` | Text, borders, hard shadows, the "You" bubble, active tab |
+| `--ink-muted` | `#48566A` | Secondary text on white; `#33445A` on mint (`--ink-muted-on-mint`) |
+| `--tomato` | `#FF5A36` | **Brand and action only:** the Ask button, the logo mark, the "AI" highlight in the headline, the "You" bubble's shadow. Never a status |
+| `--tomato-soft` | `#FFD9CF` | The risky suggestion chip, the "untrusted proposal" stripe on Gemini cards, the retry banner |
+| `--pass` | `#0E8A5F` | PASS, PROMOTE, "holds": dots, the PROMOTE stamp, ✓ |
+| `--pass-soft` | `#CFEFDD` | PASS pill backgrounds (with ink text) |
+| `--fail` | `#C0262D` | FAIL, REJECT, "broken": dots, the REJECT stamp, ✕ (crimson, deliberately darker than tomato) |
+| `--fail-soft` | `#FBD9D9` | FAIL pill backgrounds (with ink text) |
+| `--marker` | `#FFD60A` | "Re-checked by DAIL" (affected) only: stage 03 and the impact tags |
+| `--carry` | `#2340E0` | "Carried forward" only: dot, tag border |
+| `--carry-soft` | `#DCE3FF` | Carried-forward tag background (ink text) |
 
-All text on colour blocks is ink, except on red, green and cobalt, where it is paper. Every pair meets WCAG AA (L3 checks this and records the ratios in `docs/DECISIONS.md`).
+- **UNKNOWN / UNSUPPORTED / UNCERTAIN:** an ink-outlined pill on white, with "?" and the word. No new colour.
+- **Text on colour:**
+  - ink on mint, white, mint-soft, tomato, tomato-soft, marker, the soft tints;
+  - white only on `--ink`, `--fail` and `--pass` at 24 px or larger (stamps, large buttons).
+- **Contrast:** compute the ratio of every text/background pair used and list them in DECISIONS. Body text ≥ 4.5:1, large text (≥ 24 px, or ≥ 18.66 px bold) ≥ 3:1. Fix any failure before the PR.
 
-**Type** (Google Fonts, self-hosted copies so the page works offline; each with a system fallback):
+#### 4.3 Type
+- **Poppins** (OFL), weights 400, 500, 600, 700, 800, and **IBM Plex Mono** (OFL), 400 and 500. Self-hosted `woff2` in `site/assets/fonts/`, with the OFL texts. `font-display: swap`, system fallbacks.
+- **Remove Archivo and Instrument Serif** and their files.
+- **Scale (px):**
 
-| Role | Typeface |
-|---|---|
-| Masthead and stage numerals | Archivo, weight 800–900, expanded width |
-| Body and UI | Archivo, weight 400–600 |
-| Editorial voice: pull-quotes, the decision reason, kicker lines | Instrument Serif, italic |
-| Code, hashes, resource addresses | IBM Plex Mono |
+  | Role | Size and weight |
+  |---|---|
+  | display | 72 / 800 / tracking −0.03em (first-screen headline) |
+  | h2 | 40 / 800 |
+  | h3 | 28 / 700 (the decision sentence: 30 / 600) |
+  | lead | 22 / 500 |
+  | body | 18 / 400 |
+  | small | 15 / 500 |
+  | meta | 13 / 500–600 (only for secondary labels) |
+  | mono | 13–15 |
 
-- The scale is fixed in tokens.
-- Labels are uppercase with letter-spacing.
-- Nothing that matters is smaller than 16 px; in presenter mode, 20 px.
+- Nothing that matters is smaller than 15 px.
+- Mono is used **only** for resource names, ids, hashes, raw DAIL lines, the model name and code.
 
-**Motion** (brutalist: quick and stepped, no floaty easing; switched off under `prefers-reduced-motion`):
-- **The one signature moment:**
-  1. the candidate card moves across the trust boundary;
-  2. the stage blocks fill in one by one as DAIL finishes them;
-  3. the stamp slams down (scale 1.4 → 1 in about 120 ms);
-  4. on PROMOTE, a new clipping drops onto the ledger and its hash link is drawn.
-- No other decorative animation.
+#### 4.4 Shape, borders, shadows
+- **Radii:**
+  - cards and the prompt box: 22 px;
+  - buttons and tab group: 14 px;
+  - tabs inside the group: 10 px;
+  - chips: 12 px;
+  - pills and tags: 999 px;
+  - the logo mark: 10 px.
+- **Borders:** 3 px ink on the prompt box, the DAIL card and the primary buttons; 2 px ink on everything else.
+- **Shadows** (hard, never blurred):
 
-**Presenter mode:** a toggle in the masthead.
-- It enlarges the type scale by 25%.
-- It hides the editor's line numbers.
-- It keeps the decision, the stages and the ledger on one screen at 1366×768.
+  | Element | Shadow |
+  |---|---|
+  | Prompt box and DAIL card | `10px 10px 0 var(--ink)` |
+  | Gemini card | `8px 8px 0 var(--ink)` |
+  | Primary button | `5px 5px 0 var(--ink)` |
+  | "You" bubble | `5px 5px 0 var(--tomato)` |
+
+- **Buttons press physically:** on `:active` they move by the shadow offset, and the shadow drops to 0.
+- **Focus:** a visible 3 px `--carry` outline, offset 3 px, on every focusable element.
+
+#### 4.5 Layout and screens
+
+**Global header** (84 px tall on desktop):
+- **Left:** the logo mark (34 px tomato square, 2 px ink border, "D" in ink 800), "DAIL Live" (Poppins 800, 24 px), and a "Demo" pill (ink outline). Hovering or focusing "Demo" shows: "Demo, not part of the DAIL evaluation."
+- **Right:** a tab group (white, 2 px ink border, radius 14) with **Ask the AI** (active: ink background, white text), **Write your own fix** and **Replays**. Then a **Presenter** toggle and a **Ledger** button.
+
+**Screen 1: Ask** (before the first request). Match `docs/design/Main.dc.html` (desktop) and `docs/design/Phone.dc.html` (phone). A centred column, 820 px wide, about 150 px below the header, gap 26 px:
+1. **Tagline pill:** "AI writes the fix · DAIL proves it is safe". White, 2 px ink border, 14 px / 600.
+2. **h1:** "What should the AI fix?", with "AI" on a tomato block (radius 14, padding 0 12 px).
+3. **Health pills:** the four pills of section 3 for the current trusted state. White, 2 px ink border, with a 10 px status dot (`--pass`, `--fail`, or "?" for uncertain).
+4. **The prompt box:**
+   - a white card with a 3 px ink border, radius 22 and the 10 px hard shadow;
+   - the label "Your request to Gemini" (13 / 600, ink-muted);
+   - a textarea: Poppins 24 / 1.4, 2 rows, auto-growing to 6;
+   - a footer bar on `--mint-soft` with a 2 px ink top border, holding:
+     - the **Scenario** select ("canonical" plus the curated scenarios, in plain names);
+     - the mono meta "<model> · judged by DAIL v1.0";
+     - on the right, the **Ask →** button: tomato, ink text, 3 px border, 5 px shadow.
+   - **Enter submits; Shift+Enter adds a new line.**
+5. **Suggestion chips** (white, 2 px ink, radius 12): "Close the public SSH port", "Make the database private", and "Close SSH and tidy up the database rules · risky" on `--tomato-soft`. Clicking one fills the box; it does not send.
+6. **Footer note** (13 px, ink-muted on mint): "Sent to Google Gemini (free tier; Google may use it to improve its products). Every decision comes from DAIL, not the AI. Demo, not part of the DAIL evaluation."
+
+**Screen 2: The thread** (after Ask). Match `docs/design/Reject.dc.html`, `Promote.dc.html` and `PhoneThread.dc.html`. The header gains, centred, the health pills of the **current** trusted state and "Trusted state vN". Content is a centred column, 840 px wide, messages with a 24 px gap, in order:
+1. **"You" bubble:** right-aligned, at most 560 px, ink background, white 20 px text, radius 22 (bottom-right corner 6 px), tomato hard shadow. The label "You" above it (13 / 600).
+2. **Gemini card**, one per attempt:
+   - white, 2 px ink border, radius 22, 8 px shadow;
+   - a 14 px **untrusted stripe** in `--tomato-soft` down its left edge, with the vertical label "UNTRUSTED" (11 / 700, letter-spaced) for screen readers too;
+   - header: "Gemini · attempt n" (15 / 700), and on the right "a proposal, untrusted until DAIL says so" (15 / 500, ink-muted);
+   - a list of changes: verb tag (ink outline pill, 13 / 700), then the plain noun, then the short name in mono;
+   - **Show the code:** expands a unified diff in a `--mint-soft` mono box with `+` and `−` lines. Added lines `--pass-soft` background, removed lines `--fail-soft`, ink text in both;
+   - **while Gemini is writing:** the card shows "Gemini is writing a fix" and three 10 px ink squares blinking in sequence (the only looping animation; off under reduced motion).
+3. **DAIL card:** white, **3 px** ink border, radius 22, 10 px shadow, padding 24.
+   - **Header:** "DAIL · checked in your browser" (15 / 700), and on the right "N checks · M carried forward" (mono 13).
+   - **Five-step bar:** one row of five equal cells inside a 2 px ink frame (radius 14):
+
+     | Cell | Content |
+     |---|---|
+     | 01 | "Valid patch" (or "Refused") |
+     | 02 | "N resources changed" |
+     | 03 | "N rules re-checked" (on `--marker`) |
+     | 04 | "All checks passed" or "N check(s) failed" |
+     | 05 | "Decided" (ink background, white text) |
+
+     Each cell shows its number at 28 / 800. The cells fill in one by one as DAIL reports each stage: a step animation of 150 ms per cell, none under reduced motion.
+   - **Verdict row:**
+     - the **stamp:** 3 px ink border, radius 14, rotated −4°, 8 px hard shadow, "PROMOTE" on `--pass` or "REJECT" on `--fail`, white Poppins 800 at 64 px, with "Decided by DAIL" (13 / 600) under it. It lands with one 160 ms scale from 1.15 to 1 (none under reduced motion);
+     - beside it, the decision sentence (30 / 600) and DAIL's raw line in mono 13 (ink-muted).
+   - **Card footer** (2 px ink top border):
+     - the comparison line, with "accepted" or "rejected" in an outlined pill (`--pass` border if accepted, `--fail` border if rejected; ink text);
+     - right: **DAIL's evidence ↓**;
+     - on PROMOTE also: the mini ledger "v0 → v1", each state a 2 px ink pill with the short hash in mono, the new one with a 4 px `--pass` hard shadow, and a **Verify chain** button that shows DAIL's own result text.
+   - **Live mode only:** "Terraform validation is not run in the browser." (13, ink-muted).
+4. **Retry banner** (after a REJECT, before the next Gemini card): a `--tomato-soft` strip with a 2 px ink border, radius 14: "↻ **Attempt 2 of 3.** DAIL's reason was sent back to Gemini."
+5. **Earlier attempts collapse** to one row each when a later attempt starts: a white row, 2 px ink border, radius 14, holding the outlined status pill "Attempt 1 · Reject" (`--fail` border, ink text), the decision sentence, and "Open ↓".
+6. **The prompt box docks** at the bottom (sticky, 840 px wide, same style at a smaller scale):
+   - label "Next request";
+   - placeholder "Ask for another fix. It starts from trusted state vN.";
+   - disabled, with a **Stop** button, while an attempt is running.
+
+**DAIL's evidence** (collapsed by default, inside the DAIL card; match `docs/design/Evidence.dc.html`):
+- **What changed:** every changed resource with its change type and flags (mono name, plain verb).
+- **What it affects:**
+  - every affected invariant, with a `--marker` tag "re-checked" and its dependency path in mono (for example `app_to_db_5432 → security_group.db → db_instance.database`);
+  - every carried-forward invariant, with a `--carry-soft` tag "carried forward" (`--carry` border);
+  - uncertainty reasons, if any.
+- **Every check:** target, verifier, then a ✓ PASS pill (`--pass-soft`, ink text) or ✕ FAIL pill (`--fail-soft`), or "? UNKNOWN" / "? UNSUPPORTED" (outlined), then the reason.
+- **Ids and hashes:** candidate, parent state, state hash.
+
+**Screen 3: Write your own fix** (match `docs/design/OwnFix.dc.html`). The same thread, but the first message is an **editor card** in place of the "You" bubble and the Gemini card:
+- white, 2 px ink, radius 22;
+- file tabs as pills;
+- a mono textarea on `--mint-soft`;
+- quick-fill buttons "Fill: the safe repair" and "Fill: the repair that breaks the database path";
+- **Submit to DAIL →** (the tomato primary button).
+
+DAIL's card, the comparison and the ledger then work exactly as above. No retry loop.
+
+**Screen 4: Replays** (match `docs/design/Replays.dc.html`).
+- A grid of run cards: white, 2 px ink, radius 22, 8 px shadow. Each shows:
+  - the scenario's plain name;
+  - the source ("Gemini, recorded <date>", "Reference patch", "Typed");
+  - the decision as an outlined pill (`--pass` or `--fail` border);
+  - "Open".
+- Opening a card renders the **same thread** from the trace (attempts, cards, evidence), with the label "Recorded run" in place of the prompt box.
+
+**Ledger drawer** (the header button; match `docs/design/Ledger.dc.html`):
+- a right-hand panel (white, 3 px ink left border) listing every trusted state of the tab: version, the four status dots, state hash, parent link;
+- **Verify chain** at the top.
+
+**Presenter mode:** multiplies the type scale by 1.25, hides the code by default, and keeps the DAIL card fully visible at 1366×768.
+
+**Phone (≤ 600 px):**
+- a single column with a 16 px gutter;
+- header: logo and "DAIL Live", plus a **Menu** button that opens the tabs, Presenter and Ledger;
+- the first-screen headline at 44 px;
+- the health pills wrap;
+- suggestion chips scroll horizontally inside their own container. The page never scrolls sideways;
+- the prompt box docked at the bottom;
+- in the five-step bar, the cells show only the number and a ✓ or ✕;
+- the stamp at 44 px;
+- the ledger drawer becomes a bottom sheet.
+
+#### 4.6 Motion (functional only)
+**Allowed:**
+- the button press;
+- the stage cells filling;
+- the stamp landing;
+- the typing squares;
+- a new ledger pill sliding in (200 ms);
+- expand and collapse (150 ms).
 
 **Not allowed:**
-- dark-neon or terminal looks;
-- purple or blue gradients;
-- glassmorphism;
-- emoji;
-- stock illustrations;
-- the CloudShield name or branding.
+- background or ambient animation;
+- parallax;
+- floating shapes;
+- hover animations beyond the colour change.
 
-**Acceptance (added to L3):**
-- The page follows this section.
-- One screenshot per zone is attached to the PR, at 1366×768 and at phone width.
-- The contrast ratios are recorded.
-- The page works with no internet: fonts are self-hosted and no CDN is used.
+All motion is off under `prefers-reduced-motion`.
+
+#### 4.7 Accessibility
+- Real `<button>`, `<a href>`, `<label>` + `<textarea>` / `<select>`.
+- Every control reachable by keyboard, with a visible focus outline.
+- An `aria-live="polite"` region announces "Gemini proposed a fix", "DAIL: rejected. <sentence>", "Attempt 2 of 3", and "DAIL: promoted. <sentence>".
+- The thread is an `<ol>` of messages, each an `<article>` with an `aria-label` ("Your request", "Gemini, attempt 1", "DAIL's decision on attempt 1").
+- Stamps and pills always contain words.
+- Touch targets ≥ 44 px.
 
 ---
 

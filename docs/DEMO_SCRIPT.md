@@ -1,36 +1,33 @@
 # DAIL Live: the 3-minute demo
 
-**Before you start:** open the site with `?mode=live`, so DAIL is already loaded when you begin (about 6 s, 16.8 MB; or press **Live** a minute early). Turn on **Presenter mode** for a projector. Pick the scenario **canonical**. Say once, early: *"This is a demo, not part of the DAIL evaluation; the results are in the paper."*
+**Before you start:** open the site a minute early, so that DAIL is loaded (about 17 MB; the **Ask →** button becomes active). For a projector, press **Presenter** (bigger type, the code hidden). Say once, early: *"This is a demo, not part of the DAIL evaluation; the results are in the paper."*
 
-## 1. The problem (30 s)
+## 1. The Ask screen (20 s)
 
-- Point at the ledger: **v0**, DAIL's baseline. INV-SEC-001 is **VIOLATED**: SSH is open to the internet. The other three invariants are **PROTECTED**.
-- *"An AI, or a person, proposes a fix. Most tools check only the thing being fixed. A fix can close SSH and quietly cut the app off from its database."*
+Four health pills, one red: **SSH open to the internet**. *"An app server and a database. Four things must hold; three do. We want SSH closed."*
 
-## 2. Live: the fix that breaks something else (45 s)
+## 2. Ask the AI (20 s)
 
-- In the untrusted zone, press **Fill: the repair that breaks INV-FUNC-001**, then **Submit to the gate**.
-- Walk the gate, 01 to 05: the patch is admitted; four resources changed; three invariants affected (yellow), INV-SEC-003 carried forward (blue); five checks, one **FAIL**: INV-FUNC-001.
-- The stamp: **REJECT**.
-- Point at **Opinion vs. Fact**: target-only checking says **PROMOTE** after 3 checks; DAIL says **REJECT** after 5.
-- *"Same patch, same parent. Target-only would have shipped the outage."*
-- Under the stamp: *"Terraform validation is not run in the browser"*. The replays show runs with the full gate.
+Click the chip **Close SSH and tidy up the database rules · risky**. It fills the box; it does not send. Then **Ask →** (or Enter). *"Gemini writes the fix with DAIL's own prompt. Everything it says is untrusted."* The Gemini card shows "Gemini is writing a fix", then the plain list of changes; **Show the code ↓** if someone asks.
 
-## 3. Let the audience edit (45 s)
+## 3. DAIL rejects it (45 s)
 
-- Press **Fill: the safe repair** and **Submit**: **PROMOTE**. A new clipping, **v1**, drops onto the ledger, linked to v0 by its hash.
-- Hand over the keyboard: *"Try to sneak something past the gate."* Ideas: re-open port 22; delete the database rule; add an `output` block. A refusal before DAIL shows its reason in the untrusted zone; a REJECT leaves the ledger where it was.
-- **Reset** returns to v0 at any time.
+The DAIL card fills its five cells as DAIL works, in this browser tab, then the stamp lands: **REJECT**. Read the sentence: *"Rejected: the app would lose its connection to the database."* Point at the footer: **"A normal checker would have accepted this fix."** *"Checking only the SSH rule would have let this through."*
 
-## 4. A Gemini replay (30 s)
+## 4. The automatic retry, which DAIL promotes (45 s)
 
-- Press **Replays**, pick **canonical**, then the run **Gemini (gemini-3.5-flash-lite)**.
-- *"Recorded on the laptop: Gemini wrote this patch; DAIL's parser, patch validator and terraform validate checked it before DAIL decided."* Show the attempt and its verdicts, then the decision.
-- Optionally, **tp-v1-F8-0196**, session steps 1 and 2: step 1 is promoted; step 2 is rejected by DAIL and promoted by target-only. The break is caught at step 2.
+The banner says **"Attempt 2 of 3. DAIL's reason was sent back to Gemini."** The first attempt folds into one row. Gemini's second fix arrives, DAIL checks it: **PROMOTE**. The pills in the header turn green, and the mini ledger shows **v0 → v1**. *"Same AI, one honest reason, and now a fix that holds."* Press **Verify chain**: DAIL recomputes every hash.
 
-## 5. The ledger and "Verify chain" (30 s)
+**The AI is live, so be ready for the other story.** If DAIL promotes the first attempt (it did in our earlier real run of this request), say *"This time the AI was careful, and DAIL proved it."* and show the rejection with step 6's backup instead.
 
-- Back in **Live**, press **Verify chain**: *"DAIL rebuilds every trusted state from its store, recomputes each hash and checks every candidate's evidence chain. Change one stored hash and this fails."* The test suite proves that.
-- Close: *"Every decision you saw came from the released DAIL, unmodified. This is a demo; the evaluation is in the paper."*
+## 5. Open DAIL's evidence (30 s)
 
-**If something fails on stage:** Replays need no Pyodide, but each recorded run is fetched when you pick it, so the page still needs its server (or a local preview, `docs/DEPLOY.md`, which works offline).
+On either card, **DAIL's evidence ↓**: what changed, what it affects (the yellow "re-checked" rows with their dependency paths, the blue "carried forward" one), every check with ✓ PASS or ✕ FAIL, and the ids and hashes. **Ledger** (top right) lists every trusted state, each linked to its parent by hash. *"Rejected fixes never enter the ledger."*
+
+## 6. Backup, if the AI is slow or the quota is gone (any time)
+
+The page says "The AI's free quota is used up for now. Try again later, or write your own fix." Nothing else stops working.
+- **Write your own fix → Fill: the repair that breaks the database path → Submit to DAIL →**: REJECT, "Rejected: the app would lose its connection to the database.", and a normal checker would have accepted it. **Fill: the safe repair** is promoted. No network is needed once DAIL is loaded.
+- Or **Replays**: the canonical regression and `tp-v1-F8-0196` step 2 are both rejected by DAIL and accepted by a normal checker; the Gemini runs are recorded real runs.
+
+Under every live decision the page says "Terraform validation is not run in the browser." The replays were recorded with it.

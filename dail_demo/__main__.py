@@ -42,6 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--pyodide",
         help="a folder with the Pyodide 0.27.7 files to copy in (default: check the ones in site/vendor)",
     )
+    serve = commands.add_parser("serve", help="the website and the Gemini proxy on 127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
     commands.add_parser("record", help="record the site's replays into site/runs/ (local engine, gate on)")
     return parser
 
@@ -119,6 +121,10 @@ def main(argv: list[str] | None = None) -> int:
         return _generate(args)
     if args.command == "bundle":
         return _bundle(args)
+    if args.command == "serve":
+        from dail_demo.serve import run_serve
+
+        return run_serve(args.port)
     if args.command == "record":
         return _record(args)
     return 2  # unreachable: argparse rejects unknown commands

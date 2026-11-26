@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DAIL Live: replays</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#DDF2E6}
+a{color:#0D1B2A;text-decoration-thickness:2px}a:hover{text-decoration-thickness:3px}
+.mono{font-family:'IBM Plex Mono',Consolas,monospace}
+.page{background:#DDF2E6;color:#0D1B2A;font-family:'Poppins',Arial,sans-serif;position:relative;overflow:hidden}
+.hdr{height:84px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid #0D1B2A}
+.logo{width:34px;height:34px;border-radius:10px;background:#FF5A36;border:2px solid #0D1B2A;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.tabs{display:flex;gap:6px;background:#FFFFFF;padding:6px;border-radius:14px;border:2px solid #0D1B2A}
+.tab{padding:9px 16px;border-radius:10px;color:#0D1B2A;text-decoration:none;font-weight:500;font-size:14px}
+.tab.on{background:#0D1B2A;color:#FFFFFF;font-weight:600}
+.sbtn{font-family:'Poppins',Arial,sans-serif;font-weight:600;font-size:14px;border:2px solid #0D1B2A;border-radius:12px;padding:8px 14px;background:#FFFFFF;color:#0D1B2A;cursor:pointer;text-decoration:none}
+.run{background:#FFFFFF;border:2px solid #0D1B2A;border-radius:22px;box-shadow:8px 8px 0 #0D1B2A;padding:18px 20px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:#0D1B2A}
+.run:hover{background:#F1FAF5}
+.src{font-size:13px;font-weight:600;color:#48566A}
+.dec{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:2px solid #0D1B2A;border-radius:999px;padding:4px 10px}
+.p{border-color:#0E8A5F}.r{border-color:#C0262D}
+.ai{background:#FFD9CF}
+.fchip{font-family:'Poppins',Arial,sans-serif;font-size:14px;font-weight:500;padding:8px 14px;border-radius:12px;border:2px solid #0D1B2A;background:#FFFFFF;color:#0D1B2A;cursor:pointer}
+.fchip.on{background:#0D1B2A;color:#FFFFFF}
+</style>
+</helmet>
+<div class="page" style="width: 1440px; height: 900px">
+  <header class="hdr">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <span class="logo">D</span>
+      <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.02em">DAIL Live</span>
+      <span title="Demo, not part of the DAIL evaluation" style="font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 2px solid #0D1B2A">Demo</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <nav class="tabs" aria-label="Modes"><a href="Main.dc.html" class="tab">Ask the AI</a><a href="OwnFix.dc.html" class="tab">Own fix</a><a href="#" class="tab on">Replays</a></nav>
+      <a href="Ledger.dc.html" class="sbtn">Ledger</a>
+    </div>
+  </header>
+
+  <div style="position: absolute; left: 80px; right: 80px; top: 120px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px">
+      <div>
+        <h1 style="margin: 0; font-size: 40px; font-weight: 800; letter-spacing: -0.02em">Recorded runs</h1>
+        <p style="margin: 6px 0 0; font-size: 18px; color: #33445A">Real runs recorded on the authors' laptop, with the full Terraform check.</p>
+      </div>
+      <div style="display: flex; gap: 8px"><button type="button" class="fchip on">All</button><button type="button" class="fchip">Gemini</button><button type="button" class="fchip">Reference patches</button><button type="button" class="fchip">Rejected</button></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px">
+      <a href="Reject.dc.html" class="run"><span class="src">Reference patch</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">App and database: SSH fix that cuts the database</span><span class="dec r">✕ Reject</span><span class="mono" style="font-size: 12px; color: #48566A">canonical · regression</span></a>
+      <a href="Promote.dc.html" class="run"><span class="src">Reference patch</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">App and database: the safe SSH fix</span><span class="dec p">✓ Promote</span><span class="mono" style="font-size: 12px; color: #48566A">canonical · safe</span></a>
+      <a href="Promote.dc.html" class="run"><span class="src" style="align-self: flex-start; padding: 2px 8px; border-radius: 999px" >Gemini · recorded 26 Nov 2026</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">App and database: Gemini's SSH fix</span><span class="dec p">✓ Promote</span><span class="mono" style="font-size: 12px; color: #48566A">canonical · gemini-3.5-flash-lite</span></a>
+      <a href="Reject.dc.html" class="run"><span class="src">Reference patch</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">SSH repair that removes the database ingress</span><span class="dec r">✕ Reject</span><span class="mono" style="font-size: 12px; color: #48566A">tp-v1-F4-0092 · fixed</span></a>
+      <a href="Reject.dc.html" class="run"><span class="src">Reference patch</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">Database-port repair that reopens SSH</span><span class="dec r">✕ Reject</span><span class="mono" style="font-size: 12px; color: #48566A">tp-v1-F4-0093 · fixed</span></a>
+      <a href="Promote.dc.html" class="run"><span class="src">Gemini · recorded 26 Nov 2026</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">Gemini repairs the F4-0092 setup</span><span class="dec p">✓ Promote</span><span class="mono" style="font-size: 12px; color: #48566A">tp-v1-F4-0092 · gemini</span></a>
+      <a href="Reject.dc.html" class="run"><span class="src">Reference patch · 2 steps</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">Two-step repair, broken at step 2</span><span class="dec r">✕ Reject at step 2</span><span class="mono" style="font-size: 12px; color: #48566A">tp-v1-F8-0196 · session</span></a>
+      <a href="Promote.dc.html" class="run"><span class="src">Reference patch</span><span style="font-size: 18px; font-weight: 700; line-height: 1.3">A safe SSH repair</span><span class="dec p">✓ Promote</span><span class="mono" style="font-size: 12px; color: #48566A">tp-v1-F2-0027 · fixed</span></a>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #33445A">14 recorded runs. Opening one replays it as a thread, labelled "Recorded run". Demo, not part of the DAIL evaluation.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DAIL Live: attempt 2 promoted</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#DDF2E6}
+a{color:#0D1B2A;text-decoration-thickness:2px}a:hover{text-decoration-thickness:3px}
+.mono{font-family:'IBM Plex Mono',Consolas,monospace}
+.page{background:#DDF2E6;color:#0D1B2A;font-family:'Poppins',Arial,sans-serif;position:relative;overflow:hidden}
+.hdr{height:84px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid #0D1B2A}
+.logo{width:34px;height:34px;border-radius:10px;background:#FF5A36;border:2px solid #0D1B2A;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.tabs{display:flex;gap:6px;background:#FFFFFF;padding:6px;border-radius:14px;border:2px solid #0D1B2A}
+.tab{padding:9px 16px;border-radius:10px;color:#0D1B2A;text-decoration:none;font-weight:500;font-size:14px}
+.tab.on{background:#0D1B2A;color:#FFFFFF;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#FFFFFF;border:2px solid #0D1B2A;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.ok{background:#0E8A5F}.bad{background:#C0262D}.carry{background:#2340E0}
+.card{background:#FFFFFF;border:2px solid #0D1B2A;border-radius:22px;box-shadow:8px 8px 0 #0D1B2A}
+.card3{background:#FFFFFF;border:3px solid #0D1B2A;border-radius:22px;box-shadow:10px 10px 0 #0D1B2A}
+.btn{font-family:'Poppins',Arial,sans-serif;font-weight:700;font-size:16px;border:3px solid #0D1B2A;border-radius:14px;padding:12px 22px;box-shadow:5px 5px 0 #0D1B2A;background:#FFFFFF;color:#0D1B2A;cursor:pointer}
+.btn.primary{background:#FF5A36}
+.sbtn{font-family:'Poppins',Arial,sans-serif;font-weight:600;font-size:14px;border:2px solid #0D1B2A;border-radius:12px;padding:8px 14px;background:#FFFFFF;color:#0D1B2A;cursor:pointer;text-decoration:none}
+.tag{display:inline-block;min-width:78px;text-align:center;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:2px solid #0D1B2A;border-radius:999px;padding:3px 10px;background:#FFFFFF}
+.meta{font-size:13px;font-weight:600;color:#48566A}
+.step{padding:12px 14px;display:flex;flex-direction:column;gap:4px;border-right:2px solid #0D1B2A}
+.num{font-size:28px;font-weight:800;line-height:1}
+</style>
+</helmet>
+<div class="page" style="width: 1440px; height: 1500px">
+
+  <header class="hdr">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <span class="logo">D</span>
+      <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.02em">DAIL Live</span>
+      <span title="Demo, not part of the DAIL evaluation" style="font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 2px solid #0D1B2A">Demo</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <span class="meta" style="color: #33445A">Trusted state v1</span>
+      <span class="pill"><span class="dot ok"></span>SSH closed</span>
+      <span class="pill"><span class="dot ok"></span>DB port closed</span>
+      <span class="pill"><span class="dot ok"></span>DB not public</span>
+      <span class="pill"><span class="dot ok"></span>App reaches DB</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <nav class="tabs" aria-label="Modes"><a href="Main.dc.html" class="tab on">Ask the AI</a><a href="OwnFix.dc.html" class="tab">Own fix</a><a href="Replays.dc.html" class="tab">Replays</a></nav>
+      <a href="Ledger.dc.html" class="sbtn">Ledger</a>
+    </div>
+  </header>
+
+  <ol style="list-style: none; margin: 0; padding: 0; position: absolute; left: 300px; top: 124px; width: 840px; display: flex; flex-direction: column; gap: 24px">
+
+    <li style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px">
+      <span class="meta">You</span>
+      <article aria-label="Your request" style="max-width: 560px; background: #0D1B2A; color: #FFFFFF; padding: 16px 22px; font-size: 20px; border-radius: 22px 22px 6px 22px; box-shadow: 5px 5px 0 #FF5A36">Close SSH and tidy up the database rules</article>
+    </li>
+
+    <li>
+      <a href="Reject.dc.html" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; background: #FFFFFF; border: 2px solid #0D1B2A; border-radius: 14px; padding: 12px 16px; text-decoration: none">
+        <span style="display: flex; align-items: center; gap: 14px"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border: 2px solid #C0262D; border-radius: 999px; padding: 4px 10px">✕ Attempt 1 · Reject</span><span style="font-size: 16px">Rejected: the app would lose its connection to the database.</span></span>
+        <span style="font-size: 14px; font-weight: 600">Open ↓</span>
+      </a>
+    </li>
+
+    <li style="display: flex; align-items: center; gap: 12px; font-size: 15px; color: #33445A"><span style="font-weight: 800; color: #0D1B2A">↻</span>DAIL's reason was sent back to Gemini.</li>
+
+    <li>
+      <article class="card" aria-label="Gemini, attempt 2" style="display: flex; overflow: hidden">
+        <div style="width: 30px; background: #FFD9CF; border-right: 2px solid #0D1B2A; display: flex; align-items: center; justify-content: center"><span style="writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; font-weight: 700; letter-spacing: 0.12em">UNTRUSTED</span></div>
+        <div style="flex-grow: 1; padding: 18px 24px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 700">Gemini · attempt 2</span><span style="font-size: 15px; font-weight: 500; color: #48566A">a proposal, untrusted until DAIL says so</span></div>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; font-size: 17px">
+            <li style="display: flex; gap: 12px; align-items: center"><span class="tag">Removes</span><span>the rule <span class="mono" style="font-size: 14px; color: #48566A">app_ssh_public</span></span></li>
+            <li style="display: flex; gap: 12px; align-items: center"><span class="tag">Edits</span><span>the security group <span class="mono" style="font-size: 14px; color: #48566A">app</span></span></li>
+            <li style="display: flex; gap: 12px; align-items: center"><span class="tag">Keeps</span><span>the rule <span class="mono" style="font-size: 14px; color: #48566A">app_to_db_5432</span></span></li>
+          </ul>
+          <a href="#" style="font-size: 14px; font-weight: 600">Show the code ↓</a>
+        </div>
+      </article>
+    </li>
+
+    <li>
+      <article class="card3" aria-label="DAIL's decision on attempt 2" style="padding: 24px; display: flex; flex-direction: column; gap: 22px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 700">DAIL · checked in your browser</span><span class="mono" style="font-size: 13px; color: #48566A">5 checks · 1 carried forward</span></div>
+        <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 2px solid #0D1B2A; border-radius: 14px; overflow: hidden">
+          <li class="step"><span class="num">01</span><span style="font-size: 14px">Valid patch</span></li>
+          <li class="step"><span class="num">02</span><span style="font-size: 14px">2 resources changed</span></li>
+          <li class="step" style="background: #FFD60A"><span class="num">03</span><span style="font-size: 14px">3 rules re-checked</span></li>
+          <li class="step"><span class="num">04</span><span style="font-size: 14px; font-weight: 600">✓ All checks passed</span></li>
+          <li class="step" style="border-right: 0; background: #0D1B2A; color: #FFFFFF"><span class="num">05</span><span style="font-size: 14px">Decided</span></li>
+        </ol>
+        <div style="display: flex; gap: 34px; align-items: center">
+          <div style="flex-shrink: 0; transform: rotate(-4deg); border: 3px solid #0D1B2A; border-radius: 14px; background: #0E8A5F; color: #FFFFFF; box-shadow: 8px 8px 0 #0D1B2A; padding: 12px 26px; display: flex; flex-direction: column">
+            <span style="font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.02em">PROMOTE</span>
+            <span style="font-size: 13px; font-weight: 600">Decided by DAIL</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <p style="margin: 0; font-size: 30px; font-weight: 600; line-height: 1.2">Promoted: SSH is closed to the internet, and everything that held before still holds.</p>
+            <p class="mono" style="margin: 0; font-size: 13px; color: #48566A">ALL_REQUIRED_PROVEN · INV-SEC-003 carried forward</p>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; border-top: 2px solid #0D1B2A; padding-top: 16px; flex-wrap: wrap">
+          <p style="margin: 0; font-size: 18px">A normal checker would also have <span style="font-weight: 700; padding: 2px 10px; border: 2px solid #0E8A5F; border-radius: 999px">accepted</span> this fix <span style="color: #48566A">(3 checks).</span></p>
+          <div style="display: flex; align-items: center">
+            <span style="border: 2px solid #0D1B2A; border-radius: 999px; padding: 4px 12px; font-weight: 700">v0 <span class="mono" style="font-size: 12px; font-weight: 400; color: #48566A">1864e83f…</span></span>
+            <span style="width: 24px; border-top: 2px solid #0D1B2A"></span>
+            <span style="border: 2px solid #0D1B2A; border-radius: 999px; padding: 4px 12px; font-weight: 700; box-shadow: 4px 4px 0 #0E8A5F">v1 <span class="mono" style="font-size: 12px; font-weight: 400; color: #48566A">e2aabc2a…</span></span>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: -6px">
+          <span style="font-size: 13px; color: #48566A">Terraform validation is not run in the browser.</span>
+          <span style="display: flex; gap: 18px"><a href="Ledger.dc.html" style="font-size: 14px; font-weight: 600">Verify chain</a><a href="Evidence.dc.html" style="font-size: 14px; font-weight: 600">DAIL's evidence ↓</a></span>
+        </div>
+      </article>
+    </li>
+  </ol>
+
+  <form style="position: absolute; left: 300px; width: 840px; bottom: 36px; margin: 0; background: #FFFFFF; border: 3px solid #0D1B2A; border-radius: 22px; box-shadow: 10px 10px 0 #0D1B2A; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 22px">
+    <label for="next2" class="meta" style="white-space: nowrap">Next request</label>
+    <input id="next2" type="text" placeholder="Ask for another fix. It starts from trusted state v1." style="flex-grow: 1; border: 0; outline: none; font-family: 'Poppins', Arial, sans-serif; font-size: 17px; background: #FFFFFF; color: #0D1B2A">
+    <button type="button" class="btn primary">Ask →</button>
+  </form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

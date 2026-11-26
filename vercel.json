@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": null,
+  "buildCommand": null,
+  "outputDirectory": "site",
+  "rewrites": [{ "source": "/", "destination": "/index.html" }],
+  "functions": {
+    "api/propose.py": {
+      "maxDuration": 150,
+      "includeFiles": "site/vendor/{dail,scenarios}/**",
+      "excludeFiles": "{tests/**,docs/**,site/assets/**,site/runs/**,site/vendor/pyodide/**,site/vendor/dail_live/**}"
+    }
+  }
+}

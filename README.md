@@ -2,16 +2,21 @@
 
 DAIL Live is a demo in which an AI (Google Gemini, free tier) or a person proposes a fix to a Terraform configuration, and the real, released DAIL decides, stage by stage, whether to promote it. Beside DAIL's decision it shows what target-only checking would have decided on the same patch.
 
-**Status:** all packages of the fast track (L0, B, C; `docs/PLAN.md` §5) are built: the local engine, and the static website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
+**Status:** packages L0, B, C and D are built: the local engine, and the AI-first website in `site/`. The authors deploy the website themselves ([`docs/DEPLOY.md`](docs/DEPLOY.md)); the demo script is [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
 
-**The website has two modes** (PLAN §3.8):
-- **Live, "Beat the gate":** you edit a configuration and the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB). Terraform validation is not run in the browser; the page says so under every live decision.
-- **Replays:** runs recorded on the authors' laptop with the local engine and `terraform validate`, including Gemini's patches. They need no Pyodide.
+**The website** (PLAN §3.9) works like a chat:
+- **Ask the AI:** you ask for a fix in plain words. Gemini proposes a patch (an untrusted card); the released DAIL v1.0, unmodified, judges it in your browser (self-hosted Pyodide, about 17 MB) and shows its decision as a stamp, one plain sentence, DAIL's raw reason and what a normal, target-only checker would have decided. When DAIL rejects it, the page sends DAIL's reason back to Gemini and it tries again, up to 3 attempts. A promotion adds a trusted state to the tab's ledger.
+- **Write your own fix:** your edit goes to the same DAIL, with no retry.
+- **Replays:** runs recorded on the authors' laptop with `terraform validate`.
 
-Preview it locally, then open http://127.0.0.1:8000/:
+Every technical detail stays one click away under **DAIL's evidence**. Terraform validation is not run in the browser; the page says so under every live decision. The Gemini key lives only in the server function (`api/propose.py` on Vercel, or `serve` locally) and never reaches the browser.
+
+**The design** is "Mint and tomato" (PLAN §3.7): Poppins and IBM Plex Mono, a mint background, white cards with ink borders and hard shadows, tomato for actions, and no background animation. The approved mock-ups are in [`docs/design/`](docs/design/); screenshots of the built site, at 1440×900, 1366×768 (presenter) and 390×844, are in [`docs/screenshots/`](docs/screenshots/).
+
+Preview everything locally on http://127.0.0.1:8000/:
 
 ```powershell
-py -3.12 -m http.server --bind 127.0.0.1 -d site 8000
+py -3.12 -m dail_demo serve
 ```
 
 **Demo, not part of the DAIL evaluation.** The output of DAIL Live is a demonstration. It is not part of the DAIL evaluation; the research results are in DAIL's repository and paper.
@@ -70,7 +75,7 @@ py -3.12 -m dail_demo record                                             # re-re
 - No AWS: no account, no credentials, no API call.
 - No `terraform plan`, `apply` or `destroy`.
 - No paid API, paid model or paid cloud.
-- No server code and no key in the website: it is static files only (PLAN §3.8); a local preview binds to `127.0.0.1` only.
+- No key in the repository, the browser, a response or a log; the only server code is the Gemini proxy `api/propose.py` (PLAN §3.9). `serve` binds to `127.0.0.1` only.
 
 ## How it was built
 
@@ -80,4 +85,4 @@ The browser tests use Node and Playwright, in tests and CI only (D-21): `npm ci`
 
 ## Licence and credits
 
-Apache-2.0. See [`LICENSE`](LICENSE). The website also serves DAIL (Apache-2.0), TerraPreserve scenarios (CC-BY-4.0, TerraGoat-derived files Apache-2.0), Pyodide (MPL-2.0) and three OFL fonts; see [`site/credits.html`](site/credits.html).
+Apache-2.0. See [`LICENSE`](LICENSE). The website also serves DAIL (Apache-2.0), TerraPreserve scenarios (CC-BY-4.0, TerraGoat-derived files Apache-2.0), Pyodide (MPL-2.0) and two OFL fonts (Poppins, IBM Plex Mono); see [`site/credits.html`](site/credits.html).
