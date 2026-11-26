@@ -7,9 +7,13 @@ the safe patch; "FAIL ALWAYS", "GARBAGE" and "QUOTA" change that (``tests/browse
 from __future__ import annotations
 
 import json
+import os
+import re
+import socket
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -57,6 +61,24 @@ class SiteInBrowserTests(DataDirCase):
         self.assertEqual(self.r["chipLabels"], ["Close the public SSH port", "Make the database private",
                                                 "Close SSH and tidy up the database rules · risky"])  # fmt: skip
         self.assertEqual(self.r["chip"], "Close SSH and tidy up the database rules")  # a chip fills, it does not send
+
+    def test_the_ask_screen_fits_1440_by_900(self) -> None:
+        fold = self.r["askFold"]
+        below = {k: v for k, v in fold["bottoms"].items() if v > fold["height"]}
+        self.assertEqual(below, {}, fold)  # nothing on the Ask screen lies below 900 px
+        self.assertEqual((fold["headlineLines"], fold["pillRows"], fold["footRows"], fold["chipRows"]), (1, 1, 1, 1), fold)
+        self.assertLessEqual(fold["select"], 300)
+        self.assertEqual(fold["placeholder"], "Describe the fix, for example: close the public SSH port")
+
+    def test_the_untrusted_label_is_never_clipped(self) -> None:
+        stripes = self.r["stripes"]  # the writing card, then the Gemini card of every replay
+        self.assertTrue(all(count >= 1 for count, _, _ in stripes), stripes)
+        self.assertEqual([clipped for _, clipped, _ in stripes], [0] * len(stripes), stripes)
+
+    def test_the_risky_chip_comes_first_on_a_phone(self) -> None:
+        self.assertEqual(self.r["phoneChips"], ["Close SSH and tidy up the database rules · risky",
+                                                "Close the public SSH port", "Make the database private"])  # fmt: skip
+        self.assertEqual(self.r["chipLabels"][2], "Close SSH and tidy up the database rules · risky")  # desktop order
 
     def test_the_loop_rejects_sends_the_reason_and_promotes_the_retry(self) -> None:
         self.assertEqual(self.r["writing"], "Gemini is writing a fix")
@@ -194,6 +216,29 @@ class SiteInBrowserTests(DataDirCase):
         self.assertEqual(logs, [[]] * 6)
         self.assertNotIn(FAKE_KEY[:6], self.text)
         self.assertNotIn("Traceback", self.stderr)
+
+
+class FailFastTests(unittest.TestCase):
+    """If the page check cannot run (here: a browser channel that does not exist), it fails at once and the
+    fake Gemini server is gone with it, instead of the caller waiting for the 900 s timeout (D-45)."""
+
+    def test_a_browser_that_does_not_launch_fails_within_60_seconds(self) -> None:
+        node = node_ready()
+        environ = {**os.environ, "DAIL_LIVE_BROWSER": "no-such-browser-channel"}
+        with tempfile.TemporaryDirectory() as tmp:
+            start = time.monotonic()
+            done = subprocess.run(
+                [node, str(BROWSER_DIR / "site.mjs"), sys.executable, "check", str(Path(tmp) / "check.json")],
+                cwd=REPO_ROOT, capture_output=True, text=True, encoding="utf-8", check=False, timeout=60, env=environ,
+            )
+            elapsed = time.monotonic() - start
+        self.assertNotEqual(done.returncode, 0)
+        self.assertLess(elapsed, 60)
+        self.assertIn("no-such-browser-channel", done.stderr)
+        port = int(re.search(r"fake-gemini port (\d+)", done.stderr).group(1))
+        with self.assertRaises(OSError):  # the fake Gemini and serve are stopped
+            socket.create_connection(("127.0.0.1", port), timeout=2).close()
+        print(f"\n  failed in {elapsed:.1f} s, server on port {port} stopped", end="")
 
 
 if __name__ == "__main__":

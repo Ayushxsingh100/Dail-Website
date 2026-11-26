@@ -16,14 +16,28 @@ const [python, command, target] = process.argv.slice(2);
 const here = dirname(fileURLToPath(import.meta.url));
 const tmp = mkdtempSync(join(tmpdir(), "dail-live-site-"));
 const seenFile = join(tmp, "seen.json");
-const server = spawn(python, [join(here, "serve_fake.py"), seenFile], { stdio: ["ignore", "pipe", "inherit"] });
+// The fake Gemini and `serve` run in one Python process. Whatever ends this script (success, a failed check, a
+// browser that does not launch, an uncaught error), that process is stopped with it, so the caller never waits
+// on a server (or on its open output pipe) that outlives the check.
+const server = spawn(python, [join(here, "serve_fake.py"), seenFile], { stdio: ["ignore", "pipe", "pipe"] });
+server.stderr.on("data", (d) => process.stderr.write(d));
+let stopped = false;
+function stop() {
+  if (stopped) return;
+  stopped = true;
+  if (server.exitCode === null) server.kill();
+  rmSync(tmp, { recursive: true, force: true });
+}
+process.on("exit", stop);
+for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => process.exit(1));
 const port = await new Promise((resolve, reject) => {
   server.stdout.once("data", (d) => resolve(String(d).trim()));
   server.once("exit", () => reject(new Error("the local server stopped")));
 });
+console.error(`fake-gemini port ${port}`);
 const origin = `http://127.0.0.1:${port}`;
 const seen = () => { try { return JSON.parse(readFileSync(seenFile, "utf8")); } catch { return []; } };
-const browser = await chromium.launch({ channel: process.env.DAIL_LIVE_BROWSER || undefined, headless: process.env.DAIL_LIVE_HEADED !== "1" });
+let browser = null;
 const DESK = { width: 1440, height: 900 };
 const PRESENTER = { width: 1366, height: 768 };
 const PHONE = { width: 390, height: 844 };
@@ -105,6 +119,14 @@ const read = (page) => page.evaluate(() => {
   };
 });
 
+// every UNTRUSTED label on the page fits inside its stripe (D-45): [cards, clipped, smallest card height]
+const stripeFits = (page) => page.evaluate(() => {
+  const stripes = [...document.querySelectorAll("#thread .gemini__stripe")];
+  return [stripes.length,
+    stripes.filter((s) => { const a = s.getBoundingClientRect(); const b = s.firstElementChild.getBoundingClientRect(); return b.top < a.top || b.bottom > a.bottom; }).length,
+    Math.min(...stripes.map((s) => Math.round(s.getBoundingClientRect().height)))];
+});
+
 async function check() {
   const out = { browser: `${process.env.DAIL_LIVE_BROWSER || "chromium"} ${browser.version()}` };
   { // first load per tab
@@ -123,6 +145,23 @@ async function check() {
     await ready(page);
     out.readyMs = Date.now() - t0;
     out.first = await read(page);
+    // everything on the Ask screen is above the fold at 1440 x 900 (D-45)
+    out.askFold = await page.evaluate(() => {
+      const parts = { tagline: ".tagline", headline: "#headline", health: "#health", prompt: "#ask-form", chips: "#chips", footnote: "#ask-screen .footnote" };
+      const r = (s) => document.querySelector(s).getBoundingClientRect();
+      // rows: a child starts a new row when it begins below the bottom of the row so far
+      const rows = (s) => [...document.querySelectorAll(`${s} > *`)].filter((e) => e.offsetParent !== null)
+        .map((e) => e.getBoundingClientRect()).sort((x, y) => x.top - y.top)
+        .reduce((acc, r) => (acc.n && r.top < acc.bottom ? { n: acc.n, bottom: Math.max(acc.bottom, r.bottom) } : { n: acc.n + 1, bottom: r.bottom }), { n: 0, bottom: 0 }).n;
+      return {
+        height: innerHeight, scroll: document.documentElement.scrollHeight,
+        bottoms: Object.fromEntries(Object.entries(parts).map(([k, s]) => [k, Math.round(r(s).bottom)])),
+        headlineLines: Math.round(r("#headline").height / parseFloat(getComputedStyle(document.querySelector("#headline")).lineHeight)),
+        pillRows: rows("#health"), footRows: rows(".prompt__foot"), chipRows: rows("#chips"),
+        select: Math.round(r("#scenario").width),
+        placeholder: document.querySelector("#instruction").placeholder,
+      };
+    });
     out.firstText = await page.evaluate(() => document.querySelector("#ask-screen").innerText);
     out.model = await page.locator("#model-meta").innerText();
     await page.click("#chips .chip--risky");
@@ -145,6 +184,7 @@ async function check() {
     await page.click("#ask");
     await page.waitForSelector("#thread .writing");
     out.writing = await page.locator("#thread .writing").innerText();
+    out.stripes = [await stripeFits(page)];
     await page.waitForSelector("#thread .banner");
     out.atBanner = await read(page);
     await idle(page);
@@ -250,6 +290,7 @@ async function check() {
       const card = await page.locator("#runs .run").nth(i).innerText();
       await page.locator("#runs .run").nth(i).click();
       await page.waitForSelector("#thread .dail .stamp, #thread .dail .refused-box");
+      out.stripes.push(await stripeFits(page));
       out.replays.push({ file: runs[i].file, expected: runs[i].decisions, card: card.replace(/\s+/g, " "), shown: await read(page) });
       await page.click("#back-to-runs");
       await page.waitForSelector("#runs .run");
@@ -304,6 +345,9 @@ async function check() {
   }
   { // the phone
     const { page, context, log } = await open(PHONE, { reduced: true });
+    await page.waitForSelector("#chips .chip");
+    out.phoneChips = await page.evaluate(() => [...document.querySelectorAll("#chips .chip")]
+      .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left).map((c) => c.textContent));
     await ready(page);
     out.phoneMenu = await page.evaluate(() => getComputedStyle(document.querySelector("#nav")).display);
     await page.click("#menu");
@@ -384,9 +428,12 @@ async function shots() {
 }
 
 try {
+  browser = await chromium.launch({ channel: process.env.DAIL_LIVE_BROWSER || undefined, headless: process.env.DAIL_LIVE_HEADED !== "1" });
   await (command === "shots" ? shots() : check());
+} catch (error) {
+  console.error(error && error.stack ? error.stack : String(error));
+  process.exitCode = 1;
 } finally {
-  await browser.close();
-  server.kill();
-  rmSync(tmp, { recursive: true, force: true });
+  if (browser) await browser.close().catch(() => {});
+  stop();
 }
